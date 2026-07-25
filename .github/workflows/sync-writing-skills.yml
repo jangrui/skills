@@ -4,8 +4,8 @@ name: Sync writing skills
 # 机制：跑 scripts/sync-writing-skills.sh → 若有更新则自动开 PR 等待人工 review
 "on":
   schedule:
-    # 每周一 09:30 UTC（北京 17:30，错开 diagram 的 09:00 避免并发）
-    - cron: '30 9 * * 1'
+    # 每天 21:00 UTC（北京 05:00，与 diagram 同时跑，夜间无并发压力）
+    - cron: '0 21 * * *'
   workflow_dispatch:
 
 permissions:

@@ -4,8 +4,8 @@ name: Sync diagram skills
 # 机制：跑 scripts/sync-diagram-skills.sh → 若有更新则自动开 PR 等待人工 review
 "on":
   schedule:
-    # 每周一 09:00 UTC（北京 17:00）跑一次
-    - cron: '0 9 * * 1'
+    # 每天 21:00 UTC（北京 05:00）
+    - cron: '0 21 * * *'
   workflow_dispatch: # 支持手动触发
 
 permissions:

@@ -95,7 +95,7 @@
 
 **同步上游更新**:
 
-CI 自动同步 + 人工 review 兜底——GitHub Action [`sync-diagram-skills`](./.github/workflows/sync-diagram-skills.yml) 每周一 09:00 UTC(北京 17:00)自动检查 5 个上游仓库,有更新时自动开 PR,人工 review diff 后合并即可。也可在 Actions 页面手动触发(`workflow_dispatch`)。
+CI 自动同步 + 人工 review 兜底——GitHub Action [`sync-diagram-skills`](./.github/workflows/sync-diagram-skills.yml) 每天 21:00 UTC(北京 05:00)自动检查 5 个上游仓库,有更新时自动开 PR,人工 review diff 后合并即可。也可在 Actions 页面手动触发(`workflow_dispatch`)。
 
 手动同步(应急或 CI 不可用时):
 
