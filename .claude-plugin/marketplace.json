@@ -1,0 +1,112 @@
+{
+  "name": "jangrui",
+  "owner": {
+    "name": "jangrui",
+    "email": "admin@jangrui.com"
+  },
+  "plugins": [
+    {
+      "name": "diagram",
+      "description": "5 种图表技能合集：drawio / mermaid / excalidraw / tldraw / plantuml。把自然语言、源码或架构描述转成专业图表（导出 PNG/SVG/PDF）。",
+      "source": "./plugins/diagram",
+      "category": "diagram",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "diagram",
+        "drawio",
+        "mermaid",
+        "excalidraw",
+        "tldraw",
+        "plantuml",
+        "visualization",
+        "uml"
+      ],
+      "skills": [
+        "./plugins/diagram/drawio",
+        "./plugins/diagram/mermaid",
+        "./plugins/diagram/excalidraw",
+        "./plugins/diagram/tldraw",
+        "./plugins/diagram/plantuml"
+      ]
+    },
+    {
+      "name": "cc-skills-golang",
+      "description": "AI Agent Skills for production-ready Go projects",
+      "source": {
+        "source": "github",
+        "repo": "samber/cc-skills-golang"
+      },
+      "author": {
+        "name": "Samuel Berthe",
+        "email": "hey@samuel-berthe.fr"
+      },
+      "homepage": "https://github.com/samber/cc-skills-golang",
+      "repository": "https://github.com/samber/cc-skills-golang",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "golang",
+        "go",
+        "ai-agent",
+        "skills",
+        "agentic"
+      ],
+      "category": "productivity"
+    },
+    {
+      "name": "mattpocock-skills",
+      "description": "Matt Pocock's agent skills for real engineering — grilling, spec/ticket flows, TDD, code review, domain modelling and more.",
+      "source": {
+        "source": "github",
+        "repo": "mattpocock/skills"
+      },
+      "author": {
+        "name": "Matt Pocock"
+      },
+      "homepage": "https://github.com/mattpocock/skills",
+      "repository": "https://github.com/mattpocock/skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "engineering",
+        "tdd",
+        "code-review"
+      ],
+      "category": "productivity"
+    },
+    {
+      "name": "humanizer",
+      "description": "Remove signs of AI-generated writing from text, making it sound more natural and human. Based on Wikipedia's 'Signs of AI writing' guide.",
+      "source": {
+        "source": "github",
+        "repo": "blader/humanizer"
+      },
+      "author": {
+        "name": "Blader"
+      },
+      "homepage": "https://github.com/blader/humanizer",
+      "repository": "https://github.com/blader/humanizer",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "writing",
+        "humanizer"
+      ],
+      "category": "productivity"
+    }
+  ]
+}

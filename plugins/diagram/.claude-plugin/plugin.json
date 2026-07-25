@@ -1,0 +1,31 @@
+{
+  "name": "diagram",
+  "version": "0.1.0",
+  "description": "5 种图表技能合集：drawio / mermaid / excalidraw / tldraw / plantuml。把自然语言、源码或架构描述转成专业图表。",
+  "author": {
+    "name": "jangrui",
+    "email": "admin@jangrui.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "plugin",
+    "ai-agent",
+    "skills",
+    "diagram",
+    "drawio",
+    "mermaid",
+    "excalidraw",
+    "tldraw",
+    "plantuml"
+  ],
+  "category": "diagram",
+  "skills": [
+    "./drawio",
+    "./mermaid",
+    "./excalidraw",
+    "./tldraw",
+    "./plantuml"
+  ]
+}
