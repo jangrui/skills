@@ -1,0 +1,25 @@
+{
+  "name": "writing",
+  "version": "0.1.0",
+  "description": "写作润色技能合集：检测并去除 AI 写作痕迹，让文字更自然。",
+  "author": {
+    "name": "jangrui",
+    "email": "admin@jangrui.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "plugin",
+    "ai-agent",
+    "skills",
+    "writing",
+    "humanizer",
+    "polish",
+    "chinese"
+  ],
+  "category": "writing",
+  "skills": [
+    "./humanizer-zh"
+  ]
+}

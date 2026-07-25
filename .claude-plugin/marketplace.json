@@ -34,6 +34,26 @@
       ]
     },
     {
+      "name": "writing",
+      "description": "写作润色技能合集：检测并去除 AI 写作痕迹（中文），让文字更自然。基于维基百科「AI 写作特征」指南。",
+      "source": "./plugins/writing",
+      "category": "writing",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "writing",
+        "humanizer",
+        "polish",
+        "chinese"
+      ],
+      "skills": [
+        "./plugins/writing/humanizer-zh"
+      ]
+    },
+    {
       "name": "cc-skills-golang",
       "description": "AI Agent Skills for production-ready Go projects",
       "source": {

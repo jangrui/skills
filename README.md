@@ -65,8 +65,8 @@
 | [humanizer](https://github.com/blader/humanizer) | 去除 AI 写作痕迹,让文字更自然(基于维基百科「Signs of AI writing」) | 英文 | blader |
 | [Humanizer-zh](https://github.com/op7418/Humanizer-zh) | 检测并改写 24 种中文 AI 文风痕迹(宣传式语言、过度象征、破折号滥用等) | 中文 | op7418 |
 
-> `humanizer`(英文)是 ⊕ 标准插件;`Humanizer-zh`(中文)是纯 skill 仓库,`SKILL.md` 在根目录。
-> - **Claude Code**:`humanizer` 走下方 marketplace;`Humanizer-zh` 整个 clone 到 `~/.claude/skills/humanizer-zh/`。
+> 两者均为 ⊕ 标准插件,可经本目录的 marketplace 一键安装。
+> - **Claude Code**:`humanizer`(英文)和 `humanizer-zh`(中文)都走下方 marketplace。
 > - **Codex**:两者都整个 clone 到 `~/.codex/skills/<名字>/`。可并用。
 
 ---
@@ -78,6 +78,7 @@
 ```text
 /plugin marketplace add jangrui/skills
 /plugin install diagram@jangrui                # 绘图五件套(drawio/mermaid/excalidraw/tldraw/plantuml)
+/plugin install writing@jangrui                 # 写作润色(humanizer-zh 中文去 AI 痕迹)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
 /plugin install humanizer@jangrui
