@@ -35,7 +35,7 @@
     },
     {
       "name": "writing",
-      "description": "写作润色技能合集：检测并去除 AI 写作痕迹（中文），让文字更自然。基于维基百科「AI 写作特征」指南。",
+      "description": "写作润色技能合集：检测并去除 AI 写作痕迹（中英文），让文字更自然。基于维基百科「AI 写作特征」指南。",
       "source": "./plugins/writing",
       "category": "writing",
       "keywords": [
@@ -47,9 +47,11 @@
         "writing",
         "humanizer",
         "polish",
+        "english",
         "chinese"
       ],
       "skills": [
+        "./plugins/writing/humanizer",
         "./plugins/writing/humanizer-zh"
       ]
     },
@@ -101,30 +103,6 @@
         "engineering",
         "tdd",
         "code-review"
-      ],
-      "category": "productivity"
-    },
-    {
-      "name": "humanizer",
-      "description": "Remove signs of AI-generated writing from text, making it sound more natural and human. Based on Wikipedia's 'Signs of AI writing' guide.",
-      "source": {
-        "source": "github",
-        "repo": "blader/humanizer"
-      },
-      "author": {
-        "name": "Blader"
-      },
-      "homepage": "https://github.com/blader/humanizer",
-      "repository": "https://github.com/blader/humanizer",
-      "license": "MIT",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "writing",
-        "humanizer"
       ],
       "category": "productivity"
     }

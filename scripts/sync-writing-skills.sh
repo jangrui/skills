@@ -35,13 +35,18 @@ PLUGIN_DIR="$REPO_ROOT/plugins/writing"
 
 # skill 元数据：key | 本地目录名 | 上游 owner | 上游 repo | 上游 skill 路径模式
 #   path_mode:
-#     root   = 上游根目录即 skill（如 Humanizer-zh）
+#     root   = 上游根目录即 skill（如 humanizer、Humanizer-zh）
 #     subdir = 上游 skills/<name>/ 下（如 baoyu 那种，预留）
-SKILL_NAMES=(humanizer-zh)
+# 注：humanizer (blader/humanizer) 虽本身是标准 plugin，但为与 humanizer-zh 共用
+#     writing 聚合项，按 B 方案 vendor 进来（只取 SKILL.md，排除上游 plugin 声明）
+SKILL_NAMES=(humanizer humanizer-zh)
 meta_for() {
   case "$1" in
-    humanizer-zh)
+    humanizer)
       # local_dir|owner|repo|path_mode
+      echo "humanizer|blader|humanizer|root"
+      ;;
+    humanizer-zh)
       echo "humanizer-zh|op7418|Humanizer-zh|root"
       ;;
     *) return 1 ;;
@@ -128,13 +133,24 @@ sync_one() {
     return 0
   fi
 
-  # rsync 精选 skill 本体文件：SKILL.md + 同目录下的子目录(references/scripts等)
-  # 排除 .git / README / .gitignore / LICENSE / package.json 等仓库级文件
+  # rsync 精选 skill 本体文件：SKILL.md + 同目录下的子目录(references 等)
+  # 排除所有仓库级/非运行时文件：
+  #   .claude-plugin/  上游 plugin 声明（避免和本 writing plugin.json 冲突）
+  #   agents/          上游的 OpenAI Codex 展示配置等
+  #   scripts/         上游的 CI/校验脚本（如 humanizer 的 validate-package.py）
+  #   .github/         上游 CI
+  #   AGENTS.md        上游 agent 指南
+  #   README/LICENSE   文档与许可证
   mkdir -p "$vendor_dir"
   rsync -a --delete \
     --exclude='.upstream-commit' \
     --exclude='.git' \
     --exclude='.gitignore' \
+    --exclude='.claude-plugin' \
+    --exclude='.github' \
+    --exclude='agents' \
+    --exclude='scripts' \
+    --exclude='AGENTS.md' \
     --exclude='LICENSE' \
     --exclude='README.md' \
     --exclude='README.zh.md' \

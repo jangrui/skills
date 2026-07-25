@@ -78,10 +78,9 @@
 ```text
 /plugin marketplace add jangrui/skills
 /plugin install diagram@jangrui                # 绘图五件套(drawio/mermaid/excalidraw/tldraw/plantuml)
-/plugin install writing@jangrui                 # 写作润色(humanizer-zh 中文去 AI 痕迹)
+/plugin install writing@jangrui                 # 写作润色(humanizer 英文 + humanizer-zh 中文,去 AI 痕迹)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
-/plugin install humanizer@jangrui
 ```
 
 > Codex 没有 marketplace 机制,请用下方方式安装。

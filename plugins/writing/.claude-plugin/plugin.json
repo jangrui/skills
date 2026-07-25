@@ -1,7 +1,7 @@
 {
   "name": "writing",
   "version": "0.1.0",
-  "description": "写作润色技能合集：检测并去除 AI 写作痕迹，让文字更自然。",
+  "description": "写作润色技能合集：检测并去除 AI 写作痕迹（中英文），让文字更自然。基于维基百科「AI 写作特征」指南。",
   "author": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
@@ -16,10 +16,12 @@
     "writing",
     "humanizer",
     "polish",
+    "english",
     "chinese"
   ],
   "category": "writing",
   "skills": [
+    "./humanizer",
     "./humanizer-zh"
   ]
 }
