@@ -1,0 +1,105 @@
+name: Sync writing skills
+
+# 定期同步写作润色类 skill（当前：humanizer-zh）的上游更新
+# 机制：跑 scripts/sync-writing-skills.sh → 若有更新则自动开 PR 等待人工 review
+"on":
+  schedule:
+    # 每周一 09:30 UTC（北京 17:30，错开 diagram 的 09:00 避免并发）
+    - cron: '30 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-writing-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run sync script
+        id: sync
+        env:
+          CI_CHANGES_FILE: /tmp/updated-skills.txt
+        run: |
+          bash ./scripts/sync-writing-skills.sh
+          if [ -f "$CI_CHANGES_FILE" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "updated<<EOF" >> "$GITHUB_OUTPUT"
+            cat "$CI_CHANGES_FILE" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+            count=$(wc -l < "$CI_CHANGES_FILE" | tr -d ' ')
+            echo "count=$count" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip if no changes
+        if: steps.sync.outputs.has_changes != 'true'
+        run: echo "✅ 所有 skill 已是最新，无需 PR"
+
+      - name: Create branch & commit
+        if: steps.sync.outputs.has_changes == 'true'
+        run: |
+          BRANCH="chore/sync-writing-${GITHUB_RUN_ID}"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+          git add plugins/writing/
+          git commit -m "$(cat <<COMMIT_EOF
+          chore(writing): sync ${COUNT} upstream skill(s)
+
+          Updated: $(echo "$UPDATED" | tr '\n' ' ')
+
+          Run ./scripts/sync-writing-skills.sh --check locally to reproduce.
+          COMMIT_EOF
+          )"
+        env:
+          COUNT: ${{ steps.sync.outputs.count }}
+          UPDATED: ${{ steps.sync.outputs.updated }}
+
+      - name: Create pull request
+        if: steps.sync.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COUNT: ${{ steps.sync.outputs.count }}
+          UPDATED: ${{ steps.sync.outputs.updated }}
+        run: |
+          PR_BODY=$(cat <<BODY
+          ## 上游同步
+
+          本次检测到 **${COUNT} 个** skill 有上游更新，已自动 vendor 到 \`plugins/writing/\`。
+
+          ### 更新的 skill
+          $(echo "$UPDATED" | sed 's/^/- /')
+
+          ### 校验
+          - ✅ 同步脚本执行完成
+          - ✅ 自包含性自检通过（无兄弟包依赖）
+
+          ### 请人工 review
+          - 查看 \`plugins/writing/<skill>/\` 的 diff
+          - 确认 SKILL.md 行为变化可接受
+          - 合并即可
+
+          ---
+          _此 PR 由 GitHub Action [\`sync-writing-skills\`](../actions/workflows/sync-writing-skills.yml) 自动生成。_
+          BODY
+          )
+
+          gh pr create \
+            --title "chore(writing): sync ${COUNT} upstream skill(s) 🔄" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "$BRANCH" \
+            --label "dependencies"
