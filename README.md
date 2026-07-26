@@ -1,8 +1,12 @@
 # jangrui 的 AI 编程助手技能目录
 
-一个按主题分类的技能导航,适用于 **Claude Code** 与 **OpenAI Codex CLI** 两类客户端。本仓库只做索引,不持有任何 skill 源码——所有技能均链接到上游作者维护的原始仓库。
+一个按主题分类的技能导航,适用于 **Claude Code** 与 **OpenAI Codex CLI** 两类客户端。本仓库对部分 skill 做 **vendor**(本地化到 `plugins/`,CI 自动跟进上游),其余只做**索引**(链接到上游仓库)。
 
-- 🤖 **Claude Code**:目录里的「标准 plugin」可一键安装,见 [作为 Marketplace 使用](#-作为-marketplace-使用)。
+表格里的标注:
+- ⊕ = 已 vendor 成标准 plugin,Claude Code `/plugin install` 后自动跟进上游更新;Codex 可从 `plugins/` 直拷
+- 无符号 = 纯索引(未入库),需 clone 上游仓库自行安装
+
+- 🤖 **Claude Code**:⊕ 标注的技能可一键安装,见 [作为 Marketplace 使用](#-作为-marketplace-使用)。
 - 🧠 **Codex CLI**:所有技能均兼容,把 `SKILL.md` 所在文件夹放进 `~/.codex/skills/` 即自动加载,见 [在 Codex 中使用](#-在-codex-中使用)。
 
 ---
@@ -29,9 +33,9 @@
 | --- | --- | --- |
 | [wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) | WPS 笔记全场景 Agent Skills(40+ skill,覆盖读写、创作、搜索、学习) | WPS Note Team |
 
-> 本身是一个 marketplace。
-> - **Claude Code**:`/plugin marketplace add wpsnote/wpsnote-skills`。
-> - **Codex**:clone 后把想要的 `skills/<名字>/` 子目录拷进 `~/.codex/skills/`(共 40+ 个)。
+> 本身是一个独立的 marketplace(40+ skill,体积较大),未聚合进来。
+> - **Claude Code**:`/plugin marketplace add wpsnote/wpsnote-skills`(直连上游)。
+> - **Codex**:clone 后把想要的 `skills/<名字>/` 子目录拷进 `~/.codex/skills/`。
 
 ## 🐹 Go 开发
 
@@ -55,9 +59,11 @@
 
 | 技能 | 一句话 | 来源 |
 | --- | --- | --- |
-| [mattpocock-skills](https://github.com/mattpocock/skills) | TDD、code review、grilling 追问法、spec/ticket 流程、领域建模等 22 个工程技能 | Matt Pocock |
+| [mattpocock-skills](https://github.com/mattpocock/skills) | TDD、code review、grilling 追问法、spec/ticket 流程、领域建模等工程技能 | Matt Pocock |
 
-> ⊕ 标准插件,可经本目录的 marketplace 一键安装。
+> ⊕ 标准插件,经本目录的 marketplace 一键安装(**维持 remote 引用**)。
+>
+> 维持 remote 的原因:上游 41 个 skill 分布在 `engineering/` `productivity/` `deprecated/` `in-progress/` 等 6 个二级目录,含已废弃和未完成的 skill;且有 changeset/monorepo 工程化特征。vendor 需先做目录筛选,暂未推进。
 
 ## 🗄️ 数据库
 
@@ -65,7 +71,7 @@
 | --- | --- | --- |
 | [dbx skill](https://github.com/t8y2/dbx) (位于 `skills/dbx/`) | 通过 dbx CLI 安全探索 schema、执行只读 SQL(写操作需确认),支持 70+ 数据库 | t8y2 |
 
-> 需先安装 [dbx CLI](https://github.com/t8y2/dbx);skill 文件在仓库的 `skills/dbx/` 子目录。
+> 纯索引(未入库)。需先安装 [dbx CLI](https://github.com/t8y2/dbx);skill 文件在仓库的 `skills/dbx/` 子目录。
 > - **Claude Code** / **Codex**:clone 后把 `skills/dbx/` 拷进各自的 skills 目录(`~/.claude/skills/` 或 `~/.codex/skills/`)。
 
 ## ✍️ 写作润色
@@ -219,7 +225,7 @@ Grafana Labs 官方维护的 48 个 Agent Skills——覆盖 Grafana 全家桶�
 | **实用工具** | [baoyu-compress-image](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-compress-image) | 图片压缩（WebP / PNG） | `bun` / `npx` |
 | | [baoyu-electron-extract](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-electron-extract) | Electron 应用资源提取（从 `.asar` 反解源码） | `bun` |
 
-> baoyu-skills 因 workspace 兄弟包依赖不可零散 vendor，只能整仓库引用。
+> baoyu-skills **不能 vendor,只能整仓库引用**。实测:21 个 skill 中 13 个依赖 4 个 workspace 兄弟包(`baoyu-chrome-cdp` / `baoyu-md` / `baoyu-fetch` / `baoyu-codex-imagegen`,共 13 MB),零散 vendor 会让这 13 个核心 skill 报错;整仓 vendor 又违反「排除非运行时文件」原则。
 >
 > **前置依赖**（按需）：大部分 skill 需要 `bun` 运行时：
 > ```bash
@@ -240,26 +246,33 @@ Grafana Labs 官方维护的 48 个 Agent Skills——覆盖 Grafana 全家桶�
 
 ## 🔌 作为 Marketplace 使用(Claude Code)
 
-本目录同时是一个 Claude Code marketplace,聚合了上方标注 ⊕ 的标准插件——安装后自动跟进上游,无需手动同步。
+本目录同时是一个 Claude Code marketplace。下方 install 命令分为两组:
+
+- **vendor 项**(本地化,CI 自动跟进上游):装完后 `/plugin update` 即可跟进上游更新
+- **remote 项**(指向上游 GitHub):装的是上游仓库本身,由上游维护
 
 ```text
 /plugin marketplace add jangrui/skills
+
+# —— vendor 项（自动跟进上游）——
 /plugin install diagram@jangrui                # 绘图五件套(drawio/mermaid/excalidraw/tldraw/plantuml)
 /plugin install writing@jangrui                 # 写作润色(humanizer 英文 + humanizer-zh 中文,去 AI 痕迹)
-/plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
-	/plugin install ppt@jangrui                   # 网页 PPT 生成(guizang-ppt-skill:杂志风/瑞士风,单 HTML 横向翻页)
+/plugin install ppt@jangrui                     # 网页 PPT 生成(guizang-ppt-skill:杂志风/瑞士风,单 HTML 横向翻页)
 /plugin install illustration@jangrui            # 文章配图 + 社交卡片(小黑手绘插画 + 归藏小红书/公众号封面)
-/plugin install grafana-core@jangrui           # Grafana 核心(Dashboard/PromQL/Alloy/Beyla/OTel/告警,8 个)——另有 grafana-cloud/lgtm/plugins/app-sdk/k6/datasources 6 个姊妹 plugin
+/plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
+/plugin install cc-skills-golang@jangrui        # Go 生产级技能(46 个:并发/错误处理/slog/samber 全家桶/cobra-viper/测试/性能等)
+/plugin install grafana-core@jangrui           # Grafana 核心(8 个)——另有 grafana-cloud/lgtm/plugins/app-sdk/k6/datasources 6 个姊妹 plugin
+
+# —— remote 项（指向上游仓库）——
 /plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
-/plugin install cc-skills-golang@jangrui
-/plugin install mattpocock-skills@jangrui
+/plugin install mattpocock-skills@jangrui       # 工程实践(TDD/code review/grilling/spec 流程等)
 ```
 
 > Codex 没有 marketplace 机制,请用下方方式安装。
 
 ### 关于 `diagram` 的 vendor 策略
 
-`diagram` 与本目录其它聚合项不同——它不是直连上游仓库,而是把 5 个 skill 的**本体文件** vendor(本地化)进 `plugins/diagram/<skill名>/`,只保留 skill 运行所需内容(SKILL.md + 脚本 + references),丢弃上游的 `.git`/`tests`/`docs`/CI 配置等噪声。这样做的原因:
+`diagram` 是本目录最早的 vendor 项,采用与其他聚合项相同的 vendor 套路——把 5 个 skill 的**本体文件** vendor(本地化)进 `plugins/diagram/<skill名>/`,只保留 skill 运行所需内容(SKILL.md + 脚本 + references),丢弃上游的 `.git`/`tests`/`docs`/CI 配置等噪声。这样做的原因:
 
 - **仓库体积**:5 个 skill 本体合计约 **1.2 MB**;若用 git submodule 拉完整仓库,光 drawio 一个就 8.2 MB(含 tests/assets/.github 等),总计约 40 MB。
 - **精确圈定**:Claude Code/Claude Code 的 marketplace schema 中,一个 plugin 的 `source` 只能指向一个来源,**没有"跨仓库挑 5 个合并成 1 个"的语义**。要让"1 个聚合名 + 只要绘图五件套"成立,必须先做物理聚合。
@@ -376,6 +389,27 @@ git diff plugins/illustration/                                 # review
 
 CI(GitHub Action `sync-illustration-skills`)每天 21:00 UTC 自动检查并开 PR。
 
+### 关于 `golang` 的 vendor 策略
+
+`golang` 与 `lark` 同属「单仓库多 skill / 扁平」型,把 [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) 的 `skills/` 下 46 个 `golang-*` 子目录 vendor 到 `plugins/golang/<skill名>/`。与 `lark` 的差异:
+
+- **排除 `evals/`**:每个 skill 下都有 `evals/evals.json`(上游 CI 质量评估用的测试用例),实测 **0 个 SKILL.md 引用它**,是纯非运行时文件。排除后省 32% 体积(3.1 MB → 2.1 MB)。
+- **保留 `references/`(43 个 skill)和 `assets/`(6 个 skill)**:这两类被大量 SKILL.md 引用(`references/` 是知识库文档,`assets/` 是可复制的工程样板如 CI 配置、代码示例),必须保留。
+- **skill 间大量交叉引用**:46 个 skill 通过 `samber/cc-skills-golang@golang-xxx` 语法互相引用(覆盖 43 个不同目标),因此**全量 vendor**(不裁剪子集)——否则会有悬空引用。
+
+marketplace 里插件名保留 `cc-skills-golang`(与上游一致,不影响已有用户的 install 命令)。
+
+**同步上游更新**:
+
+```bash
+./scripts/sync-golang-skills.sh --check              # dry-run
+./scripts/sync-golang-skills.sh                      # 全部同步
+./scripts/sync-golang-skills.sh golang-concurrency    # 只同步某个
+git diff plugins/golang/                               # review
+```
+
+CI(GitHub Action `sync-golang-skills`)每天 21:00 UTC 自动检查并开 PR。
+
 ## 🧠 在 Codex 中使用
 
 Codex CLI 没有 marketplace,而是把每个 skill 作为一个含 `SKILL.md` 的文件夹放进 skills 目录即自动加载:
@@ -383,7 +417,23 @@ Codex CLI 没有 marketplace,而是把每个 skill 作为一个含 `SKILL.md` �
 - **全局**: `~/.codex/skills/<skill-name>/SKILL.md`
 - **项目级**: `<项目>/.codex/skills/<skill-name>/SKILL.md`
 
-通用安装套路(以 drawio 为例,Claude Code 与 Codex 通用):
+### 方式一(推荐):直拷本仓库已 vendor 的 skill
+
+对 ⊕ 标注的 skill(diagram/writing/lark/ppt/illustration/grafana/golang,共 131 个),已本地化在 `plugins/` 下,clone 本仓库后直接拷,无需再连上游:
+
+```bash
+git clone --depth 1 https://github.com/jangrui/skills /tmp/jangrui-skills
+
+# 装某一个
+cp -r /tmp/jangrui-skills/plugins/golang/golang-concurrency ~/.codex/skills/golang-concurrency
+
+# 装整个分类
+cp -r /tmp/jangrui-skills/plugins/lark/lark-* ~/.codex/skills/
+```
+
+### 方式二:clone 上游仓库(纯索引项适用)
+
+无符号标注的 skill(如 dbx、wpsnote、cc-skills-golang 若不想用 vendor 版)需要直连上游。以 drawio 为例:
 
 ```bash
 git clone --depth 1 https://github.com/Agents365-ai/drawio-skill /tmp/drawio-skill
@@ -395,7 +445,7 @@ cp -r /tmp/drawio-skill/skills/drawio-skill ~/.claude/skills/
 cp -r /tmp/drawio-skill/skills/drawio-skill ~/.codex/skills/
 ```
 
-> 上方表格里「根目录就是 skill」的仓库(`Humanizer-zh`、`humanizer`)整个 clone 到 skills 目录即可;「skill 在 `skills/<名字>/` 子目录」的仓库(dbx、绘图五件套、wpsnote 各 skill)只拷那个子目录。
+> 上方表格里「根目录就是 skill」的仓库(`Humanizer-zh`、`humanizer`)整个 clone 到 skills 目录即可;「skill 在 `skills/<名字>/` 子目录」的仓库(dbx、wpsnote 各 skill)只拷那个子目录。
 > 本机已检测到 `~/.codex/skills/` 存在;若你设置了 `CODEX_HOME` 环境变量,请改用 `$CODEX_HOME/skills/`。
 
 ---
