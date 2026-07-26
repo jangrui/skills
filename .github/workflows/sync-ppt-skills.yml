@@ -1,0 +1,102 @@
+name: Sync ppt skills
+
+# 定期同步 guizang-ppt-skill 的上游更新
+# 机制：跑 scripts/sync-ppt-skills.sh → 若有更新则自动开 PR 等待人工 review
+"on":
+  schedule:
+    # 每天 21:00 UTC（北京 05:00）
+    - cron: '0 21 * * *'
+  workflow_dispatch: # 支持手动触发
+
+permissions:
+  contents: write      # 创建分支、提交
+  pull-requests: write # 开 PR
+
+concurrency:
+  group: sync-ppt-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run sync script
+        id: sync
+        env:
+          CI_CHANGES_FILE: /tmp/updated-skills.txt
+        run: |
+          bash ./scripts/sync-ppt-skills.sh
+          # 把更新的 skill 列表存到 step output
+          if [ -f "$CI_CHANGES_FILE" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "updated<<EOF" >> "$GITHUB_OUTPUT"
+            cat "$CI_CHANGES_FILE" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+            count=$(wc -l < "$CI_CHANGES_FILE" | tr -d ' ')
+            echo "count=$count" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # 没有更新就直接结束
+      - name: Skip if no changes
+        if: steps.sync.outputs.has_changes != 'true'
+        run: echo "✅ 所有 skill 已是最新，无需 PR"
+
+      - name: Create branch & commit
+        if: steps.sync.outputs.has_changes == 'true'
+        run: |
+          BRANCH="chore/sync-ppt-${GITHUB_RUN_ID}"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+          git add plugins/ppt/
+          git commit -m "$(cat <<COMMIT_EOF
+          chore(ppt): sync guizang-ppt upstream
+
+          Updated: $(echo "$UPDATED")
+
+          Run ./scripts/sync-ppt-skills.sh --check locally to reproduce.
+          COMMIT_EOF
+          )"
+        env:
+          UPDATED: ${{ steps.sync.outputs.updated }}
+
+      - name: Create pull request
+        if: steps.sync.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATED: ${{ steps.sync.outputs.updated }}
+        run: |
+          PR_BODY=$(cat <<BODY
+          ## 上游同步
+
+          本次检测到 \`guizang-ppt-skill\` 有上游更新，已自动 vendor 到 \`plugins/ppt/guizang-ppt/\`。
+
+          ### 校验
+          - ✅ 同步脚本执行完成
+          - ✅ 自包含性自检通过（无兄弟包依赖）
+
+          ### 请人工 review
+          - 查看 \`plugins/ppt/guizang-ppt/\` 的 diff
+          - 确认 SKILL.md 行为变化可接受
+          - 合并即可，合入后 marketplace 用户 \`/plugin update\` 自动跟进
+
+          ---
+          _此 PR 由 GitHub Action [\`sync-ppt-skills\`](../actions/workflows/sync-ppt-skills.yml) 自动生成。_
+          BODY
+          )
+
+          gh pr create \
+            --title "chore(ppt): sync guizang-ppt upstream 🔄" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "$BRANCH" \
+            --label "dependencies"

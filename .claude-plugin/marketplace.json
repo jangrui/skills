@@ -111,6 +111,28 @@
       ]
     },
     {
+      "name": "ppt",
+      "description": "网页 PPT 生成技能：生成横向翻页单文件 HTML 网页 PPT，含 WebGL 背景、电子杂志风/瑞士国际主义风双模板系统（22 种版式、截图美化、数据大字报等）。",
+      "source": "./plugins/ppt",
+      "category": "ppt",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "presentation",
+        "ppt",
+        "guizang",
+        "swiss-style",
+        "web-deck",
+        "horizontal-swipe"
+      ],
+      "skills": [
+        "./plugins/ppt/guizang-ppt"
+      ]
+    },
+    {
       "name": "baoyu-skills",
       "description": "宝玉的 21 个 AI 创作技能合集：AI 绘图/配图/漫画/封面/信息图生成、URL→Markdown、Markdown 格式化/转 HTML、翻译、幻灯片、X/微博/微信发文、YouTube 字幕、小红书图片、网页抓取等。",
       "source": {

@@ -93,6 +93,18 @@
 
 ---
 
+## 📊 演示文稿
+
+生成横向翻页网页 PPT（单文件 HTML），内置两套专业设计系统——电子杂志风与瑞士国际主义风。
+
+| 技能 | 一句话 | 来源 |
+| --- | --- | --- |
+| [guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) | 横向翻页网页 PPT：双模板（电子杂志 × 电子墨水 / 瑞士国际主义）、WebGL 背景、22 种版式。支持照片、截图、数据大字报、时间线、地图等场景 | op7418 |
+
+> ⊕ 标准插件，已 vendor 到本目录的 `ppt` 插件，可经 marketplace 一键安装。
+> - **Claude Code**：`/plugin install ppt@jangrui`
+> - **Codex**：从 `plugins/ppt/guizang-ppt/` 拷进 `~/.codex/skills/guizang-ppt-skill`
+
 ## 🎨 AI 创作与内容工具
 
 宝玉（Jim Liu）维护的 21 个 AI 创作技能合集——覆盖 AI 图像生成、内容获取/转换、多平台发布、实用工具四大类。大部分 skill 内有 `.ts` 脚本依赖 workspace 共享包，需**整仓引用**。
@@ -149,6 +161,7 @@
 /plugin install diagram@jangrui                # 绘图五件套(drawio/mermaid/excalidraw/tldraw/plantuml)
 /plugin install writing@jangrui                 # 写作润色(humanizer 英文 + humanizer-zh 中文,去 AI 痕迹)
 /plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
+/plugin install ppt@jangrui                   # 网页 PPT 生成(guizang-ppt-skill:杂志风/瑞士风,单 HTML 横向翻页)
 /plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
@@ -200,6 +213,22 @@ git diff plugins/lark/                          # review
 ```
 
 CI(GitHub Action `sync-lark-skills`)每天 21:00 UTC 自动检查并开 PR。
+
+### 关于 `ppt` 的 vendor 策略
+
+`ppt` 与 `diagram` 同属单仓库单 skill 的 vendor 模式,将上游 `guizang-ppt-skill` 的 SKILL.md、`assets/`(HTML 模板 + WebGL shader + Motion One + 截图背景)、`references/`(布局、主题色、组件、检查清单)和 `scripts/`(瑞士风校验器) vendor 到 `plugins/ppt/guizang-ppt/`。
+
+本 skill 为**纯 AI 自包含型**：SKILL 教 AI 写的单文件 HTML 由 AI 的 Write 工具直接产出,无需任何外部 CLI 配合。符合 AGENTS.md 入库决策树第一分支——✅ vendor。
+
+**同步上游更新**:
+
+```bash
+./scripts/sync-ppt-skills.sh --check          # dry-run 看更新
+./scripts/sync-ppt-skills.sh                  # 同步
+git diff plugins/ppt/                          # review
+```
+
+CI(GitHub Action `sync-ppt-skills`)每天 21:00 UTC 自动检查并开 PR。
 
 ## 🧠 在 Codex 中使用
 
