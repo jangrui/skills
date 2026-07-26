@@ -118,6 +118,60 @@
 > - **Claude Code**：`/plugin install illustration@jangrui`
 > - **Codex**：从 `plugins/illustration/` 下对应目录拷进 `~/.codex/skills/`（`ian-xiaohei-illustrations`、`guizang-social-card` 各一个）
 
+## 📊 Grafana 可观测性
+
+Grafana Labs 官方维护的 48 个 Agent Skills——覆盖 Grafana 全家桶：Dashboard 建模、PromQL、告警 IRM、Alloy/Beyla/OpenTelemetry 采集、Grafana Cloud 治理（成本、fleet、SSO、私有连接）、LGTM 开源栈（Loki/Tempo/Mimir/Prometheus/Pyroscope）、插件开发、k6 负载测试。
+
+| 类别 | 代表 skill | 一句话 |
+|---|---|---|
+| **Grafana 核心** | `dashboarding` | 通过 HTTP API 构建/修改/发布 Grafana 仪表盘 JSON |
+| | `promql` | 编写、校验、优化 PromQL 查询（rate/histogram_quantile/基数排查） |
+| | `alerting-irm` | 配置 Grafana Alerting / IRM / SLO 端到端 |
+| | `alloy` | 用 Grafana Alloy 构建统一遥测管线（OpenTelemetry 兼容） |
+| | `beyla` | 用 eBPF 自动插桩 HTTP/gRPC/DB 流量（无需改代码） |
+| | `opentelemetry` | 用 OTel 插桩并把 metrics/logs/traces 发到 Grafana |
+| | `grafana-oss` | 配置 Grafana OSS（YAML 供应 dashboard + 数据源） |
+| | `skill-authoring` | 按 Anthropic 指南审计/编写 Grafana SKILL.md |
+| **Grafana Cloud**（18 个） | `adaptive-metrics` | 用 Adaptive Metrics 聚合规则降低 Cloud Metrics 成本 |
+| | `fleet-management` | 集中管理一批 Alloy 采集器（基于属性下发管线） |
+| | `cost-management` | 把 Grafana Cloud 账单归因到团队、降遥测量 |
+| | `admin` | 管理 Cloud 账号：组织/stack/RBAC/SSO/服务账号/Terraform |
+| | `assistant-mcp` | 经 `mcp-grafana` 把 AI agent 接入 Grafana Cloud |
+| | `infrastructure` | `k8s-monitoring` Helm 把 K8s/主机/容器遥测送进 Cloud |
+| | `ml-ai` | 开启 Cloud 的 AI/ML：Grafana Assistant、异常检测、SLO 等 |
+| | `app-observability` | Application Observability：RED 指标 + 服务图 + RUM + LLM 监控 |
+| | `database-observability` | MySQL/PostgreSQL 数据库可观测性（Performance Schema 等） |
+| | `private-connectivity` | AWS/Azure/GCP 私有连接到 Grafana Cloud |
+| | `dpm-finder` | 找出撑高 Cloud 账单的 Prometheus 指标 |
+| | `loki-label-analyzer` / `prometheus-label-strategy` | Loki/Prometheus 标签策略评估器 |
+| | `prometheus-cardinality-troubleshooter` | Prometheus 基数爆炸诊断（慢查询/OOM/高账单） |
+| | `cloud-integrations` / `send-data` / `testing` / `oncall-irm` | 云集成、数据接入、合成监控、OnCall 排班 |
+| **LGTM 开源栈** | `loki` / `tempo` / `mimir` / `prometheus` / `pyroscope` | 日志/追踪/长期 Prometheus 指标/持续 profiling |
+| **插件开发** | `plugin-bundle-size` | 用 React.lazy + 代码分割优化插件包体积 |
+| | `react-19-plugin-migration` | 把插件迁移到 React 19（适配 Grafana 12） |
+| | `grafana-scenes` | 用 @grafana/scenes 构建插件页面 |
+| | `check-npm` / `audit-and-reduce-dependencies` | npm 供应链加固 / 依赖瘦身 |
+| **App SDK** | `cue-kind-definition` / `reconciler-logic` / `admission-control` / `app-sdk-concepts` | 在 Grafana App Platform 上构建应用（CUE schema、reconciler、admission） |
+| **k6 负载测试** | `k6` | 生成/校验/review k6 脚本（load/stress/spike/soak 等） |
+| | `k6-perf-test-website` | 端到端性能测试一个公开网站 |
+| | `k6-cloud-investigate-test` / `k6-trend-analysis` / `k6-test-maintenance` / `k6-manage` / `k6-docs` | 排查/趋势分析/维护/管理/写文档 |
+| **数据源** | `datasources-provisioning` | 生成 Grafana 数据源 provisioning 文件（YAML/Terraform） |
+
+> ⊕ 标准插件，已 vendor 到本目录的 `grafana` 插件，可经 marketplace 一键安装。
+>
+> - **Claude Code**：`/plugin install grafana@jangrui`（一次装全 48 个 skill，见 [作为 Marketplace 使用](#-作为-marketplace-使用)）
+> - **Codex**：从 `plugins/grafana/grafana-<category>/<skill>/` 拷进 `~/.codex/skills/`，例如：
+>   ```bash
+>   # 装某个 skill
+>   cp -r plugins/grafana/grafana-core/promql ~/.codex/skills/promql
+>   # 装整个 category
+>   cp -r plugins/grafana/grafana-lgtm/* ~/.codex/skills/
+>   ```
+>
+> **vendor 策略**：与 `lark` 相同（单仓库多 skill），但上游多嵌套一层 category——`skills/grafana-<category>/<skill>/`。vendor 到 `plugins/grafana/grafana-<category>/<skill>/`，保留两层结构便于按 category 同步。CI 每天 21:00 UTC 自动检查上游并开 PR。
+
+---
+
 ## 🎨 AI 创作与内容工具
 
 宝玉（Jim Liu）维护的 21 个 AI 创作技能合集——覆盖 AI 图像生成、内容获取/转换、多平台发布、实用工具四大类。大部分 skill 内有 `.ts` 脚本依赖 workspace 共享包，需**整仓引用**。
@@ -175,8 +229,9 @@
 /plugin install writing@jangrui                 # 写作润色(humanizer 英文 + humanizer-zh 中文,去 AI 痕迹)
 /plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
 	/plugin install ppt@jangrui                   # 网页 PPT 生成(guizang-ppt-skill:杂志风/瑞士风,单 HTML 横向翻页)
-	/plugin install illustration@jangrui            # 文章配图 + 社交卡片(小黑手绘插画 + 归藏小红书/公众号封面)
-	/plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
+/plugin install illustration@jangrui            # 文章配图 + 社交卡片(小黑手绘插画 + 归藏小红书/公众号封面)
+/plugin install grafana@jangrui                  # Grafana 可观测性全家桶(48 个 skill:Dashboard/PromQL/LGTM/Cloud/k6/插件)
+/plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
 ```
@@ -227,6 +282,40 @@ git diff plugins/lark/                          # review
 ```
 
 CI(GitHub Action `sync-lark-skills`)每天 21:00 UTC 自动检查并开 PR。
+
+### 关于 `grafana` 的 vendor 策略
+
+`grafana` 与 `lark` 同属「单仓库多 skill」型，但来自 [grafana/skills](https://github.com/grafana/skills) 的上游多嵌套一层 category——`skills/grafana-<category>/<skill>/SKILL.md`，共 7 个 category、48 个 skill：
+
+| category | skill 数 | 内容 |
+|---|---|---|
+| `grafana-core` | 8 | Dashboard、PromQL、Alloy、Beyla、OpenTelemetry、alerting-irm、grafana-oss、skill-authoring |
+| `grafana-cloud` | 18 | Adaptive Metrics、Fleet、Admin、成本、ML/AI、基础设施、私有连接等 |
+| `grafana-lgtm` | 5 | Loki、Tempo、Mimir、Prometheus、Pyroscope（开源 LGTM 栈） |
+| `grafana-plugins` | 5 | 插件包体积、React 19 迁移、@grafana/scenes、依赖审计 |
+| `grafana-app-sdk` | 4 | CUE kind 定义、reconciler、admission control |
+| `grafana-k6` | 7 | k6 脚本生成/校验/趋势分析/性能测试网站 |
+| `grafana-datasources` | 1 | 数据源 provisioning |
+
+vendor 时**保留两层结构**到 `plugins/grafana/grafana-<category>/<skill>/`（不像 `lark` 那样扁平化），原因：
+
+- 与上游目录一一对应，diff 更直观；
+- 同步脚本可按 category 维度单独操作（`./scripts/sync-grafana-skills.sh grafana-k6`）；
+- 每个 skill 目录单独保存 `.upstream-commit`，便于单点回退。
+
+与 `lark` 的相似点：都靠一次 `git sparse-checkout set skills/` 拿全部，无需循环 clone；都有「自包含性自检」防兄弟包依赖；都自动检测上游新增 skill（需手动加入 `plugin.json` / `marketplace.json` 的 skills 数组，脚本会提示）。
+
+**同步上游更新**：
+
+```bash
+./scripts/sync-grafana-skills.sh --check                    # dry-run 看哪些有更新
+./scripts/sync-grafana-skills.sh                            # 同步全部
+./scripts/sync-grafana-skills.sh grafana-k6                 # 同步整个 category
+./scripts/sync-grafana-skills.sh grafana-core/promql        # 只同步某个 skill
+git diff plugins/grafana/                                    # review
+```
+
+CI（GitHub Action `sync-grafana-skills`）每天 21:00 UTC 自动检查并开 PR。
 
 ### 关于 `ppt` 的 vendor 策略
 
