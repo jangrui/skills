@@ -37,9 +37,19 @@
 
 | 技能 | 一句话 | 来源 |
 | --- | --- | --- |
-| [cc-skills-golang](https://github.com/samber/cc-skills-golang) | 生产级 Go 项目技能集:并发、错误处理、slog、samber 全家桶、cobra/viper、测试、性能等 | Samuel Berthe |
+| [cc-skills-golang](https://github.com/samber/cc-skills-golang) | 生产级 Go 项目技能集（46 个 skill）：并发、错误处理、slog、samber 全家桶（lo/mo/ro/oops/hot/do）、cobra/viper、stretchr/testify、uber dig/fx、google wire、测试、性能、安全、可观测性、grpc、graphql、数据库、依赖注入、设计模式、项目布局、命名、现代化改造、文档、Swagger、troubleshooting 等 | Samuel Berthe |
 
-> ⊕ 标准插件,可经本目录的 marketplace 一键安装。
+> ⊕ 标准插件，已 vendor 到本目录的 `golang` 插件，可经 marketplace 一键安装。
+> - **Claude Code**：`/plugin install cc-skills-golang@jangrui`
+> - **Codex**：从 `plugins/golang/golang-<skill>/` 拷进 `~/.codex/skills/`，例如：
+>   ```bash
+>   # 装某个 skill
+>   cp -r plugins/golang/golang-concurrency ~/.codex/skills/golang-concurrency
+>   # 装全部
+>   cp -r plugins/golang/golang-* ~/.codex/skills/
+>   ```
+>
+> **vendor 策略**：与 `lark` 同属「单仓库多 skill / 扁平」型，把 46 个 `golang-*` skill 本体（SKILL.md + references/ + assets/，约 2.2 MB）vendor 到 `plugins/golang/<skill名>/`。排除上游的 `evals/`（CI 评估数据，0 个 SKILL.md 引用，纯非运行时文件，排除省 32% 体积）。CI 每天 21:00 UTC 自动检查上游并开 PR。
 
 ## 🛠️ 通用工程实践
 
