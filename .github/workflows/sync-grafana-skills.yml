@@ -90,7 +90,7 @@ jobs:
           ### 请人工 review
           - 查看 \`plugins/grafana/<category>/<skill>/\` 的 diff
           - 确认 SKILL.md 行为变化可接受
-          - 若上游新增了 skill 目录，脚本会提示——需手动把新 skill 加入 \`plugins/grafana/.claude-plugin/plugin.json\` 和 \`marketplace.json\` 的 skills 数组
+          - 若上游新增了 skill 目录，脚本会提示——需手动把新 skill 加入根 \`marketplace.json\` 中对应 category plugin（\`grafana-<cat>\`）的 skills 数组
           - 合并即可，合入后 marketplace 用户 \`/plugin update\` 自动跟进
 
           ---

@@ -157,9 +157,18 @@ Grafana Labs 官方维护的 48 个 Agent Skills——覆盖 Grafana 全家桶�
 | | `k6-cloud-investigate-test` / `k6-trend-analysis` / `k6-test-maintenance` / `k6-manage` / `k6-docs` | 排查/趋势分析/维护/管理/写文档 |
 | **数据源** | `datasources-provisioning` | 生成 Grafana 数据源 provisioning 文件（YAML/Terraform） |
 
-> ⊕ 标准插件，已 vendor 到本目录的 `grafana` 插件，可经 marketplace 一键安装。
+> ⊕ 拆成 **7 个独立 plugin**（与上游 `grafana/skills` 的官方分类对齐），可按需单独安装——不需要整个 Grafana 全家桶就只装相关的 category。
 >
-> - **Claude Code**：`/plugin install grafana@jangrui`（一次装全 48 个 skill，见 [作为 Marketplace 使用](#-作为-marketplace-使用)）
+> - **Claude Code**（按需挑）：
+>   ```
+>   /plugin install grafana-core@jangrui         # 8 个：Dashboard/PromQL/Alloy/Beyla/OTel/告警 IRM
+>   /plugin install grafana-cloud@jangrui        # 18 个：Fleet/Adaptive Metrics/成本/Admin(SSO+RBAC)/ML/AIOps
+>   /plugin install grafana-lgtm@jangrui         # 5 个：Loki/Tempo/Mimir/Prometheus/Pyroscope
+>   /plugin install grafana-plugins@jangrui      # 5 个：插件 bundle 优化/React 19 迁移/@grafana/scenes
+>   /plugin install grafana-app-sdk@jangrui      # 4 个：CUE kind/reconciler/admission
+>   /plugin install grafana-k6@jangrui           # 7 个：k6 脚本生成/性能测试/趋势分析
+>   /plugin install grafana-datasources@jangrui  # 1 个：数据源 provisioning
+>   ```
 > - **Codex**：从 `plugins/grafana/grafana-<category>/<skill>/` 拷进 `~/.codex/skills/`，例如：
 >   ```bash
 >   # 装某个 skill
@@ -168,7 +177,7 @@ Grafana Labs 官方维护的 48 个 Agent Skills——覆盖 Grafana 全家桶�
 >   cp -r plugins/grafana/grafana-lgtm/* ~/.codex/skills/
 >   ```
 >
-> **vendor 策略**：与 `lark` 相同（单仓库多 skill），但上游多嵌套一层 category——`skills/grafana-<category>/<skill>/`。vendor 到 `plugins/grafana/grafana-<category>/<skill>/`，保留两层结构便于按 category 同步。CI 每天 21:00 UTC 自动检查上游并开 PR。
+> **vendor 策略**：与 `lark` 相同（单仓库多 skill），但上游多嵌套一层 category——`skills/grafana-<category>/<skill>/`。vendor 到 `plugins/grafana/grafana-<category>/<skill>/`，保留两层结构。**marketplace 层面拆成 7 个独立 plugin，共享同一物理 source 目录 `./plugins/grafana`，靠各自的 `skills` 数组划分**（与上游官方 `.claude-plugin/marketplace.json` 完全一致）。CI 每天 21:00 UTC 自动检查上游并开 PR。
 
 ---
 
@@ -230,7 +239,7 @@ Grafana Labs 官方维护的 48 个 Agent Skills——覆盖 Grafana 全家桶�
 /plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
 	/plugin install ppt@jangrui                   # 网页 PPT 生成(guizang-ppt-skill:杂志风/瑞士风,单 HTML 横向翻页)
 /plugin install illustration@jangrui            # 文章配图 + 社交卡片(小黑手绘插画 + 归藏小红书/公众号封面)
-/plugin install grafana@jangrui                  # Grafana 可观测性全家桶(48 个 skill:Dashboard/PromQL/LGTM/Cloud/k6/插件)
+/plugin install grafana-core@jangrui           # Grafana 核心(Dashboard/PromQL/Alloy/Beyla/OTel/告警,8 个)——另有 grafana-cloud/lgtm/plugins/app-sdk/k6/datasources 6 个姊妹 plugin
 /plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
@@ -303,7 +312,9 @@ vendor 时**保留两层结构**到 `plugins/grafana/grafana-<category>/<skill>/
 - 同步脚本可按 category 维度单独操作（`./scripts/sync-grafana-skills.sh grafana-k6`）；
 - 每个 skill 目录单独保存 `.upstream-commit`，便于单点回退。
 
-与 `lark` 的相似点：都靠一次 `git sparse-checkout set skills/` 拿全部，无需循环 clone；都有「自包含性自检」防兄弟包依赖；都自动检测上游新增 skill（需手动加入 `plugin.json` / `marketplace.json` 的 skills 数组，脚本会提示）。
+**marketplace 层面进一步拆成 7 个独立 plugin**（`grafana-core` / `grafana-cloud` / `grafana-lgtm` / `grafana-plugins` / `grafana-app-sdk` / `grafana-k6` / `grafana-datasources`），与上游官方 `.claude-plugin/marketplace.json` 的划分完全一致。技术上：7 个 plugin 条目共享同一个物理 source 目录 `./plugins/grafana`，仅靠各自的 `skills` 数组（指向该目录下的不同子路径）来划分作用域——用户可只装 `grafana-core` 而不引入整个 Cloud 全家桶。`plugins/grafana/` 下因此**没有 `.claude-plugin/plugin.json`**（避免与 marketplace 的 7 个条目冲突）。
+
+与 `lark` 的相似点：都靠一次 `git sparse-checkout set skills/` 拿全部，无需循环 clone；都有「自包含性自检」防兄弟包依赖；都自动检测上游新增 skill（需手动加入对应 category plugin 在 `marketplace.json` 的 skills 数组，脚本会提示）。
 
 **同步上游更新**：
 

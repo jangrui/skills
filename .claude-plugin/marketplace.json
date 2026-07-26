@@ -160,36 +160,29 @@
       ]
     },
     {
-      "name": "grafana",
-      "description": "Grafana Labs 官方 Agent Skills 合集（48 个 skill，7 个 category）：Grafana 核心（dashboarding / PromQL / Alloy / Beyla / OpenTelemetry / alerting-irm）、Grafana Cloud（fleet management / adaptive metrics / AI-ML / infrastructure / cost management / admin 等 18 个）、LGTM 开源栈（Loki / Tempo / Mimir / Prometheus / Pyroscope）、Grafana 插件开发（bundle 优化 / React 19 迁移 / @grafana/scenes）、Grafana App SDK（CUE / reconciler / admission）、k6 负载测试（7 个）、数据源 provisioning。",
+      "name": "grafana-core",
+      "description": "Grafana 核心 Agent Skills（8 个）：Dashboard 建模、PromQL、Alloy/Beyla/OpenTelemetry 采集、告警 IRM、Grafana OSS、skill 编写规范。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "grafana",
-        "prometheus",
-        "loki",
-        "tempo",
-        "mimir",
-        "pyroscope",
-        "promql",
-        "opentelemetry",
-        "alloy",
-        "beyla",
-        "k6",
-        "load-testing",
-        "observability",
-        "lgtm"
-      ],
+      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "promql", "alloy", "beyla", "opentelemetry", "alerting", "dashboard"],
       "skills": [
-        "./plugins/grafana/grafana-app-sdk/admission-control",
-        "./plugins/grafana/grafana-app-sdk/app-sdk-concepts",
-        "./plugins/grafana/grafana-app-sdk/cue-kind-definition",
-        "./plugins/grafana/grafana-app-sdk/reconciler-logic",
+        "./plugins/grafana/grafana-core/alerting-irm",
+        "./plugins/grafana/grafana-core/alloy",
+        "./plugins/grafana/grafana-core/beyla",
+        "./plugins/grafana/grafana-core/dashboarding",
+        "./plugins/grafana/grafana-core/grafana-oss",
+        "./plugins/grafana/grafana-core/opentelemetry",
+        "./plugins/grafana/grafana-core/promql",
+        "./plugins/grafana/grafana-core/skill-authoring"
+      ]
+    },
+    {
+      "name": "grafana-cloud",
+      "description": "Grafana Cloud Agent Skills（18 个）：Fleet Management、Adaptive Metrics、成本治理、Admin（SSO/RBAC/Terraform）、AI/ML、基础设施监控、私有连接、应用/数据库可观测性等。",
+      "source": "./plugins/grafana",
+      "category": "grafana",
+      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana-cloud", "fleet-management", "adaptive-metrics", "cost-management", "sso", "terraform", "kubernetes"],
+      "skills": [
         "./plugins/grafana/grafana-cloud/adaptive-metrics",
         "./plugins/grafana/grafana-cloud/admin",
         "./plugins/grafana/grafana-cloud/app-observability",
@@ -207,33 +200,74 @@
         "./plugins/grafana/grafana-cloud/prometheus-cardinality-troubleshooter",
         "./plugins/grafana/grafana-cloud/prometheus-label-strategy",
         "./plugins/grafana/grafana-cloud/send-data",
-        "./plugins/grafana/grafana-cloud/testing",
-        "./plugins/grafana/grafana-core/alerting-irm",
-        "./plugins/grafana/grafana-core/alloy",
-        "./plugins/grafana/grafana-core/beyla",
-        "./plugins/grafana/grafana-core/dashboarding",
-        "./plugins/grafana/grafana-core/grafana-oss",
-        "./plugins/grafana/grafana-core/opentelemetry",
-        "./plugins/grafana/grafana-core/promql",
-        "./plugins/grafana/grafana-core/skill-authoring",
-        "./plugins/grafana/grafana-datasources/datasources-provisioning",
+        "./plugins/grafana/grafana-cloud/testing"
+      ]
+    },
+    {
+      "name": "grafana-lgtm",
+      "description": "LGTM 开源栈 Agent Skills（5 个）：Loki（日志）、Tempo（追踪）、Mimir（长期 Prometheus 指标）、Prometheus、Pyroscope（持续 profiling）。",
+      "source": "./plugins/grafana",
+      "category": "grafana",
+      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "loki", "tempo", "mimir", "prometheus", "pyroscope", "lgtm", "tracing", "logging", "profiling"],
+      "skills": [
+        "./plugins/grafana/grafana-lgtm/loki",
+        "./plugins/grafana/grafana-lgtm/mimir",
+        "./plugins/grafana/grafana-lgtm/prometheus",
+        "./plugins/grafana/grafana-lgtm/pyroscope",
+        "./plugins/grafana/grafana-lgtm/tempo"
+      ]
+    },
+    {
+      "name": "grafana-plugins",
+      "description": "Grafana 插件开发 Agent Skills（5 个）：bundle 体积优化、React 19 迁移、@grafana/scenes 框架、npm 供应链加固、依赖瘦身。",
+      "source": "./plugins/grafana",
+      "category": "grafana",
+      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "plugins", "bundle-size", "react-19", "grafana-scenes", "webpack"],
+      "skills": [
+        "./plugins/grafana/grafana-plugins/audit-and-reduce-dependencies",
+        "./plugins/grafana/grafana-plugins/check-npm",
+        "./plugins/grafana/grafana-plugins/grafana-scenes",
+        "./plugins/grafana/grafana-plugins/plugin-bundle-size",
+        "./plugins/grafana/grafana-plugins/react-19-plugin-migration"
+      ]
+    },
+    {
+      "name": "grafana-app-sdk",
+      "description": "Grafana App SDK Agent Skills（4 个）：在 Grafana App Platform 上构建应用——CUE kind 定义、reconciler 逻辑、admission control、核心概念。",
+      "source": "./plugins/grafana",
+      "category": "grafana",
+      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "app-sdk", "app-platform", "cue", "kubernetes", "reconciler"],
+      "skills": [
+        "./plugins/grafana/grafana-app-sdk/admission-control",
+        "./plugins/grafana/grafana-app-sdk/app-sdk-concepts",
+        "./plugins/grafana/grafana-app-sdk/cue-kind-definition",
+        "./plugins/grafana/grafana-app-sdk/reconciler-logic"
+      ]
+    },
+    {
+      "name": "grafana-k6",
+      "description": "k6 负载测试 Agent Skills（7 个）：脚本生成/校验、性能测试网站、Cloud k6 排查与趋势分析、测试维护、文档编写。",
+      "source": "./plugins/grafana",
+      "category": "grafana",
+      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "k6", "load-testing", "performance", "testing", "stress-test"],
+      "skills": [
         "./plugins/grafana/grafana-k6/k6",
         "./plugins/grafana/grafana-k6/k6-cloud-investigate-test",
         "./plugins/grafana/grafana-k6/k6-docs",
         "./plugins/grafana/grafana-k6/k6-manage",
         "./plugins/grafana/grafana-k6/k6-perf-test-website",
         "./plugins/grafana/grafana-k6/k6-test-maintenance",
-        "./plugins/grafana/grafana-k6/k6-trend-analysis",
-        "./plugins/grafana/grafana-lgtm/loki",
-        "./plugins/grafana/grafana-lgtm/mimir",
-        "./plugins/grafana/grafana-lgtm/prometheus",
-        "./plugins/grafana/grafana-lgtm/pyroscope",
-        "./plugins/grafana/grafana-lgtm/tempo",
-        "./plugins/grafana/grafana-plugins/audit-and-reduce-dependencies",
-        "./plugins/grafana/grafana-plugins/check-npm",
-        "./plugins/grafana/grafana-plugins/grafana-scenes",
-        "./plugins/grafana/grafana-plugins/plugin-bundle-size",
-        "./plugins/grafana/grafana-plugins/react-19-plugin-migration"
+        "./plugins/grafana/grafana-k6/k6-trend-analysis"
+      ]
+    },
+    {
+      "name": "grafana-datasources",
+      "description": "Grafana 数据源 Agent Skills（1 个）：生成数据源 provisioning 文件（YAML/Terraform）。",
+      "source": "./plugins/grafana",
+      "category": "grafana",
+      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "datasources", "provisioning", "terraform"],
+      "skills": [
+        "./plugins/grafana/grafana-datasources/datasources-provisioning"
       ]
     },
     {
