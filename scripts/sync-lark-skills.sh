@@ -107,11 +107,11 @@ sync_one() {
   local commit_file="$vendor_dir/.upstream-commit"
 
   if [ ! -d "$src" ]; then
-    echo "  ⚠️  上游已移除 $skill，本地保留（如需删除请手动）"
+    echo "  ⚠️  上游已移除 ${skill}，本地保留（如需删除请手动）"
     return 0
   fi
   if [ ! -f "$src/SKILL.md" ]; then
-    echo "  ⚠️  跳过 $skill：上游无 SKILL.md（可能不是 skill 目录）"
+    echo "  ⚠️  跳过 ${skill}：上游无 SKILL.md（可能不是 skill 目录）"
     return 0
   fi
 
@@ -185,7 +185,7 @@ else
     [ -d "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$sub" ] || continue
     [ -f "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$sub/SKILL.md" ] || continue
     if [ ! -d "$SKILLS_DIR/$sub" ]; then
-      echo "  🆕 上游新增 $sub（本地未 vendor）"
+      echo "  🆕 上游新增 ${sub}（本地未 vendor）"
       if [ "$DRY_RUN" = "1" ]; then
         echo "     dry-run，跳过；如需纳入请去掉 --check 重跑"
       else
