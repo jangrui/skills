@@ -118,11 +118,11 @@ sync_one() {
   local commit_file="$vendor_dir/.upstream-commit"
 
   if [ ! -d "$src" ]; then
-    echo "  ⚠️  上游已移除 $cat/$skill，本地保留（如需删除请手动）"
+    echo "  ⚠️  上游已移除 ${cat}/${skill}，本地保留（如需删除请手动）"
     return 0
   fi
   if [ ! -f "$src/SKILL.md" ]; then
-    echo "  ⚠️  跳过 $cat/$skill：上游无 SKILL.md（可能不是 skill 目录）"
+    echo "  ⚠️  跳过 ${cat}/${skill}：上游无 SKILL.md（可能不是 skill 目录）"
     return 0
   fi
 
@@ -224,14 +224,14 @@ else
   while IFS= read -r cat; do
     [ -d "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$cat" ] || continue
     if [ ! -d "$PLUGIN_DIR/$cat" ]; then
-      echo "  🆕 上游新增 category $cat（本地未 vendor）"
+      echo "  🆕 上游新增 category ${cat}（本地未 vendor）"
       local_added=1
     fi
     while IFS= read -r sub; do
       [ -d "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$cat/$sub" ] || continue
       [ -f "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$cat/$sub/SKILL.md" ] || continue
       if [ ! -d "$PLUGIN_DIR/$cat/$sub" ]; then
-        echo "  🆕 上游新增 $cat/$sub（本地未 vendor）"
+        echo "  🆕 上游新增 ${cat}/${sub}（本地未 vendor）"
         if [ "$DRY_RUN" = "1" ]; then
           echo "     dry-run，跳过；如需纳入请去掉 --check 重跑"
         else
@@ -240,7 +240,7 @@ else
             "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$cat/$sub/" "$PLUGIN_DIR/$cat/$sub/"
           echo "$UPSTREAM_COMMIT" > "$PLUGIN_DIR/$cat/$sub/.upstream-commit"
           echo "  ✅ 已 vendor 新 skill: $cat/$sub"
-          echo "  ⚠️  请手动把 \"$cat/$sub\" 加入根 .claude-plugin/marketplace.json 中对应 category plugin（名为 $cat）的 skills 数组"
+          echo "  ⚠️  请手动把 \"$cat/$sub\" 加入根 .claude-plugin/marketplace.json 中对应 category plugin（名为 ${cat}）的 skills 数组"
           UPDATED_SKILLS+=("$cat/$sub")
           local_added=1
         fi

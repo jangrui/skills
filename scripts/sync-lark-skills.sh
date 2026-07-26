@@ -165,7 +165,7 @@ echo ""
 # 如果指定了 TARGET，校验并只同步一个；否则扫本地目录同步全部
 if [ -n "$TARGET" ]; then
   if [ ! -d "$SKILLS_DIR/$TARGET" ]; then
-    echo "❌ 本地无 $TARGET（本地目录名即 skill key，如 lark-base）"
+    echo "❌ 本地无 ${TARGET}（本地目录名即 skill key，如 lark-base）"
     echo "可选: $(discover_skills | tr '\n' ' ')"
     exit 1
   fi
