@@ -69,6 +69,28 @@
 > - **Claude Code**:`humanizer`(英文)和 `humanizer-zh`(中文)都走下方 marketplace。
 > - **Codex**:两者都整个 clone 到 `~/.codex/skills/<名字>/`。可并用。
 
+## 🐦 飞书 / Lark
+
+飞书官方 `lark-cli` 的全套 Agent Skills——让 AI 直接操作飞书 IM、文档、多维表格、日历、邮箱、任务、知识库等。
+
+| 技能 | 一句话 | 来源 |
+| --- | --- | --- |
+| [lark-cli](https://github.com/larksuite/cli) | 飞书官方 CLI 配套 27 个 skill：IM 收发、云文档、多维表格、日历、邮箱、任务、知识库、视频会议、审批、OKR、妙搭应用开发等 | larksuite |
+
+> ⊕ 标准插件,已聚合为本目录的 `lark` 插件。
+>
+> **前置依赖**:所有 skill 都需要先装 npm 包 `lark-cli`:
+> ```bash
+> npx @larksuite/cli@latest install   # 装 lark-cli 二进制
+> lark-cli config init                # 配置应用凭证
+> lark-cli auth login --recommend     # 登录授权
+> ```
+>
+> - **Claude Code**:`/plugin install lark@jangrui` 一次装全 27 个 skill(见 [作为 Marketplace 使用](#-作为-marketplace-使用))。
+> - **Codex**:clone 后把 `skills/lark-*/` 子目录拷进 `~/.codex/skills/`(`cp -r skills/lark-* ~/.codex/skills/`),或用上游自带的 `npx skills add larksuite/cli -y -g`。
+>
+> **vendor 策略**:与 `diagram` 相同,把 27 个 skill 本体(SKILL.md + references/,约 5.5 MB)vendor 到 `plugins/lark/<skill名>/`,只保留运行时所需内容。CI 每天 21:00 UTC 自动检查上游并开 PR。
+
 ---
 
 ## 🔌 作为 Marketplace 使用(Claude Code)
@@ -79,6 +101,7 @@
 /plugin marketplace add jangrui/skills
 /plugin install diagram@jangrui                # 绘图五件套(drawio/mermaid/excalidraw/tldraw/plantuml)
 /plugin install writing@jangrui                 # 写作润色(humanizer 英文 + humanizer-zh 中文,去 AI 痕迹)
+/plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
 ```
@@ -110,6 +133,25 @@ git commit -am "chore(diagram): sync upstream"
 每个 skill 目录下有 `.upstream-commit` 文件记录当前对应的上游 commit,可追溯、可回退。同步脚本内置「自包含性自检」,若上游某天重构引入了兄弟包依赖,会告警提示改用整仓库引用。
 
 当前各 skill 对应的上游版本见 [`plugins/diagram/*/`](./plugins/diagram/) 下的 `.upstream-commit`。
+
+### 关于 `lark` 的 vendor 策略
+
+`lark` 与 `diagram` 同属「多 skill 需要聚合 + 自包含」的情况,采用相同的 vendor 套路,把飞书官方 `larksuite/cli` 仓库 `skills/` 下的 27 个 `lark-*` 子目录抓到 `plugins/lark/<skill名>/`。与 `diagram` 的差异:
+
+- **单仓库多 skill**:`diagram` 是 5 个独立上游仓库,而 `lark` 全部来自 `larksuite/cli` 一个仓库。同步脚本 `sync-lark-skills.sh` 一次 sparse-checkout 拿全部,无需循环 clone。
+- **外部二进制依赖**:所有 `lark-*` skill 的 frontmatter 都声明 `metadata.requires.bins: ["lark-cli"]`,需另装 `npm` 包 `lark-cli` 才能工作(见上方「前置依赖」)。
+- **自动检测新 skill**:脚本会扫描上游新增的 `lark-*` 目录并 vendor 进来,但需手动把它加入 `plugins/lark/.claude-plugin/plugin.json` 和 `marketplace.json` 的 skills 数组(脚本会提示)。
+
+**同步上游更新**:
+
+```bash
+./scripts/sync-lark-skills.sh --check          # dry-run 看哪些有更新
+./scripts/sync-lark-skills.sh                  # 同步全部
+./scripts/sync-lark-skills.sh lark-base        # 只同步某个
+git diff plugins/lark/                          # review
+```
+
+CI(GitHub Action `sync-lark-skills`)每天 21:00 UTC 自动检查并开 PR。
 
 ## 🧠 在 Codex 中使用
 
