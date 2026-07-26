@@ -105,6 +105,19 @@
 > - **Claude Code**：`/plugin install ppt@jangrui`
 > - **Codex**：从 `plugins/ppt/guizang-ppt/` 拷进 `~/.codex/skills/guizang-ppt-skill`
 
+## 🖼️ 文章插画与社交卡片
+
+生成固定风格的中文文章配图和社交媒体卡片。
+
+| 技能 | 一句话 | 来源 |
+| --- | --- | --- |
+| [ian-xiaohei-illustrations](https://github.com/helloianneo/ian-xiaohei-illustrations) | 16:9 白底黑线描中文文章配图，固定 IP 角色「小黑」手绘怪诞风格 | helloianneo |
+| [guizang-social-card-skill](https://github.com/op7418/guizang-social-card-skill) | 小红书图文/公众号封面生成器：Editorial × Swiss 双排版系统，28 种版式骨架，支持 Live Photo | op7418 |
+
+> ⊕ 标准插件，已 vendor 到本目录的 `illustration` 插件，可经 marketplace 一键安装。
+> - **Claude Code**：`/plugin install illustration@jangrui`
+> - **Codex**：从 `plugins/illustration/` 下对应目录拷进 `~/.codex/skills/`（`ian-xiaohei-illustrations`、`guizang-social-card` 各一个）
+
 ## 🎨 AI 创作与内容工具
 
 宝玉（Jim Liu）维护的 21 个 AI 创作技能合集——覆盖 AI 图像生成、内容获取/转换、多平台发布、实用工具四大类。大部分 skill 内有 `.ts` 脚本依赖 workspace 共享包，需**整仓引用**。
@@ -161,8 +174,9 @@
 /plugin install diagram@jangrui                # 绘图五件套(drawio/mermaid/excalidraw/tldraw/plantuml)
 /plugin install writing@jangrui                 # 写作润色(humanizer 英文 + humanizer-zh 中文,去 AI 痕迹)
 /plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
-/plugin install ppt@jangrui                   # 网页 PPT 生成(guizang-ppt-skill:杂志风/瑞士风,单 HTML 横向翻页)
-/plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
+	/plugin install ppt@jangrui                   # 网页 PPT 生成(guizang-ppt-skill:杂志风/瑞士风,单 HTML 横向翻页)
+	/plugin install illustration@jangrui            # 文章配图 + 社交卡片(小黑手绘插画 + 归藏小红书/公众号封面)
+	/plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
 ```
@@ -229,6 +243,28 @@ git diff plugins/ppt/                          # review
 ```
 
 CI(GitHub Action `sync-ppt-skills`)每天 21:00 UTC 自动检查并开 PR。
+
+### 关于 `illustration` 的 vendor 策略
+
+`illustration` 聚合了两个来自不同上游的 skill，采用两种同步策略：
+
+| skill | SKILL.md 位置 | 同步策略 |
+|---|---|---|
+| `ian-xiaohei-illustrations` | 子目录 `ian-xiaohei-illustrations/` | sparse-checkout |
+| `guizang-social-card` | 仓库根目录 | 浅克隆 + rsync |
+
+前者与 `diagram` 各 skill 结构相同（子目录），后者与 `ppt` 结构相同（根目录）。同步脚本 `sync-illustration-skills.sh` 根据 SKILL.md 位置自动选择策略。
+
+**同步上游更新**:
+
+```bash
+./scripts/sync-illustration-skills.sh --check                 # dry-run
+./scripts/sync-illustration-skills.sh                         # 全部同步
+./scripts/sync-illustration-skills.sh guizang-social-card     # 只同步某个
+git diff plugins/illustration/                                 # review
+```
+
+CI(GitHub Action `sync-illustration-skills`)每天 21:00 UTC 自动检查并开 PR。
 
 ## 🧠 在 Codex 中使用
 

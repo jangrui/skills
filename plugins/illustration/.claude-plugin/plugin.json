@@ -1,0 +1,31 @@
+{
+  "name": "illustration",
+  "version": "0.1.0",
+  "description": "文章配图与社交媒体卡片生成技能合集：小黑手绘插画（ian-xiaohei-illustrations）+ 归藏风格小红书/公众号封面（guizang-social-card）。",
+  "author": {
+    "name": "jangrui",
+    "email": "admin@jangrui.com"
+  },
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "plugin",
+    "ai-agent",
+    "skills",
+    "illustration",
+    "article-illustration",
+    "social-card",
+    "xiaohongshu",
+    "rednote",
+    "wechat-cover",
+    "xiaohei",
+    "hand-drawn",
+    "guizang"
+  ],
+  "category": "illustration",
+  "skills": [
+    "./ian-xiaohei-illustrations",
+    "./guizang-social-card"
+  ]
+}
