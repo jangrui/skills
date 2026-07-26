@@ -93,6 +93,53 @@
 
 ---
 
+## 🎨 AI 创作与内容工具
+
+宝玉（Jim Liu）维护的 21 个 AI 创作技能合集——覆盖 AI 图像生成、内容获取/转换、多平台发布、实用工具四大类。大部分 skill 内有 `.ts` 脚本依赖 workspace 共享包，需**整仓引用**。
+
+| 类别 | 技能 | 一句话 | 前置依赖 |
+|---|---|---|---|
+| **AI 图像生成** | [baoyu-image-gen](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-image-gen) | 多后端 AI 绘图（OpenAI GPT Image 2、Azure OpenAI、Google、Replicate、MiniMax、Seedream、通义万相、智谱 GLM、快手可灵等） | `bun` |
+| | [baoyu-article-illustrator](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-article-illustrator) | 分析文章结构，定位配图位置，按 Type×Style×Palette 三维度生成插图 | `bun` |
+| | [baoyu-comic](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-comic) | 知识漫画生成器（多艺术风格、分镜布局、批量出图） | `bun` |
+| | [baoyu-cover-image](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-cover-image) | 文章封面图生成器（11 色板 × 7 渲染风格，支持 2.35:1 / 16:9 / 1:1） | `bun` |
+| | [baoyu-infographic](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-infographic) | 专业信息图生成器（21 种布局 × 22 种视觉风格） | `bun` |
+| | [baoyu-diagram](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-diagram) | 深色主题 SVG 专业图表（架构图、流程图、时序图、思维导图等） | —（纯 skill） |
+| | [baoyu-xhs-images](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-xhs-images) | 小红书/微信图文卡片系列（12 视觉风格 × 8 布局 × 3 色板） | `bun` |
+| | [baoyu-slide-deck](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-slide-deck) | 幻灯片图像生成 | `bun` |
+| | [baoyu-danger-gemini-web](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-danger-gemini-web) | 逆向 Gemini Web API 的图片/文本生成（备用后端） | `bun` |
+| **内容获取与转换** | [baoyu-url-to-markdown](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-url-to-markdown) | URL→Markdown（Chrome CDP + 站点适配器，支持 X/YouTube/HN/通用页面） | `bun` |
+| | [baoyu-danger-x-to-markdown](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-danger-x-to-markdown) | X/Twitter 帖子/文章→Markdown（需用户授权逆向 API） | `bun` |
+| | [baoyu-youtube-transcript](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-youtube-transcript) | YouTube 字幕/封面/章节/说话人识别下载 | —（纯 skill） |
+| | [baoyu-format-markdown](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-format-markdown) | Markdown 格式化（前置元数据、标题层级、加粗列表、代码块；不改内容） | `bun` / `npx` |
+| | [baoyu-markdown-to-html](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-markdown-to-html) | Markdown→HTML（微信兼容主题、代码高亮、数学公式、Mermaid/PlantUML 渲染） | `bun` |
+| | [baoyu-translate](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-translate) | 高质量翻译（精翻），支持文章/技术文档 | —（纯 skill） |
+| | [baoyu-wechat-summary](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-wechat-summary) | 微信群聊精华摘要（支持毒舌版、用户画像、事实记忆） | `wx-cli` |
+| **发布** | [baoyu-post-to-wechat](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-post-to-wechat) | 发布到微信公众号（文章/贴图/图文，Markdown 外链自动转底部引用） | `bun` |
+| | [baoyu-post-to-weibo](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-post-to-weibo) | 发布到微博（普通帖/头条文章） | `bun` |
+| | [baoyu-post-to-x](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-post-to-x) | 发布到 X/Twitter（普通帖 + X Articles） | `bun` |
+| **实用工具** | [baoyu-compress-image](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-compress-image) | 图片压缩（WebP / PNG） | `bun` / `npx` |
+| | [baoyu-electron-extract](https://github.com/JimLiu/baoyu-skills/tree/main/skills/baoyu-electron-extract) | Electron 应用资源提取（从 `.asar` 反解源码） | `bun` |
+
+> baoyu-skills 因 workspace 兄弟包依赖不可零散 vendor，只能整仓库引用。
+>
+> **前置依赖**（按需）：大部分 skill 需要 `bun` 运行时：
+> ```bash
+> curl -fsSL https://bun.sh/install | bash
+> ```
+>
+> - **Claude Code**：`/plugin install baoyu-skills@jangrui`（或直连上游 `/plugin marketplace add JimLiu/baoyu-skills`）。
+> - **Codex**：clone 整个仓库并 symlink 到 skills 目录：
+>   ```bash
+>   git clone --depth 1 https://github.com/JimLiu/baoyu-skills.git /tmp/baoyu-skills
+>   # 然后对每个期望的 skill 做 symlink（或全量拷贝）
+>   for d in /tmp/baoyu-skills/skills/baoyu-*/; do
+>     ln -sf "$d" ~/.codex/skills/"$(basename "$d")"
+>   done
+>   ```
+
+---
+
 ## 🔌 作为 Marketplace 使用(Claude Code)
 
 本目录同时是一个 Claude Code marketplace,聚合了上方标注 ⊕ 的标准插件——安装后自动跟进上游,无需手动同步。
@@ -102,6 +149,7 @@
 /plugin install diagram@jangrui                # 绘图五件套(drawio/mermaid/excalidraw/tldraw/plantuml)
 /plugin install writing@jangrui                 # 写作润色(humanizer 英文 + humanizer-zh 中文,去 AI 痕迹)
 /plugin install lark@jangrui                    # 飞书/Lark 全家桶(27 个 skill,需配合 npm 包 lark-cli)
+/plugin install baoyu-skills@jangrui            # AI 创作 21 技能(宝玉文集:AI绘图/图文转换/发布/工具)
 /plugin install cc-skills-golang@jangrui
 /plugin install mattpocock-skills@jangrui
 ```

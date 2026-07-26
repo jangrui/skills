@@ -111,6 +111,42 @@
       ]
     },
     {
+      "name": "baoyu-skills",
+      "description": "宝玉的 21 个 AI 创作技能合集：AI 绘图/配图/漫画/封面/信息图生成、URL→Markdown、Markdown 格式化/转 HTML、翻译、幻灯片、X/微博/微信发文、YouTube 字幕、小红书图片、网页抓取等。",
+      "source": {
+        "source": "github",
+        "repo": "JimLiu/baoyu-skills"
+      },
+      "author": {
+        "name": "Jim Liu (宝玉)",
+        "email": "junminliu@gmail.com"
+      },
+      "homepage": "https://github.com/JimLiu/baoyu-skills",
+      "repository": "https://github.com/JimLiu/baoyu-skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "baoyu",
+        "宝玉",
+        "image-generation",
+        "wechat",
+        "weibo",
+        "markdown",
+        "translate",
+        "slides",
+        "youtube",
+        "xiaohongshu",
+        "article-illustrator",
+        "comic",
+        "infographic"
+      ],
+      "category": "productivity"
+    },
+    {
       "name": "cc-skills-golang",
       "description": "AI Agent Skills for production-ready Go projects",
       "source": {
