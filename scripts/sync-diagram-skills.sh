@@ -48,16 +48,26 @@ local_name() {              # skill key → 本地 vendor 目录名（= skill ke
 }
 
 # ---------- 参数解析 ----------
+# 支持任意位置的 --check/-n（避免 `script.sh drawio --check` 被当成真实同步）
 DRY_RUN=0
 TARGET=""
-case "${1:-}" in
-  --check|-n) DRY_RUN=1 ;;
-  -h|--help)
-    sed -n '2,20p' "$0" | sed 's/^# \?//'
-    exit 0 ;;
-  "") : ;;  # 全部
-  *) TARGET="$1" ;;
-esac
+for arg in "$@"; do
+  case "$arg" in
+    --check|-n) DRY_RUN=1 ;;
+    -h|--help)
+      sed -n '2,20p' "$0" | sed 's/^# \?//'
+      exit 0 ;;
+    -*)
+      echo "❌ 未知参数：${arg}"
+      exit 1 ;;
+    *)
+      if [ -n "$TARGET" ]; then
+        echo "❌ 只能指定一个 skill，已有：${TARGET}，又收到：${arg}"
+        exit 1
+      fi
+      TARGET="$arg" ;;
+  esac
+done
 
 # CI 模式：记录变更到 $CI_CHANGES_FILE 供 workflow 读取
 CI_CHANGES_FILE="${CI_CHANGES_FILE:-}"
@@ -90,11 +100,15 @@ sync_one() {
     echo "  ❌ clone 失败：$UPSTREAM_OWNER/$repo"
     return 1
   fi
-  (cd "$tmp/$repo" && git sparse-checkout set "skills/$repo") 2>/dev/null || true
+  # 不要吞掉 sparse-checkout 失败：空源 + rsync --delete 会清空已有 vendor
+  if ! (cd "$tmp/$repo" && git sparse-checkout set "skills/$repo") >/dev/null 2>&1; then
+    echo "  ❌ sparse-checkout 失败：skills/$repo"
+    return 1
+  fi
 
   local src="$tmp/$repo/skills/$repo"
-  if [ ! -d "$src" ]; then
-    echo "  ❌ 上游无 skills/$repo 子目录，请检查仓库结构是否变更"
+  if [ ! -d "$src" ] || [ ! -f "$src/SKILL.md" ]; then
+    echo "  ❌ 上游无 skills/$repo/SKILL.md，请检查仓库结构是否变更"
     return 1
   fi
 

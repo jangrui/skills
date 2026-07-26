@@ -54,16 +54,26 @@ meta_for() {
 }
 
 # ---------- 参数解析 ----------
+# 支持任意位置的 --check/-n（避免 `script.sh humanizer --check` 被当成真实同步）
 DRY_RUN=0
 TARGET=""
-case "${1:-}" in
-  --check|-n) DRY_RUN=1 ;;
-  -h|--help)
-    sed -n '2,25p' "$0" | sed 's/^# \?//'
-    exit 0 ;;
-  "") : ;;
-  *) TARGET="$1" ;;
-esac
+for arg in "$@"; do
+  case "$arg" in
+    --check|-n) DRY_RUN=1 ;;
+    -h|--help)
+      sed -n '2,25p' "$0" | sed 's/^# \?//'
+      exit 0 ;;
+    -*)
+      echo "❌ 未知参数：${arg}"
+      exit 1 ;;
+    *)
+      if [ -n "$TARGET" ]; then
+        echo "❌ 只能指定一个 skill，已有：${TARGET}，又收到：${arg}"
+        exit 1
+      fi
+      TARGET="$arg" ;;
+  esac
+done
 
 # CI 模式：记录变更到 $CI_CHANGES_FILE 供 workflow 读取
 CI_CHANGES_FILE="${CI_CHANGES_FILE:-}"

@@ -42,16 +42,26 @@ discover_skills() {
 }
 
 # ---------- 参数解析 ----------
+# 支持任意位置的 --check/-n（避免 `script.sh lark-base --check` 被当成真实同步）
 DRY_RUN=0
 TARGET=""
-case "${1:-}" in
-  --check|-n) DRY_RUN=1 ;;
-  -h|--help)
-    sed -n '2,24p' "$0" | sed 's/^# \?//'
-    exit 0 ;;
-  "") : ;;  # 全部
-  *) TARGET="$1" ;;
-esac
+for arg in "$@"; do
+  case "$arg" in
+    --check|-n) DRY_RUN=1 ;;
+    -h|--help)
+      sed -n '2,24p' "$0" | sed 's/^# \?//'
+      exit 0 ;;
+    -*)
+      echo "❌ 未知参数：${arg}"
+      exit 1 ;;
+    *)
+      if [ -n "$TARGET" ]; then
+        echo "❌ 只能指定一个 skill，已有：${TARGET}，又收到：${arg}"
+        exit 1
+      fi
+      TARGET="$arg" ;;
+  esac
+done
 
 # CI 模式：记录变更到 $CI_CHANGES_FILE 供 workflow 读取
 CI_CHANGES_FILE="${CI_CHANGES_FILE:-}"
@@ -70,7 +80,10 @@ fetch_upstream() {
     echo "❌ clone 失败：$UPSTREAM_OWNER/$UPSTREAM_REPO"
     return 1
   fi
-  (cd "$tmp" && git sparse-checkout set "$UPSTREAM_SUBDIR") 2>/dev/null || true
+  if ! (cd "$tmp" && git sparse-checkout set "$UPSTREAM_SUBDIR") >/dev/null 2>&1; then
+    echo "❌ sparse-checkout 失败：$UPSTREAM_SUBDIR"
+    return 1
+  fi
   if [ ! -d "$tmp/$UPSTREAM_SUBDIR" ]; then
     echo "❌ 上游无 $UPSTREAM_SUBDIR 子目录，请检查仓库结构是否变更"
     return 1

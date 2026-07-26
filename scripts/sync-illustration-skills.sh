@@ -32,20 +32,29 @@ repo_of() {     case "$1" in ian-xiaohei-illustrations) echo "ian-xiaohei-illust
 subdir_of() {   case "$1" in ian-xiaohei-illustrations) echo "ian-xiaohei-illustrations" ;; guizang-social-card) echo "" ;; *) echo "" ;; esac; }
 
 # ---------- 参数解析 ----------
+# 支持任意位置的 --check/-n（避免 `script.sh ian-xiaohei-illustrations --check` 被当成真实同步）
 DRY_RUN=0
 TARGET=""
-case "${1:-}" in
-  --check|-n) DRY_RUN=1 ;;
-  -h|--help)
-    sed -n '2,20p' "$0" | sed 's/^# \?//'
-    exit 0 ;;
-  "") : ;;
-  *)
-    valid=0
-    for s in "${SKILL_NAMES[@]}"; do [ "$s" = "$1" ] && valid=1 && break; done
-    [ "$valid" = "1" ] || { echo "❌ 未知 skill: $1，可选: ${SKILL_NAMES[*]}"; exit 1; }
-    TARGET="$1" ;;
-esac
+for arg in "$@"; do
+  case "$arg" in
+    --check|-n) DRY_RUN=1 ;;
+    -h|--help)
+      sed -n '2,20p' "$0" | sed 's/^# \?//'
+      exit 0 ;;
+    -*)
+      echo "❌ 未知参数：${arg}"
+      exit 1 ;;
+    *)
+      if [ -n "$TARGET" ]; then
+        echo "❌ 只能指定一个 skill，已有：${TARGET}，又收到：${arg}"
+        exit 1
+      fi
+      valid=0
+      for s in "${SKILL_NAMES[@]}"; do [ "$s" = "$arg" ] && valid=1 && break; done
+      [ "$valid" = "1" ] || { echo "❌ 未知 skill: ${arg}，可选: ${SKILL_NAMES[*]}"; exit 1; }
+      TARGET="$arg" ;;
+  esac
+done
 
 CI_CHANGES_FILE="${CI_CHANGES_FILE:-}"
 UPDATED_SKILLS=()
@@ -108,11 +117,15 @@ sync_sparse() {
     echo "  ❌ clone 失败"
     rm -rf "$tmp"; return 1
   fi
-  (cd "$tmp/$repo" && git sparse-checkout set "$subdir") 2>/dev/null || true
+  # 不要吞掉 sparse-checkout 失败：空源 + rsync --delete 会清空已有 vendor
+  if ! (cd "$tmp/$repo" && git sparse-checkout set "$subdir") >/dev/null 2>&1; then
+    echo "  ❌ sparse-checkout 失败：$subdir"
+    rm -rf "$tmp"; return 1
+  fi
 
   local src="$tmp/$repo/$subdir"
-  if [ ! -d "$src" ]; then
-    echo "  ❌ 上游无 $subdir/ 子目录"
+  if [ ! -d "$src" ] || [ ! -f "$src/SKILL.md" ]; then
+    echo "  ❌ 上游无 $subdir/SKILL.md"
     rm -rf "$tmp"; return 1
   fi
 

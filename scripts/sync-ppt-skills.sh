@@ -29,12 +29,17 @@ LOCAL_DIR="guizang-ppt"                # vendor 目录名
 
 # ---------- 参数解析 ----------
 DRY_RUN=0
-case "${1:-}" in
-  --check|-n) DRY_RUN=1 ;;
-  -h|--help)
-    sed -n '2,18p' "$0" | sed 's/^# \?//'
-    exit 0 ;;
-esac
+for arg in "$@"; do
+  case "$arg" in
+    --check|-n) DRY_RUN=1 ;;
+    -h|--help)
+      sed -n '2,18p' "$0" | sed 's/^# \?//'
+      exit 0 ;;
+    -*|*)
+      echo "❌ 未知参数：${arg}（仅支持 --check / -n / --help）"
+      exit 1 ;;
+  esac
+done
 
 # CI 模式：记录变更到 $CI_CHANGES_FILE 供 workflow 读取
 CI_CHANGES_FILE="${CI_CHANGES_FILE:-}"
@@ -58,7 +63,9 @@ COMMIT_FILE="$VENDOR_DIR/.upstream-commit"
 
 # 浅克隆整仓，后续用 rsync 排除非运行时文件
 TMP_DIR=$(mktemp -d)
-trap 'rm -rf "$TMP_DIR"' RETURN
+# 必须用 EXIT：macOS 系统 bash 3.2 在脚本顶层不会触发 RETURN trap，
+# 会导致 clone 目录泄漏（已实测：RETURN 静默不触发，EXIT 正常清理）。
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 if ! git clone --depth 1 --filter=blob:none \
      "https://github.com/$UPSTREAM_OWNER/$UPSTREAM_REPO.git" "$TMP_DIR/$UPSTREAM_REPO" >/dev/null 2>&1; then
