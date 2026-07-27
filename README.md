@@ -3,8 +3,10 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#-作为-marketplace-使用claude-code)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#-在-codex-中使用)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-174-informational)](#-技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-15-informational)](#-作为-marketplace-使用claude-code)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-190-informational)](#-技能目录)
+[![Plugins](https://img.shields.io/badge/Plugins-16-informational)](#-作为-marketplace-使用claude-code)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-190-informational)](#-技能目录)
+[![Plugins](https://img.shields.io/badge/Plugins-16-informational)](#-作为-marketplace-使用claude-code)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2021%3A00%20UTC-success)](#-同步上游)
 
 面向 **Claude Code** 与 **OpenAI Codex CLI** 的 AI 编程助手 skill 索引与 marketplace。
@@ -51,9 +53,12 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| Marketplace 插件 | 15 |
-| 本地 vendored skill（`SKILL.md`） | 174 |
-| 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 工程实践 等 |
+| Marketplace 插件 | 16 |
+| 本地 vendored skill（`SKILL.md`） | 190 |
+| 主题分类 | 绘图 / 写作（humanizer + WPS 笔记） / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 数据库 / 工程实践 等 |
+| Marketplace 插件 | 16 |
+| 本地 vendored skill（`SKILL.md`） | 190 |
+| 主题分类 | 绘图 / 写作（humanizer + WPS 笔记） / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 数据库 / 工程实践 等 |
 
 适合这些场景：
 
@@ -112,12 +117,13 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 
 ```text
 /plugin install diagram@jangrui                 # 绘图五件套（5）
-/plugin install writing@jangrui                  # 中英文去 AI 痕迹（2）
+/plugin install writing@jangrui                  # 中英文去 AI 痕迹 + WPS 笔记全家桶（38，需 wpsnote-cli）
 /plugin install ppt@jangrui                      # 网页 PPT（1）
 /plugin install illustration@jangrui             # 文章配图 + 社交卡片（2）
 /plugin install lark@jangrui                     # 飞书全家桶（27，需 lark-cli）
 /plugin install cc-skills-golang@jangrui         # Go 生产级技能（46）
 /plugin install baoyu-skills@jangrui             # 宝玉 AI 创作合集（21，需 Bun）
+/plugin install dbx@jangrui                      # 数据库 CLI 探索（1，需 @dbx-app/cli）
 /plugin install grafana-core@jangrui             # Grafana 核心（8）
 /plugin install grafana-cloud@jangrui            # Grafana Cloud（18）
 /plugin install grafana-lgtm@jangrui             # LGTM 开源栈（5）
@@ -133,7 +139,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 | 插件 | 模式 | Skill 数 | 约体积 |
 | --- | --- | ---: | ---: |
 | `diagram` | 多独立仓库 / 子目录 | 5 | ~1.2 MB |
-| `writing` | 多独立仓库 / 子目录 | 2 | ~0.1 MB |
+| `writing` | 多独立仓库（humanizer）+ 单仓库多 skill（wpsnote，flatten to `plugins/writing/wpsnote/`） | 38 | ~1.4 MB |
 | `ppt` | 单仓库单 skill / 根目录 | 1 | ~0.6 MB |
 | `illustration` | 混合（子目录 + 根目录） | 2 | ~3.5 MB |
 | `cc-skills-golang` | 单仓库多 skill / 扁平（排除 `evals/`） | 46 | ~2.1 MB |
@@ -141,6 +147,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 | `grafana-*`（7 个） | 单仓库多 skill / 两层 category | 48 | ~6.0 MB |
 | `baoyu-skills` | 单仓库多 skill / 扁平（兄弟包 npm 发布） | 21 | ~3.4 MB |
 | `mattpocock-skills` | 单仓库多 skill / 两层 bucket（仅 promoted） | 22 | ~0.4 MB |
+| `dbx` | 单仓库多 skill / 扁平（当前 1 个；需 `@dbx-app/cli`） | 1 | ~8 KB |
 
 ---
 
@@ -221,9 +228,46 @@ Claude Code：
 /plugin install baoyu-skills@jangrui
 ```
 
-#### dbx（纯索引）
+#### wpsnote（writing 插件子集）
 
-先安装 [dbx CLI](https://github.com/t8y2/dbx)，再把上游 `skills/dbx/` 拷进各自 skills 目录。
+以上 humanizer 技能无需额外 CLI。writing 插件还包含 **WPS 笔记全家桶（36 个 skill）**，需安装并开通 WPS 笔记的 `wpsnote-cli`：
+
+1. 下载安装 [WPS 笔记](https://www.kdocs.cn/)
+2. 打开应用 → 左下角「设置」→「AI 实验室」开通
+3. 确认 CLI 可用：
+
+```bash
+wpsnote-cli status --json
+```
+
+Claude Code：
+
+```text
+/plugin install writing@jangrui
+```
+
+部分 skill（如 `web-importer` / `image-gen`）另需 Python 第三方包（`httpx`、`beautifulsoup4`、`requests` 等），按对应 `SKILL.md` 安装。
+
+#### dbx
+
+先安装 [dbx CLI](https://www.npmjs.com/package/@dbx-app/cli)（并建议安装/配置 DBX Desktop）：
+
+```bash
+npm install -g @dbx-app/cli
+dbx doctor
+```
+
+Claude Code：
+
+```text
+/plugin install dbx@jangrui
+```
+
+Codex CLI：
+
+```bash
+cp -r plugins/dbx/dbx ~/.codex/skills/dbx
+```
 
 ---
 
@@ -294,6 +338,7 @@ Claude Code：
 | --- | --- | --- | --- |
 | [humanizer](https://github.com/blader/humanizer) | 英文 | 去除 AI 写作痕迹 | blader |
 | [humanizer-zh](https://github.com/op7418/Humanizer-zh) | 中文 | 检测并改写 24 种中文 AI 文风 | op7418 |
+| [wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) | 中文 | WPS 笔记全家桶（读写/创作/捕获/学习，36 skill，需 wpsnote-cli） | WPS Note Team |
 
 ```text
 /plugin install writing@jangrui
@@ -391,20 +436,15 @@ cp -r plugins/mattpocock/productivity/grill-me ~/.codex/skills/grill-me
 ```
 
 ### 笔记与知识管理（纯索引）
+### 数据库 ⊕（vendor）
 
 | 技能 | 一句话 | 上游 |
 | --- | --- | --- |
-| [wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) | WPS 笔记 40+ skill | WPS Note Team |
+| [dbx](https://github.com/t8y2/dbx) | 通过 dbx CLI 安全探索 schema / 执行只读 SQL，支持 70+ 数据库 | t8y2 |
 
 ```text
-/plugin marketplace add wpsnote/wpsnote-skills
+/plugin install dbx@jangrui
 ```
-
-### 数据库（纯索引）
-
-| 技能 | 一句话 | 上游 |
-| --- | --- | --- |
-| [dbx](https://github.com/t8y2/dbx) | 通过 dbx CLI 安全探索 schema / 执行 SQL，支持 70+ 数据库 | t8y2 |
 
 ---
 
@@ -418,7 +458,7 @@ jangrui/skills/
 │   └── marketplace.json              # Claude Code marketplace 声明
 ├── plugins/                          # vendored skill 本体
 │   ├── diagram/                      # drawio / mermaid / excalidraw / tldraw / plantuml
-│   ├── writing/                      # humanizer / humanizer-zh
+│   ├── writing/                      # humanizer / humanizer-zh / wpsnote/（38 skill）
 │   ├── ppt/guizang-ppt/
 │   ├── illustration/
 │   ├── golang/golang-*/              # 46 个 Go skill
@@ -426,6 +466,8 @@ jangrui/skills/
 │   ├── baoyu/baoyu-*/                # 21 个 AI 创作 skill
 │   ├── grafana/grafana-*/            # 7 个 category × 48 skill
 │   └── mattpocock/{engineering,productivity}/  # 22 个工程实践 skill
+│   ├── dbx/dbx/                      # 1 个数据库 CLI skill
+│   └── grafana/grafana-*/            # 7 个 category × 48 skill
 ├── scripts/                          # 上游同步脚本
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
@@ -436,6 +478,9 @@ jangrui/skills/
 │   ├── sync-baoyu-skills.sh
 │   ├── sync-grafana-skills.sh
 │   └── sync-mattpocock-skills.sh
+│   ├── sync-wpsnote-skills.sh
+│   ├── sync-dbx-skills.sh
+│   └── sync-grafana-skills.sh
 └── .github/workflows/                # 每日自动同步 PR
 ```
 
@@ -453,12 +498,16 @@ jangrui/skills/
 ./scripts/sync-grafana-skills.sh --check
 ./scripts/sync-baoyu-skills.sh --check
 ./scripts/sync-mattpocock-skills.sh --check
+./scripts/sync-wpsnote-skills.sh --check
+./scripts/sync-dbx-skills.sh --check
 
 # 实际同步
 ./scripts/sync-diagram-skills.sh
 ./scripts/sync-lark-skills.sh lark-base          # 只同步某个 skill
 ./scripts/sync-grafana-skills.sh grafana-k6      # 只同步某个 category
 ./scripts/sync-mattpocock-skills.sh engineering/tdd  # 只同步某个 skill
+./scripts/sync-dbx-skills.sh                     # 同步 dbx
+./scripts/sync-wpsnote-skills.sh                 # 同步 wpsnote
 
 # review
 git diff plugins/
@@ -543,6 +592,8 @@ PY
 - 运行时依赖搬不走（workspace 兄弟包未发布等）
 
 mattpocock 已通过「只 vendor promoted 两桶」解决目录筛选问题，现为 vendor。
+- 需要额外目录筛选（如 mattpocock 含 deprecated / in-progress）
+- 本身是独立 marketplace 且不宜拆分（历史原因；wpsnote 已转为 writing 插件子集）
 
 ### 更新会自动进来吗？
 
@@ -591,8 +642,9 @@ lark-cli auth login --recommend
 - [larksuite/cli](https://github.com/larksuite/cli)
 - [grafana/skills](https://github.com/grafana/skills)
 - [JimLiu/baoyu-skills](https://github.com/JimLiu/baoyu-skills)
+- [wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills)
+- [t8y2/dbx](https://github.com/t8y2/dbx)
 - [mattpocock/skills](https://github.com/mattpocock/skills)
-- 以及 wpsnote、dbx 等被索引的上游项目
 
 ---
 

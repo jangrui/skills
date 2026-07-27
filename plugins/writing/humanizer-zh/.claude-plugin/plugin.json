@@ -1,0 +1,20 @@
+{
+  "name": "humanizer-zh",
+  "version": "0.1.0",
+  "description": "检测并改写 24 种中文 AI 文风，让 AI 生成的中文更像真人写作。基于维基百科人类写作特征指南。",
+  "author": {
+    "name": "op7418",
+    "url": "https://github.com/op7418"
+  },
+  "homepage": "https://github.com/op7418/Humanizer-zh",
+  "repository": "https://github.com/op7418/Humanizer-zh",
+  "license": "MIT",
+  "keywords": [
+    "humanizer-zh",
+    "writing"
+  ],
+  "category": "writing",
+  "skills": [
+    "./"
+  ]
+}
