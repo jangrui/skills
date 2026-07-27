@@ -3,8 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#-作为-marketplace-使用claude-code)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#-在-codex-中使用)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-152-informational)](#-技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-15-informational)](#-作为-marketplace-使用claude-code)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-189-informational)](#-技能目录)
+[![Plugins](https://img.shields.io/badge/Plugins-16-informational)](#-作为-marketplace-使用claude-code)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2021%3A00%20UTC-success)](#-同步上游)
 
 面向 **Claude Code** 与 **OpenAI Codex CLI** 的 AI 编程助手 skill 索引与 marketplace。
@@ -51,9 +51,9 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| Marketplace 插件 | 15 |
-| 本地 vendored skill（`SKILL.md`） | 152 |
-| 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 工程实践 等 |
+| Marketplace 插件 | 16 |
+| 本地 vendored skill（`SKILL.md`） | 189 |
+| 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / WPS 笔记 / 工程实践 等 |
 
 适合这些场景：
 
@@ -118,6 +118,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 /plugin install lark@jangrui                     # 飞书全家桶（27，需 lark-cli）
 /plugin install cc-skills-golang@jangrui         # Go 生产级技能（46）
 /plugin install baoyu-skills@jangrui             # 宝玉 AI 创作合集（21，需 Bun）
+/plugin install wpsnote-skills@jangrui           # WPS 笔记全家桶（36，需 wpsnote-cli）
 /plugin install grafana-core@jangrui             # Grafana 核心（8）
 /plugin install grafana-cloud@jangrui            # Grafana Cloud（18）
 /plugin install grafana-lgtm@jangrui             # LGTM 开源栈（5）
@@ -145,6 +146,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 | `lark` | 单仓库多 skill / 扁平 | 27 | ~5.5 MB |
 | `grafana-*`（7 个） | 单仓库多 skill / 两层 category | 48 | ~6.0 MB |
 | `baoyu-skills` | 单仓库多 skill / 扁平（兄弟包 npm 发布） | 21 | ~3.4 MB |
+| `wpsnote-skills` | 单仓库多 skill / 扁平（需 wpsnote-cli） | 36 | ~1.3 MB |
 
 ---
 
@@ -224,6 +226,32 @@ Claude Code：
 ```text
 /plugin install baoyu-skills@jangrui
 ```
+
+#### wpsnote-skills
+
+需安装并开通 **WPS 笔记** 的 `wpsnote-cli`：
+
+1. 下载安装 [WPS 笔记](https://www.kdocs.cn/)
+2. 打开应用 → 左下角「设置」→「AI 实验室」开通
+3. 确认 CLI 可用：
+
+```bash
+wpsnote-cli status --json
+```
+
+Claude Code：
+
+```text
+/plugin install wpsnote-skills@jangrui
+```
+
+Codex CLI：
+
+```bash
+cp -r /tmp/jangrui-skills/plugins/wpsnote/* ~/.codex/skills/
+```
+
+部分 skill（如 `web-importer` / `image-gen`）另需 Python 第三方包（`httpx`、`beautifulsoup4`、`requests` 等），按对应 `SKILL.md` 安装。
 
 #### dbx（纯索引）
 
@@ -386,14 +414,16 @@ cp -r plugins/baoyu ~/.codex/skills/baoyu
 /plugin install mattpocock-skills@jangrui
 ```
 
-### 笔记与知识管理（纯索引）
+### 笔记与知识管理 ⊕（vendor）
+
+[wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills)（36 个 skill）覆盖 WPS 笔记读写、搜索美化、内容创作发布、信息捕获、灵感引擎、学习场景。
 
 | 技能 | 一句话 | 上游 |
 | --- | --- | --- |
-| [wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) | WPS 笔记 40+ skill | WPS Note Team |
+| [wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) | WPS 笔记全家桶（读写/创作/捕获/学习，需 wpsnote-cli） | WPS Note Team |
 
 ```text
-/plugin marketplace add wpsnote/wpsnote-skills
+/plugin install wpsnote-skills@jangrui
 ```
 
 ### 数据库（纯索引）
@@ -420,6 +450,7 @@ jangrui/skills/
 │   ├── golang/golang-*/              # 46 个 Go skill
 │   ├── lark/lark-*/                  # 27 个飞书 skill
 │   ├── baoyu/baoyu-*/                # 21 个 AI 创作 skill
+│   ├── wpsnote/                      # 36 个 WPS 笔记 skill
 │   └── grafana/grafana-*/            # 7 个 category × 48 skill
 ├── scripts/                          # 上游同步脚本
 │   ├── sync-diagram-skills.sh
@@ -429,6 +460,7 @@ jangrui/skills/
 │   ├── sync-golang-skills.sh
 │   ├── sync-lark-skills.sh
 │   ├── sync-baoyu-skills.sh
+│   ├── sync-wpsnote-skills.sh
 │   └── sync-grafana-skills.sh
 └── .github/workflows/                # 每日自动同步 PR
 ```
@@ -446,6 +478,7 @@ jangrui/skills/
 ./scripts/sync-golang-skills.sh --check
 ./scripts/sync-grafana-skills.sh --check
 ./scripts/sync-baoyu-skills.sh --check
+./scripts/sync-wpsnote-skills.sh --check
 
 # 实际同步
 ./scripts/sync-diagram-skills.sh
@@ -531,8 +564,8 @@ PY
 
 常见原因：
 
-- 本身是独立 marketplace，体积大且边界清晰（如 wpsnote）
 - 需要额外目录筛选（如 mattpocock 含 deprecated / in-progress）
+- 本身是独立 marketplace 且不宜拆分（历史原因；wpsnote 已改为 vendor）
 
 ### 更新会自动进来吗？
 
@@ -582,8 +615,9 @@ lark-cli auth login --recommend
 - [larksuite/cli](https://github.com/larksuite/cli)
 - [grafana/skills](https://github.com/grafana/skills)
 - [JimLiu/baoyu-skills](https://github.com/JimLiu/baoyu-skills)
+- [wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills)
 - [mattpocock/skills](https://github.com/mattpocock/skills)
-- 以及 wpsnote、dbx 等被索引的上游项目
+- 以及 dbx 等被索引的上游项目
 
 ---
 
