@@ -53,7 +53,7 @@
 | --- | ---: |
 | Marketplace 插件 | 17 |
 | 本地 vendored skill（`SKILL.md`） | 190 |
-| 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / WPS 笔记 / 数据库 / 工程实践 等 |
+| 主题分类 | 绘图 / 写作（含 WPS 笔记） / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 数据库 / 工程实践 等 |
 
 适合这些场景：
 
@@ -113,12 +113,12 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 ```text
 /plugin install diagram@jangrui                 # 绘图五件套（5）
 /plugin install writing@jangrui                  # 中英文去 AI 痕迹（2）
+/plugin install wpsnote-skills@jangrui           # WPS 笔记写作全家桶（36，需 wpsnote-cli）
 /plugin install ppt@jangrui                      # 网页 PPT（1）
 /plugin install illustration@jangrui             # 文章配图 + 社交卡片（2）
 /plugin install lark@jangrui                     # 飞书全家桶（27，需 lark-cli）
 /plugin install cc-skills-golang@jangrui         # Go 生产级技能（46）
 /plugin install baoyu-skills@jangrui             # 宝玉 AI 创作合集（21，需 Bun）
-/plugin install wpsnote-skills@jangrui           # WPS 笔记全家桶（36，需 wpsnote-cli）
 /plugin install dbx@jangrui                      # 数据库 CLI 探索（1，需 @dbx-app/cli）
 /plugin install grafana-core@jangrui             # Grafana 核心（8）
 /plugin install grafana-cloud@jangrui            # Grafana Cloud（18）
@@ -140,14 +140,14 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 | 插件 | 模式 | Skill 数 | 约体积 |
 | --- | --- | ---: | ---: |
 | `diagram` | 多独立仓库 / 子目录 | 5 | ~1.2 MB |
-| `writing` | 多独立仓库 / 子目录 | 2 | ~0.1 MB |
+| `writing` | 多独立仓库 / 子目录（humanizer） | 2 | ~0.1 MB |
+| `wpsnote-skills` | 落在 `plugins/writing/wpsnote/`（需 wpsnote-cli） | 36 | ~1.3 MB |
 | `ppt` | 单仓库单 skill / 根目录 | 1 | ~0.6 MB |
 | `illustration` | 混合（子目录 + 根目录） | 2 | ~3.5 MB |
 | `cc-skills-golang` | 单仓库多 skill / 扁平（排除 `evals/`） | 46 | ~2.1 MB |
 | `lark` | 单仓库多 skill / 扁平 | 27 | ~5.5 MB |
 | `grafana-*`（7 个） | 单仓库多 skill / 两层 category | 48 | ~6.0 MB |
 | `baoyu-skills` | 单仓库多 skill / 扁平（兄弟包 npm 发布） | 21 | ~3.4 MB |
-| `wpsnote-skills` | 单仓库多 skill / 扁平（需 wpsnote-cli） | 36 | ~1.3 MB |
 | `dbx` | 单仓库多 skill / 扁平（当前 1 个；需 `@dbx-app/cli`） | 1 | ~8 KB |
 
 ---
@@ -250,7 +250,7 @@ Claude Code：
 Codex CLI：
 
 ```bash
-cp -r /tmp/jangrui-skills/plugins/wpsnote/* ~/.codex/skills/
+cp -r /tmp/jangrui-skills/plugins/writing/wpsnote/* ~/.codex/skills/
 ```
 
 部分 skill（如 `web-importer` / `image-gen`）另需 Python 第三方包（`httpx`、`beautifulsoup4`、`requests` 等），按对应 `SKILL.md` 安装。
@@ -351,6 +351,18 @@ cp -r plugins/dbx/dbx ~/.codex/skills/dbx
 /plugin install writing@jangrui
 ```
 
+#### wpsnote-skills — WPS 笔记全家桶
+
+[wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills)（36 个 skill，位于 `plugins/writing/wpsnote/`）覆盖笔记读写、内容创作发布、信息捕获、灵感引擎、小说写作、学习场景、标签管理、Skill 创建等。需配合 WPS 笔记内置的 `wpsnote-cli`。
+
+| 技能 | 一句话 | 上游 |
+| --- | --- | --- |
+| [wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) | WPS 笔记全家桶（读写/创作/捕获/学习，需 wpsnote-cli） | WPS Note Team |
+
+```text
+/plugin install wpsnote-skills@jangrui
+```
+
 ### 演示文稿 ⊕
 
 | 技能 | 一句话 | 上游 |
@@ -434,18 +446,6 @@ cp -r plugins/baoyu ~/.codex/skills/baoyu
 /plugin install mattpocock-skills@jangrui
 ```
 
-### 笔记与知识管理 ⊕（vendor）
-
-[wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills)（36 个 skill）覆盖 WPS 笔记读写、搜索美化、内容创作发布、信息捕获、灵感引擎、学习场景。
-
-| 技能 | 一句话 | 上游 |
-| --- | --- | --- |
-| [wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) | WPS 笔记全家桶（读写/创作/捕获/学习，需 wpsnote-cli） | WPS Note Team |
-
-```text
-/plugin install wpsnote-skills@jangrui
-```
-
 ### 数据库 ⊕（vendor）
 
 | 技能 | 一句话 | 上游 |
@@ -469,13 +469,12 @@ jangrui/skills/
 │   └── marketplace.json              # Claude Code marketplace 声明
 ├── plugins/                          # vendored skill 本体
 │   ├── diagram/                      # drawio / mermaid / excalidraw / tldraw / plantuml
-│   ├── writing/                      # humanizer / humanizer-zh
+│   ├── writing/                      # humanizer / humanizer-zh + wpsnote/
 │   ├── ppt/guizang-ppt/
 │   ├── illustration/
 │   ├── golang/golang-*/              # 46 个 Go skill
 │   ├── lark/lark-*/                  # 27 个飞书 skill
 │   ├── baoyu/baoyu-*/                # 21 个 AI 创作 skill
-│   ├── wpsnote/                      # 36 个 WPS 笔记 skill
 │   ├── dbx/dbx/                      # 1 个数据库 CLI skill
 │   └── grafana/grafana-*/            # 7 个 category × 48 skill
 ├── scripts/                          # 上游同步脚本
@@ -595,7 +594,6 @@ PY
 常见原因：
 
 - 需要额外目录筛选（如 mattpocock 含 deprecated / in-progress）
-- 本身是独立 marketplace 且不宜拆分（历史原因；wpsnote 已改为 vendor）
 
 ### 更新会自动进来吗？
 
