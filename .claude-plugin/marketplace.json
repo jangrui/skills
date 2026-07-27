@@ -547,31 +547,7 @@
         "domain-modeling",
         "productivity"
       ],
-      "category": "productivity",
-      "skills": [
-        "./plugins/mattpocock/engineering/ask-matt",
-        "./plugins/mattpocock/engineering/code-review",
-        "./plugins/mattpocock/engineering/codebase-design",
-        "./plugins/mattpocock/engineering/diagnosing-bugs",
-        "./plugins/mattpocock/engineering/domain-modeling",
-        "./plugins/mattpocock/engineering/grill-with-docs",
-        "./plugins/mattpocock/engineering/implement",
-        "./plugins/mattpocock/engineering/improve-codebase-architecture",
-        "./plugins/mattpocock/engineering/prototype",
-        "./plugins/mattpocock/engineering/research",
-        "./plugins/mattpocock/engineering/resolving-merge-conflicts",
-        "./plugins/mattpocock/engineering/setup-matt-pocock-skills",
-        "./plugins/mattpocock/engineering/tdd",
-        "./plugins/mattpocock/engineering/to-spec",
-        "./plugins/mattpocock/engineering/to-tickets",
-        "./plugins/mattpocock/engineering/triage",
-        "./plugins/mattpocock/engineering/wayfinder",
-        "./plugins/mattpocock/productivity/grill-me",
-        "./plugins/mattpocock/productivity/grilling",
-        "./plugins/mattpocock/productivity/handoff",
-        "./plugins/mattpocock/productivity/teach",
-        "./plugins/mattpocock/productivity/writing-great-skills"
-      ]
+      "category": "productivity"
     }
   ]
 }

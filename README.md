@@ -592,7 +592,6 @@ PY
 - 运行时依赖搬不走（workspace 兄弟包未发布等）
 
 mattpocock 已通过「只 vendor promoted 两桶」解决目录筛选问题，现为 vendor。
-- 需要额外目录筛选（如 mattpocock 含 deprecated / in-progress）
 - 本身是独立 marketplace 且不宜拆分（历史原因；wpsnote 已转为 writing 插件子集）
 
 ### 更新会自动进来吗？
