@@ -24,13 +24,6 @@
         "plantuml",
         "visualization",
         "uml"
-      ],
-      "skills": [
-        "./plugins/diagram/drawio",
-        "./plugins/diagram/mermaid",
-        "./plugins/diagram/excalidraw",
-        "./plugins/diagram/tldraw",
-        "./plugins/diagram/plantuml"
       ]
     },
     {
@@ -52,11 +45,6 @@
         "wpsnote",
         "wps-note",
         "笔记"
-      ],
-      "skills": [
-        "./plugins/writing/humanizer",
-        "./plugins/writing/humanizer-zh",
-        "./plugins/writing/wpsnote"
       ]
     },
     {
@@ -83,35 +71,6 @@
         "slides",
         "mail",
         "task"
-      ],
-      "skills": [
-        "./plugins/lark/lark-shared",
-        "./plugins/lark/lark-im",
-        "./plugins/lark/lark-doc",
-        "./plugins/lark/lark-drive",
-        "./plugins/lark/lark-markdown",
-        "./plugins/lark/lark-base",
-        "./plugins/lark/lark-sheets",
-        "./plugins/lark/lark-slides",
-        "./plugins/lark/lark-calendar",
-        "./plugins/lark/lark-task",
-        "./plugins/lark/lark-mail",
-        "./plugins/lark/lark-contact",
-        "./plugins/lark/lark-wiki",
-        "./plugins/lark/lark-event",
-        "./plugins/lark/lark-vc",
-        "./plugins/lark/lark-vc-agent",
-        "./plugins/lark/lark-whiteboard",
-        "./plugins/lark/lark-minutes",
-        "./plugins/lark/lark-note",
-        "./plugins/lark/lark-openapi-explorer",
-        "./plugins/lark/lark-skill-maker",
-        "./plugins/lark/lark-attendance",
-        "./plugins/lark/lark-approval",
-        "./plugins/lark/lark-okr",
-        "./plugins/lark/lark-apps",
-        "./plugins/lark/lark-workflow-meeting-summary",
-        "./plugins/lark/lark-workflow-standup-report"
       ]
     },
     {
@@ -131,9 +90,6 @@
         "swiss-style",
         "web-deck",
         "horizontal-swipe"
-      ],
-      "skills": [
-        "./plugins/ppt/guizang-ppt"
       ]
     },
     {
@@ -157,10 +113,6 @@
         "hand-drawn",
         "guizang",
         "black-ink"
-      ],
-      "skills": [
-        "./plugins/illustration/ian-xiaohei-illustrations",
-        "./plugins/illustration/guizang-social-card"
       ]
     },
     {
@@ -181,16 +133,6 @@
         "opentelemetry",
         "alerting",
         "dashboard"
-      ],
-      "skills": [
-        "./plugins/grafana/grafana-core/alerting-irm",
-        "./plugins/grafana/grafana-core/alloy",
-        "./plugins/grafana/grafana-core/beyla",
-        "./plugins/grafana/grafana-core/dashboarding",
-        "./plugins/grafana/grafana-core/grafana-oss",
-        "./plugins/grafana/grafana-core/opentelemetry",
-        "./plugins/grafana/grafana-core/promql",
-        "./plugins/grafana/grafana-core/skill-authoring"
       ]
     },
     {
@@ -211,26 +153,6 @@
         "sso",
         "terraform",
         "kubernetes"
-      ],
-      "skills": [
-        "./plugins/grafana/grafana-cloud/adaptive-metrics",
-        "./plugins/grafana/grafana-cloud/admin",
-        "./plugins/grafana/grafana-cloud/app-observability",
-        "./plugins/grafana/grafana-cloud/assistant-mcp",
-        "./plugins/grafana/grafana-cloud/cloud-integrations",
-        "./plugins/grafana/grafana-cloud/cost-management",
-        "./plugins/grafana/grafana-cloud/database-observability",
-        "./plugins/grafana/grafana-cloud/dpm-finder",
-        "./plugins/grafana/grafana-cloud/fleet-management",
-        "./plugins/grafana/grafana-cloud/infrastructure",
-        "./plugins/grafana/grafana-cloud/loki-label-analyzer",
-        "./plugins/grafana/grafana-cloud/ml-ai",
-        "./plugins/grafana/grafana-cloud/oncall-irm",
-        "./plugins/grafana/grafana-cloud/private-connectivity",
-        "./plugins/grafana/grafana-cloud/prometheus-cardinality-troubleshooter",
-        "./plugins/grafana/grafana-cloud/prometheus-label-strategy",
-        "./plugins/grafana/grafana-cloud/send-data",
-        "./plugins/grafana/grafana-cloud/testing"
       ]
     },
     {
@@ -253,13 +175,6 @@
         "tracing",
         "logging",
         "profiling"
-      ],
-      "skills": [
-        "./plugins/grafana/grafana-lgtm/loki",
-        "./plugins/grafana/grafana-lgtm/mimir",
-        "./plugins/grafana/grafana-lgtm/prometheus",
-        "./plugins/grafana/grafana-lgtm/pyroscope",
-        "./plugins/grafana/grafana-lgtm/tempo"
       ]
     },
     {
@@ -279,13 +194,6 @@
         "react-19",
         "grafana-scenes",
         "webpack"
-      ],
-      "skills": [
-        "./plugins/grafana/grafana-plugins/audit-and-reduce-dependencies",
-        "./plugins/grafana/grafana-plugins/check-npm",
-        "./plugins/grafana/grafana-plugins/grafana-scenes",
-        "./plugins/grafana/grafana-plugins/plugin-bundle-size",
-        "./plugins/grafana/grafana-plugins/react-19-plugin-migration"
       ]
     },
     {
@@ -305,12 +213,6 @@
         "cue",
         "kubernetes",
         "reconciler"
-      ],
-      "skills": [
-        "./plugins/grafana/grafana-app-sdk/admission-control",
-        "./plugins/grafana/grafana-app-sdk/app-sdk-concepts",
-        "./plugins/grafana/grafana-app-sdk/cue-kind-definition",
-        "./plugins/grafana/grafana-app-sdk/reconciler-logic"
       ]
     },
     {
@@ -329,15 +231,6 @@
         "performance",
         "testing",
         "stress-test"
-      ],
-      "skills": [
-        "./plugins/grafana/grafana-k6/k6",
-        "./plugins/grafana/grafana-k6/k6-cloud-investigate-test",
-        "./plugins/grafana/grafana-k6/k6-docs",
-        "./plugins/grafana/grafana-k6/k6-manage",
-        "./plugins/grafana/grafana-k6/k6-perf-test-website",
-        "./plugins/grafana/grafana-k6/k6-test-maintenance",
-        "./plugins/grafana/grafana-k6/k6-trend-analysis"
       ]
     },
     {
@@ -355,9 +248,6 @@
         "datasources",
         "provisioning",
         "terraform"
-      ],
-      "skills": [
-        "./plugins/grafana/grafana-datasources/datasources-provisioning"
       ]
     },
     {
@@ -391,30 +281,7 @@
         "comic",
         "infographic"
       ],
-      "category": "productivity",
-      "skills": [
-        "./plugins/baoyu/baoyu-article-illustrator",
-        "./plugins/baoyu/baoyu-comic",
-        "./plugins/baoyu/baoyu-compress-image",
-        "./plugins/baoyu/baoyu-cover-image",
-        "./plugins/baoyu/baoyu-danger-gemini-web",
-        "./plugins/baoyu/baoyu-danger-x-to-markdown",
-        "./plugins/baoyu/baoyu-diagram",
-        "./plugins/baoyu/baoyu-electron-extract",
-        "./plugins/baoyu/baoyu-format-markdown",
-        "./plugins/baoyu/baoyu-image-gen",
-        "./plugins/baoyu/baoyu-infographic",
-        "./plugins/baoyu/baoyu-markdown-to-html",
-        "./plugins/baoyu/baoyu-post-to-wechat",
-        "./plugins/baoyu/baoyu-post-to-weibo",
-        "./plugins/baoyu/baoyu-post-to-x",
-        "./plugins/baoyu/baoyu-slide-deck",
-        "./plugins/baoyu/baoyu-translate",
-        "./plugins/baoyu/baoyu-url-to-markdown",
-        "./plugins/baoyu/baoyu-wechat-summary",
-        "./plugins/baoyu/baoyu-xhs-images",
-        "./plugins/baoyu/baoyu-youtube-transcript"
-      ]
+      "category": "productivity"
     },
     {
       "name": "cc-skills-golang",
@@ -442,54 +309,6 @@
         "developer",
         "coding",
         "productivity"
-      ],
-      "skills": [
-        "./plugins/golang/golang-benchmark",
-        "./plugins/golang/golang-cli",
-        "./plugins/golang/golang-code-style",
-        "./plugins/golang/golang-concurrency",
-        "./plugins/golang/golang-context",
-        "./plugins/golang/golang-continuous-integration",
-        "./plugins/golang/golang-data-structures",
-        "./plugins/golang/golang-database",
-        "./plugins/golang/golang-dependency-injection",
-        "./plugins/golang/golang-dependency-management",
-        "./plugins/golang/golang-design-patterns",
-        "./plugins/golang/golang-documentation",
-        "./plugins/golang/golang-error-handling",
-        "./plugins/golang/golang-google-wire",
-        "./plugins/golang/golang-gopls",
-        "./plugins/golang/golang-graphql",
-        "./plugins/golang/golang-grpc",
-        "./plugins/golang/golang-how-to",
-        "./plugins/golang/golang-lint",
-        "./plugins/golang/golang-modernize",
-        "./plugins/golang/golang-naming",
-        "./plugins/golang/golang-observability",
-        "./plugins/golang/golang-performance",
-        "./plugins/golang/golang-pkg-go-dev",
-        "./plugins/golang/golang-popular-libraries",
-        "./plugins/golang/golang-project-layout",
-        "./plugins/golang/golang-refactoring",
-        "./plugins/golang/golang-safety",
-        "./plugins/golang/golang-samber-do",
-        "./plugins/golang/golang-samber-hot",
-        "./plugins/golang/golang-samber-lo",
-        "./plugins/golang/golang-samber-mo",
-        "./plugins/golang/golang-samber-oops",
-        "./plugins/golang/golang-samber-ro",
-        "./plugins/golang/golang-samber-slog",
-        "./plugins/golang/golang-security",
-        "./plugins/golang/golang-spf13-cobra",
-        "./plugins/golang/golang-spf13-viper",
-        "./plugins/golang/golang-stay-updated",
-        "./plugins/golang/golang-stretchr-testify",
-        "./plugins/golang/golang-structs-interfaces",
-        "./plugins/golang/golang-swagger",
-        "./plugins/golang/golang-testing",
-        "./plugins/golang/golang-troubleshooting",
-        "./plugins/golang/golang-uber-dig",
-        "./plugins/golang/golang-uber-fx"
       ]
     },
     {
@@ -518,10 +337,7 @@
         "redis",
         "mongodb"
       ],
-      "category": "productivity",
-      "skills": [
-        "./plugins/dbx/dbx"
-      ]
+      "category": "productivity"
     },
     {
       "name": "mattpocock-skills",
