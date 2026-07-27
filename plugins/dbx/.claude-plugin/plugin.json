@@ -1,0 +1,32 @@
+{
+  "name": "dbx",
+  "version": "0.1.0",
+  "description": "DBX 数据库 Agent Skill：通过 dbx CLI 安全探索 schema、执行只读 SQL、生成 AI 友好 schema context，支持 70+ 数据库。需配合 npm 包 @dbx-app/cli 使用。",
+  "author": {
+    "name": "t8y2 (skyler)",
+    "url": "https://github.com/t8y2"
+  },
+  "homepage": "https://github.com/t8y2/dbx",
+  "repository": "https://github.com/t8y2/dbx",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "plugin",
+    "ai-agent",
+    "skills",
+    "dbx",
+    "database",
+    "sql",
+    "schema",
+    "mysql",
+    "postgresql",
+    "sqlite",
+    "redis",
+    "mongodb"
+  ],
+  "category": "productivity",
+  "skills": [
+    "./dbx"
+  ]
+}
