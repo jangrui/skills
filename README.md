@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#-作为-marketplace-使用claude-code)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#-在-codex-中使用)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-131-informational)](#-技能目录)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-152-informational)](#-技能目录)
 [![Plugins](https://img.shields.io/badge/Plugins-15-informational)](#-作为-marketplace-使用claude-code)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2021%3A00%20UTC-success)](#-同步上游)
 
@@ -52,7 +52,7 @@
 | 指标 | 数量 |
 | --- | ---: |
 | Marketplace 插件 | 15 |
-| 本地 vendored skill（`SKILL.md`） | 131 |
+| 本地 vendored skill（`SKILL.md`） | 152 |
 | 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 工程实践 等 |
 
 适合这些场景：
@@ -70,7 +70,7 @@
 - **可追溯版本**：每个 vendored skill 目录含 `.upstream-commit`
 - **每日自动同步**：GitHub Actions 每天 21:00 UTC 检查上游并开 PR
 - **按需安装**：Grafana 拆成 7 个 category plugin，不必一次装全家桶
-- **明确入库边界**：依赖 monorepo 兄弟包的 skill（如 baoyu-skills）只做 remote 引用，不硬 vendor
+- **明确入库边界**：workspace 兄弟包已发布 npm 的可 vendor（如 baoyu-skills）；真正搬不走的才做 remote
 
 ---
 
@@ -117,6 +117,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 /plugin install illustration@jangrui             # 文章配图 + 社交卡片（2）
 /plugin install lark@jangrui                     # 飞书全家桶（27，需 lark-cli）
 /plugin install cc-skills-golang@jangrui         # Go 生产级技能（46）
+/plugin install baoyu-skills@jangrui             # 宝玉 AI 创作合集（21，需 Bun）
 /plugin install grafana-core@jangrui             # Grafana 核心（8）
 /plugin install grafana-cloud@jangrui            # Grafana Cloud（18）
 /plugin install grafana-lgtm@jangrui             # LGTM 开源栈（5）
@@ -129,7 +130,6 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 ### Remote 插件（指向上游仓库）
 
 ```text
-/plugin install baoyu-skills@jangrui             # 宝玉 AI 创作合集（21）
 /plugin install mattpocock-skills@jangrui        # 工程实践（TDD / review / grilling 等）
 ```
 
@@ -144,6 +144,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 | `cc-skills-golang` | 单仓库多 skill / 扁平（排除 `evals/`） | 46 | ~2.1 MB |
 | `lark` | 单仓库多 skill / 扁平 | 27 | ~5.5 MB |
 | `grafana-*`（7 个） | 单仓库多 skill / 两层 category | 48 | ~6.0 MB |
+| `baoyu-skills` | 单仓库多 skill / 扁平（兄弟包 npm 发布） | 21 | ~3.4 MB |
 
 ---
 
@@ -210,7 +211,9 @@ lark-cli auth login --recommend
 /plugin install lark@jangrui
 ```
 
-#### baoyu-skills（多数 skill 需要 Bun）
+#### baoyu-skills
+
+先安装 Bun（脚本运行时需要）：
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
@@ -220,12 +223,6 @@ Claude Code：
 
 ```text
 /plugin install baoyu-skills@jangrui
-```
-
-或直连上游：
-
-```text
-/plugin marketplace add JimLiu/baoyu-skills
 ```
 
 #### dbx（纯索引）
@@ -363,14 +360,20 @@ Claude Code：
 
 上游：[grafana/skills](https://github.com/grafana/skills)
 
-### AI 创作与内容工具 ⊕（remote）
+### AI 创作与内容工具 ⊕（vendor）
 
 [JimLiu/baoyu-skills](https://github.com/JimLiu/baoyu-skills)（21 个 skill）覆盖 AI 绘图、内容转换、多平台发布与实用工具。
 
-> 不能 vendor：21 个 skill 中 13 个依赖 monorepo workspace 兄弟包。本仓库只做 remote 引用。
+> 兄弟包（baoyu-chrome-cdp / baoyu-md / baoyu-fetch）已发布到 npm，skill 内 `scripts/package.json` 以版本号声明依赖，运行时 `bun install` 自动解析。
 
 ```text
 /plugin install baoyu-skills@jangrui
+```
+
+也可直接拷贝到 Codex：
+
+```bash
+cp -r plugins/baoyu ~/.codex/skills/baoyu
 ```
 
 ### 通用工程实践 ⊕（remote）
@@ -416,6 +419,7 @@ jangrui/skills/
 │   ├── illustration/
 │   ├── golang/golang-*/              # 46 个 Go skill
 │   ├── lark/lark-*/                  # 27 个飞书 skill
+│   ├── baoyu/baoyu-*/                # 21 个 AI 创作 skill
 │   └── grafana/grafana-*/            # 7 个 category × 48 skill
 ├── scripts/                          # 上游同步脚本
 │   ├── sync-diagram-skills.sh
@@ -424,6 +428,7 @@ jangrui/skills/
 │   ├── sync-illustration-skills.sh
 │   ├── sync-golang-skills.sh
 │   ├── sync-lark-skills.sh
+│   ├── sync-baoyu-skills.sh
 │   └── sync-grafana-skills.sh
 └── .github/workflows/                # 每日自动同步 PR
 ```
@@ -440,6 +445,7 @@ jangrui/skills/
 ./scripts/sync-lark-skills.sh --check
 ./scripts/sync-golang-skills.sh --check
 ./scripts/sync-grafana-skills.sh --check
+./scripts/sync-baoyu-skills.sh --check
 
 # 实际同步
 ./scripts/sync-diagram-skills.sh
@@ -525,7 +531,6 @@ PY
 
 常见原因：
 
-- 依赖 monorepo workspace 兄弟包（如 baoyu-skills）
 - 本身是独立 marketplace，体积大且边界清晰（如 wpsnote）
 - 需要额外目录筛选（如 mattpocock 含 deprecated / in-progress）
 

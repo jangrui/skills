@@ -164,7 +164,20 @@
       "description": "Grafana 核心 Agent Skills（8 个）：Dashboard 建模、PromQL、Alloy/Beyla/OpenTelemetry 采集、告警 IRM、Grafana OSS、skill 编写规范。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "promql", "alloy", "beyla", "opentelemetry", "alerting", "dashboard"],
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "grafana",
+        "promql",
+        "alloy",
+        "beyla",
+        "opentelemetry",
+        "alerting",
+        "dashboard"
+      ],
       "skills": [
         "./plugins/grafana/grafana-core/alerting-irm",
         "./plugins/grafana/grafana-core/alloy",
@@ -181,7 +194,20 @@
       "description": "Grafana Cloud Agent Skills（18 个）：Fleet Management、Adaptive Metrics、成本治理、Admin（SSO/RBAC/Terraform）、AI/ML、基础设施监控、私有连接、应用/数据库可观测性等。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana-cloud", "fleet-management", "adaptive-metrics", "cost-management", "sso", "terraform", "kubernetes"],
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "grafana-cloud",
+        "fleet-management",
+        "adaptive-metrics",
+        "cost-management",
+        "sso",
+        "terraform",
+        "kubernetes"
+      ],
       "skills": [
         "./plugins/grafana/grafana-cloud/adaptive-metrics",
         "./plugins/grafana/grafana-cloud/admin",
@@ -208,7 +234,22 @@
       "description": "LGTM 开源栈 Agent Skills（5 个）：Loki（日志）、Tempo（追踪）、Mimir（长期 Prometheus 指标）、Prometheus、Pyroscope（持续 profiling）。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "loki", "tempo", "mimir", "prometheus", "pyroscope", "lgtm", "tracing", "logging", "profiling"],
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "loki",
+        "tempo",
+        "mimir",
+        "prometheus",
+        "pyroscope",
+        "lgtm",
+        "tracing",
+        "logging",
+        "profiling"
+      ],
       "skills": [
         "./plugins/grafana/grafana-lgtm/loki",
         "./plugins/grafana/grafana-lgtm/mimir",
@@ -222,7 +263,19 @@
       "description": "Grafana 插件开发 Agent Skills（5 个）：bundle 体积优化、React 19 迁移、@grafana/scenes 框架、npm 供应链加固、依赖瘦身。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "plugins", "bundle-size", "react-19", "grafana-scenes", "webpack"],
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "grafana",
+        "plugins",
+        "bundle-size",
+        "react-19",
+        "grafana-scenes",
+        "webpack"
+      ],
       "skills": [
         "./plugins/grafana/grafana-plugins/audit-and-reduce-dependencies",
         "./plugins/grafana/grafana-plugins/check-npm",
@@ -236,7 +289,19 @@
       "description": "Grafana App SDK Agent Skills（4 个）：在 Grafana App Platform 上构建应用——CUE kind 定义、reconciler 逻辑、admission control、核心概念。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "app-sdk", "app-platform", "cue", "kubernetes", "reconciler"],
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "grafana",
+        "app-sdk",
+        "app-platform",
+        "cue",
+        "kubernetes",
+        "reconciler"
+      ],
       "skills": [
         "./plugins/grafana/grafana-app-sdk/admission-control",
         "./plugins/grafana/grafana-app-sdk/app-sdk-concepts",
@@ -249,7 +314,18 @@
       "description": "k6 负载测试 Agent Skills（7 个）：脚本生成/校验、性能测试网站、Cloud k6 排查与趋势分析、测试维护、文档编写。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "k6", "load-testing", "performance", "testing", "stress-test"],
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "k6",
+        "load-testing",
+        "performance",
+        "testing",
+        "stress-test"
+      ],
       "skills": [
         "./plugins/grafana/grafana-k6/k6",
         "./plugins/grafana/grafana-k6/k6-cloud-investigate-test",
@@ -265,7 +341,17 @@
       "description": "Grafana 数据源 Agent Skills（1 个）：生成数据源 provisioning 文件（YAML/Terraform）。",
       "source": "./plugins/grafana",
       "category": "grafana",
-      "keywords": ["claude-code", "claude-code-plugin", "plugin", "ai-agent", "skills", "grafana", "datasources", "provisioning", "terraform"],
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "grafana",
+        "datasources",
+        "provisioning",
+        "terraform"
+      ],
       "skills": [
         "./plugins/grafana/grafana-datasources/datasources-provisioning"
       ]
@@ -273,10 +359,7 @@
     {
       "name": "baoyu-skills",
       "description": "宝玉的 21 个 AI 创作技能合集：AI 绘图/配图/漫画/封面/信息图生成、URL→Markdown、Markdown 格式化/转 HTML、翻译、幻灯片、X/微博/微信发文、YouTube 字幕、小红书图片、网页抓取等。",
-      "source": {
-        "source": "github",
-        "repo": "JimLiu/baoyu-skills"
-      },
+      "source": "./plugins/baoyu",
       "author": {
         "name": "Jim Liu (宝玉)",
         "email": "junminliu@gmail.com"
@@ -304,7 +387,30 @@
         "comic",
         "infographic"
       ],
-      "category": "productivity"
+      "category": "productivity",
+      "skills": [
+        "./plugins/baoyu/baoyu-article-illustrator",
+        "./plugins/baoyu/baoyu-comic",
+        "./plugins/baoyu/baoyu-compress-image",
+        "./plugins/baoyu/baoyu-cover-image",
+        "./plugins/baoyu/baoyu-danger-gemini-web",
+        "./plugins/baoyu/baoyu-danger-x-to-markdown",
+        "./plugins/baoyu/baoyu-diagram",
+        "./plugins/baoyu/baoyu-electron-extract",
+        "./plugins/baoyu/baoyu-format-markdown",
+        "./plugins/baoyu/baoyu-image-gen",
+        "./plugins/baoyu/baoyu-infographic",
+        "./plugins/baoyu/baoyu-markdown-to-html",
+        "./plugins/baoyu/baoyu-post-to-wechat",
+        "./plugins/baoyu/baoyu-post-to-weibo",
+        "./plugins/baoyu/baoyu-post-to-x",
+        "./plugins/baoyu/baoyu-slide-deck",
+        "./plugins/baoyu/baoyu-translate",
+        "./plugins/baoyu/baoyu-url-to-markdown",
+        "./plugins/baoyu/baoyu-wechat-summary",
+        "./plugins/baoyu/baoyu-xhs-images",
+        "./plugins/baoyu/baoyu-youtube-transcript"
+      ]
     },
     {
       "name": "cc-skills-golang",
