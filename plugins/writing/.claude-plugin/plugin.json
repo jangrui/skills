@@ -1,7 +1,7 @@
 {
   "name": "writing",
   "version": "0.1.0",
-  "description": "写作润色技能合集：检测并去除 AI 写作痕迹（中英文），让文字更自然。基于维基百科「AI 写作特征」指南。",
+  "description": "写作润色 Skill（humanizer 中英文去 AI 痕迹）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
   "author": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
@@ -17,11 +17,50 @@
     "humanizer",
     "polish",
     "english",
-    "chinese"
+    "chinese",
+    "wpsnote",
+    "wps-note",
+    "笔记"
   ],
   "category": "writing",
   "skills": [
     "./humanizer",
-    "./humanizer-zh"
+    "./humanizer-zh",
+    "./wpsnote/wps-note",
+    "./wpsnote/wpsnote-beautifier",
+    "./wpsnote/note-copilot",
+    "./wpsnote/tag-organize",
+    "./wpsnote/tag-organize-cli",
+    "./wpsnote/skill-creator",
+    "./wpsnote/content-creator",
+    "./wpsnote/wechat-publisher",
+    "./wpsnote/short-video-copywriter",
+    "./wpsnote/xiaohongshu-note-creator",
+    "./wpsnote/image-gen",
+    "./wpsnote/content-digest",
+    "./wpsnote/news-to-note",
+    "./wpsnote/wps-note-intelligent-search",
+    "./wpsnote/literature-reader",
+    "./wpsnote/paper-researcher",
+    "./wpsnote/live-transcript-summary",
+    "./wpsnote/doc-importer",
+    "./wpsnote/web-importer",
+    "./wpsnote/coding-assistant",
+    "./wpsnote/note-calendar",
+    "./wpsnote/ie-engine",
+    "./wpsnote/ie-retrieve-memory",
+    "./wpsnote/ie-connect-dots",
+    "./wpsnote/ie-generate-insight",
+    "./wpsnote/ie-recall-memory",
+    "./wpsnote/novel-writer",
+    "./wpsnote/novel-writer-cli",
+    "./wpsnote/class-note-builder",
+    "./wpsnote/lecture-focus-extractor",
+    "./wpsnote/misconception-finder",
+    "./wpsnote/note-review-coach",
+    "./wpsnote/notes-to-flashcards",
+    "./wpsnote/notes-to-lesson-plan",
+    "./wpsnote/prerequisite-gap-finder",
+    "./wpsnote/study-note-linker"
   ]
 }
