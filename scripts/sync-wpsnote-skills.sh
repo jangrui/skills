@@ -139,6 +139,13 @@ RSYNC_EXCLUDES=(
   --exclude='**/__pycache__/'
   --exclude='*.pyc'
   --exclude='.pytest_cache/'
+  --exclude='LICENSE'
+  --exclude='LICENSE.txt'
+  --exclude='LICENSE.md'
+  --exclude='README'
+  --exclude='README.md'
+  --exclude='.github/'
+  --exclude='.claude-plugin/'
 )
 
 # ---------- 同步单个 skill ----------
