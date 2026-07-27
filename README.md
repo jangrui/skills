@@ -3,8 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#-作为-marketplace-使用claude-code)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#-在-codex-中使用)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-152-informational)](#-技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-15-informational)](#-作为-marketplace-使用claude-code)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-153-informational)](#-技能目录)
+[![Plugins](https://img.shields.io/badge/Plugins-16-informational)](#-作为-marketplace-使用claude-code)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2021%3A00%20UTC-success)](#-同步上游)
 
 面向 **Claude Code** 与 **OpenAI Codex CLI** 的 AI 编程助手 skill 索引与 marketplace。
@@ -51,9 +51,9 @@
 
 | 指标 | 数量 |
 | --- | ---: |
-| Marketplace 插件 | 15 |
-| 本地 vendored skill（`SKILL.md`） | 152 |
-| 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 工程实践 等 |
+| Marketplace 插件 | 16 |
+| 本地 vendored skill（`SKILL.md`） | 153 |
+| 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 数据库 / 工程实践 等 |
 
 适合这些场景：
 
@@ -118,6 +118,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 /plugin install lark@jangrui                     # 飞书全家桶（27，需 lark-cli）
 /plugin install cc-skills-golang@jangrui         # Go 生产级技能（46）
 /plugin install baoyu-skills@jangrui             # 宝玉 AI 创作合集（21，需 Bun）
+/plugin install dbx@jangrui                      # 数据库 CLI 探索（1，需 @dbx-app/cli）
 /plugin install grafana-core@jangrui             # Grafana 核心（8）
 /plugin install grafana-cloud@jangrui            # Grafana Cloud（18）
 /plugin install grafana-lgtm@jangrui             # LGTM 开源栈（5）
@@ -145,6 +146,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 | `lark` | 单仓库多 skill / 扁平 | 27 | ~5.5 MB |
 | `grafana-*`（7 个） | 单仓库多 skill / 两层 category | 48 | ~6.0 MB |
 | `baoyu-skills` | 单仓库多 skill / 扁平（兄弟包 npm 发布） | 21 | ~3.4 MB |
+| `dbx` | 单仓库多 skill / 扁平（当前 1 个；需 `@dbx-app/cli`） | 1 | ~8 KB |
 
 ---
 
@@ -225,9 +227,26 @@ Claude Code：
 /plugin install baoyu-skills@jangrui
 ```
 
-#### dbx（纯索引）
+#### dbx
 
-先安装 [dbx CLI](https://github.com/t8y2/dbx)，再把上游 `skills/dbx/` 拷进各自 skills 目录。
+先安装 [dbx CLI](https://www.npmjs.com/package/@dbx-app/cli)（并建议安装/配置 DBX Desktop）：
+
+```bash
+npm install -g @dbx-app/cli
+dbx doctor
+```
+
+Claude Code：
+
+```text
+/plugin install dbx@jangrui
+```
+
+Codex CLI：
+
+```bash
+cp -r plugins/dbx/dbx ~/.codex/skills/dbx
+```
 
 ---
 
@@ -396,11 +415,15 @@ cp -r plugins/baoyu ~/.codex/skills/baoyu
 /plugin marketplace add wpsnote/wpsnote-skills
 ```
 
-### 数据库（纯索引）
+### 数据库 ⊕（vendor）
 
 | 技能 | 一句话 | 上游 |
 | --- | --- | --- |
-| [dbx](https://github.com/t8y2/dbx) | 通过 dbx CLI 安全探索 schema / 执行 SQL，支持 70+ 数据库 | t8y2 |
+| [dbx](https://github.com/t8y2/dbx) | 通过 dbx CLI 安全探索 schema / 执行只读 SQL，支持 70+ 数据库 | t8y2 |
+
+```text
+/plugin install dbx@jangrui
+```
 
 ---
 
@@ -420,6 +443,7 @@ jangrui/skills/
 │   ├── golang/golang-*/              # 46 个 Go skill
 │   ├── lark/lark-*/                  # 27 个飞书 skill
 │   ├── baoyu/baoyu-*/                # 21 个 AI 创作 skill
+│   ├── dbx/dbx/                      # 1 个数据库 CLI skill
 │   └── grafana/grafana-*/            # 7 个 category × 48 skill
 ├── scripts/                          # 上游同步脚本
 │   ├── sync-diagram-skills.sh
@@ -429,6 +453,7 @@ jangrui/skills/
 │   ├── sync-golang-skills.sh
 │   ├── sync-lark-skills.sh
 │   ├── sync-baoyu-skills.sh
+│   ├── sync-dbx-skills.sh
 │   └── sync-grafana-skills.sh
 └── .github/workflows/                # 每日自动同步 PR
 ```
@@ -446,11 +471,13 @@ jangrui/skills/
 ./scripts/sync-golang-skills.sh --check
 ./scripts/sync-grafana-skills.sh --check
 ./scripts/sync-baoyu-skills.sh --check
+./scripts/sync-dbx-skills.sh --check
 
 # 实际同步
 ./scripts/sync-diagram-skills.sh
 ./scripts/sync-lark-skills.sh lark-base          # 只同步某个 skill
 ./scripts/sync-grafana-skills.sh grafana-k6      # 只同步某个 category
+./scripts/sync-dbx-skills.sh                     # 同步 dbx
 
 # review
 git diff plugins/
@@ -581,9 +608,10 @@ lark-cli auth login --recommend
 - [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang)
 - [larksuite/cli](https://github.com/larksuite/cli)
 - [grafana/skills](https://github.com/grafana/skills)
+- [t8y2/dbx](https://github.com/t8y2/dbx)
 - [JimLiu/baoyu-skills](https://github.com/JimLiu/baoyu-skills)
 - [mattpocock/skills](https://github.com/mattpocock/skills)
-- 以及 wpsnote、dbx 等被索引的上游项目
+- 以及 wpsnote 等被索引的上游项目
 
 ---
 
