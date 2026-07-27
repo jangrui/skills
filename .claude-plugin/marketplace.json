@@ -490,13 +490,11 @@
     },
     {
       "name": "mattpocock-skills",
-      "description": "Matt Pocock's agent skills for real engineering — grilling, spec/ticket flows, TDD, code review, domain modelling and more.",
-      "source": {
-        "source": "github",
-        "repo": "mattpocock/skills"
-      },
+      "description": "Matt Pocock 的工程实践 Agent Skills 合集（22 个 skill）：grilling、TDD、code review、spec/ticket、领域建模、wayfinder 等。",
+      "source": "./plugins/mattpocock",
       "author": {
-        "name": "Matt Pocock"
+        "name": "Matt Pocock",
+        "url": "https://www.aihero.dev"
       },
       "homepage": "https://github.com/mattpocock/skills",
       "repository": "https://github.com/mattpocock/skills",
@@ -509,9 +507,36 @@
         "skills",
         "engineering",
         "tdd",
-        "code-review"
+        "code-review",
+        "grilling",
+        "domain-modeling",
+        "productivity"
       ],
-      "category": "productivity"
+      "category": "productivity",
+      "skills": [
+        "./plugins/mattpocock/engineering/ask-matt",
+        "./plugins/mattpocock/engineering/code-review",
+        "./plugins/mattpocock/engineering/codebase-design",
+        "./plugins/mattpocock/engineering/diagnosing-bugs",
+        "./plugins/mattpocock/engineering/domain-modeling",
+        "./plugins/mattpocock/engineering/grill-with-docs",
+        "./plugins/mattpocock/engineering/implement",
+        "./plugins/mattpocock/engineering/improve-codebase-architecture",
+        "./plugins/mattpocock/engineering/prototype",
+        "./plugins/mattpocock/engineering/research",
+        "./plugins/mattpocock/engineering/resolving-merge-conflicts",
+        "./plugins/mattpocock/engineering/setup-matt-pocock-skills",
+        "./plugins/mattpocock/engineering/tdd",
+        "./plugins/mattpocock/engineering/to-spec",
+        "./plugins/mattpocock/engineering/to-tickets",
+        "./plugins/mattpocock/engineering/triage",
+        "./plugins/mattpocock/engineering/wayfinder",
+        "./plugins/mattpocock/productivity/grill-me",
+        "./plugins/mattpocock/productivity/grilling",
+        "./plugins/mattpocock/productivity/handoff",
+        "./plugins/mattpocock/productivity/teach",
+        "./plugins/mattpocock/productivity/writing-great-skills"
+      ]
     }
   ]
 }

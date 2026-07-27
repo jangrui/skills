@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#-作为-marketplace-使用claude-code)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#-在-codex-中使用)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-152-informational)](#-技能目录)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-174-informational)](#-技能目录)
 [![Plugins](https://img.shields.io/badge/Plugins-15-informational)](#-作为-marketplace-使用claude-code)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2021%3A00%20UTC-success)](#-同步上游)
 
@@ -15,7 +15,7 @@
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时所需内容，并由 CI 每日跟进上游。
 
 > 标注约定  
-> - **⊕** = 已入库（vendor 或 remote），可通过本 marketplace 安装  
+> - **⊕** = 已入库（vendor），可通过本 marketplace 安装  
 > - 无符号 = 纯索引，需自行 clone 上游
 
 ---
@@ -52,7 +52,7 @@
 | 指标 | 数量 |
 | --- | ---: |
 | Marketplace 插件 | 15 |
-| 本地 vendored skill（`SKILL.md`） | 152 |
+| 本地 vendored skill（`SKILL.md`） | 174 |
 | 主题分类 | 绘图 / 写作 / 演示 / 插画 / Go / 飞书 / Grafana / AI 创作 / 工程实践 等 |
 
 适合这些场景：
@@ -70,7 +70,7 @@
 - **可追溯版本**：每个 vendored skill 目录含 `.upstream-commit`
 - **每日自动同步**：GitHub Actions 每天 21:00 UTC 检查上游并开 PR
 - **按需安装**：Grafana 拆成 7 个 category plugin，不必一次装全家桶
-- **明确入库边界**：workspace 兄弟包已发布 npm 的可 vendor（如 baoyu-skills）；真正搬不走的才做 remote
+- **明确入库边界**：可自包含则 vendor（含 curated 双桶如 mattpocock）；真正搬不走的才做 remote / 纯索引
 
 ---
 
@@ -125,12 +125,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 /plugin install grafana-app-sdk@jangrui          # App SDK（4）
 /plugin install grafana-k6@jangrui               # k6 负载测试（7）
 /plugin install grafana-datasources@jangrui      # 数据源 provisioning（1）
-```
-
-### Remote 插件（指向上游仓库）
-
-```text
-/plugin install mattpocock-skills@jangrui        # 工程实践（TDD / review / grilling 等）
+/plugin install mattpocock-skills@jangrui        # 工程实践（TDD / review / grilling 等，22）
 ```
 
 ### Vendor 一览
@@ -145,6 +140,7 @@ cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
 | `lark` | 单仓库多 skill / 扁平 | 27 | ~5.5 MB |
 | `grafana-*`（7 个） | 单仓库多 skill / 两层 category | 48 | ~6.0 MB |
 | `baoyu-skills` | 单仓库多 skill / 扁平（兄弟包 npm 发布） | 21 | ~3.4 MB |
+| `mattpocock-skills` | 单仓库多 skill / 两层 bucket（仅 promoted） | 22 | ~0.4 MB |
 
 ---
 
@@ -376,14 +372,22 @@ Claude Code：
 cp -r plugins/baoyu ~/.codex/skills/baoyu
 ```
 
-### 通用工程实践 ⊕（remote）
+### 通用工程实践 ⊕（vendor）
 
-| 技能 | 一句话 | 上游 |
-| --- | --- | --- |
-| [mattpocock-skills](https://github.com/mattpocock/skills) | TDD、code review、grilling、spec/ticket、领域建模 | Matt Pocock |
+[mattpocock/skills](https://github.com/mattpocock/skills)（22 个 promoted skill）覆盖 grilling、TDD、code review、spec/ticket、领域建模、wayfinder 等工程实践流程。
+
+> 仅 vendor `engineering/` + `productivity/` 两 promoted 桶；`misc/` / `personal/` / `in-progress/` / `deprecated/` 不入库。
 
 ```text
 /plugin install mattpocock-skills@jangrui
+```
+
+也可直接拷贝到 Codex：
+
+```bash
+# 按 skill 拷贝（目录含两层 bucket）
+cp -r plugins/mattpocock/engineering/tdd ~/.codex/skills/tdd
+cp -r plugins/mattpocock/productivity/grill-me ~/.codex/skills/grill-me
 ```
 
 ### 笔记与知识管理（纯索引）
@@ -420,7 +424,8 @@ jangrui/skills/
 │   ├── golang/golang-*/              # 46 个 Go skill
 │   ├── lark/lark-*/                  # 27 个飞书 skill
 │   ├── baoyu/baoyu-*/                # 21 个 AI 创作 skill
-│   └── grafana/grafana-*/            # 7 个 category × 48 skill
+│   ├── grafana/grafana-*/            # 7 个 category × 48 skill
+│   └── mattpocock/{engineering,productivity}/  # 22 个工程实践 skill
 ├── scripts/                          # 上游同步脚本
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
@@ -429,7 +434,8 @@ jangrui/skills/
 │   ├── sync-golang-skills.sh
 │   ├── sync-lark-skills.sh
 │   ├── sync-baoyu-skills.sh
-│   └── sync-grafana-skills.sh
+│   ├── sync-grafana-skills.sh
+│   └── sync-mattpocock-skills.sh
 └── .github/workflows/                # 每日自动同步 PR
 ```
 
@@ -446,11 +452,13 @@ jangrui/skills/
 ./scripts/sync-golang-skills.sh --check
 ./scripts/sync-grafana-skills.sh --check
 ./scripts/sync-baoyu-skills.sh --check
+./scripts/sync-mattpocock-skills.sh --check
 
 # 实际同步
 ./scripts/sync-diagram-skills.sh
 ./scripts/sync-lark-skills.sh lark-base          # 只同步某个 skill
 ./scripts/sync-grafana-skills.sh grafana-k6      # 只同步某个 category
+./scripts/sync-mattpocock-skills.sh engineering/tdd  # 只同步某个 skill
 
 # review
 git diff plugins/
@@ -502,7 +510,7 @@ from pathlib import Path
 mp = json.loads(Path('.claude-plugin/marketplace.json').read_text())
 for p in mp['plugins']:
     skills = p.get('skills') or []
-    print(f"{p['name']}: {len(skills) if skills else 'remote'}")
+    print(f"{p['name']}: {len(skills)} skills")
 PY
 ```
 
@@ -532,12 +540,13 @@ PY
 常见原因：
 
 - 本身是独立 marketplace，体积大且边界清晰（如 wpsnote）
-- 需要额外目录筛选（如 mattpocock 含 deprecated / in-progress）
+- 运行时依赖搬不走（workspace 兄弟包未发布等）
+
+mattpocock 已通过「只 vendor promoted 两桶」解决目录筛选问题，现为 vendor。
 
 ### 更新会自动进来吗？
 
-Vendor 项：CI 每天检查上游并开 PR，合并后本地 `/plugin update` 可跟进。  
-Remote 项：跟随上游仓库本身。
+Vendor 项：CI 每天检查上游并开 PR，合并后本地 `/plugin update` 可跟进。
 
 ### 安装 lark 后不能用？
 

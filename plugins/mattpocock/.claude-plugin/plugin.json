@@ -1,0 +1,50 @@
+{
+  "name": "mattpocock-skills",
+  "version": "1.2.0",
+  "description": "Matt Pocock 的工程实践 Agent Skills 合集（22 个 skill）：grilling、TDD、code review、spec/ticket、领域建模、wayfinder 等。",
+  "author": {
+    "name": "Matt Pocock",
+    "url": "https://www.aihero.dev"
+  },
+  "homepage": "https://github.com/mattpocock/skills",
+  "repository": "https://github.com/mattpocock/skills",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "plugin",
+    "ai-agent",
+    "skills",
+    "engineering",
+    "tdd",
+    "code-review",
+    "grilling",
+    "domain-modeling",
+    "productivity"
+  ],
+  "category": "productivity",
+  "skills": [
+    "./engineering/ask-matt",
+    "./engineering/code-review",
+    "./engineering/codebase-design",
+    "./engineering/diagnosing-bugs",
+    "./engineering/domain-modeling",
+    "./engineering/grill-with-docs",
+    "./engineering/implement",
+    "./engineering/improve-codebase-architecture",
+    "./engineering/prototype",
+    "./engineering/research",
+    "./engineering/resolving-merge-conflicts",
+    "./engineering/setup-matt-pocock-skills",
+    "./engineering/tdd",
+    "./engineering/to-spec",
+    "./engineering/to-tickets",
+    "./engineering/triage",
+    "./engineering/wayfinder",
+    "./productivity/grill-me",
+    "./productivity/grilling",
+    "./productivity/handoff",
+    "./productivity/teach",
+    "./productivity/writing-great-skills"
+  ]
+}
