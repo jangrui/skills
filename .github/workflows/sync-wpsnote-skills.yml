@@ -64,6 +64,7 @@ jobs:
           Run ./scripts/sync-wpsnote-skills.sh --check locally to reproduce.
           COMMIT_EOF
           )"
+          git push origin "$BRANCH"
         env:
           COUNT: ${{ steps.sync.outputs.count }}
           UPDATED: ${{ steps.sync.outputs.updated }}

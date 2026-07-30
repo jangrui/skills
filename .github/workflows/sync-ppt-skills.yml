@@ -66,6 +66,7 @@ jobs:
           Run ./scripts/sync-ppt-skills.sh --check locally to reproduce.
           COMMIT_EOF
           )"
+          git push origin "$BRANCH"
         env:
           UPDATED: ${{ steps.sync.outputs.updated }}
 
