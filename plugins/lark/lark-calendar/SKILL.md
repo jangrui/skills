@@ -16,14 +16,16 @@ metadata:
 
 ## 身份
 
-日程操作默认使用 `--as user`（查看和管理当前用户的日程）。`--as bot` 只能访问 bot 自己的（空）日历，会拿到空结果——不要用 bot 身份查用户日程。
+按**日程归属**选身份：
+
+- 查看/管理登录用户本人的日程 → `--as user`（默认，绝大多数场景）。
+- 查看/管理 bot 自己创建/拥有的日程 → `--as bot` 
 
 ```bash
-# BAD — bot 身份查用户日程，返回空列表
-lark-cli calendar +agenda --as bot
-
-# GOOD — user 身份查日程
+# 用户本人日程 → user
 lark-cli calendar +agenda --as user
+# bot 自建或参与的日程 → bot
+lark-cli calendar +agenda --as bot
 ```
 
 ## Shortcuts
@@ -47,6 +49,8 @@ lark-cli calendar +agenda --as user
 # calendar_id不传，默认primary
 lark-cli calendar +get --calendar-id <calendar_id> --event-id <event_id>
 ```
+
+日程描述统一使用 `description` 一个字段，按 **Markdown** 富文本处理。读取日程时 `description` 返回 Markdown 富文本（仅有纯文本描述时返回该纯文本）；创建/更新日程时也通过 `--description` 传入 Markdown。
 
 ### `+search-event` — 按关键词、时间范围和参会人搜索日程
 
@@ -186,6 +190,8 @@ lark-cli contact +search-user --query <query> --as user
 lark-cli im +chat-search --query <query> --as user
 ```
 
+> 搜索用户接口不支持 bot 身份，必须用 `--as user`；搜到的 `ou_` open_id 用于日程参与人操作（如添加日程参与人）。
+
 ## 不在本 skill 范围
 
 - 查询过去的视频会议记录 → [lark-vc](../lark-vc/SKILL.md)
@@ -195,4 +201,4 @@ lark-cli im +chat-search --query <query> --as user
 - 会议室物理设施管理 → 管理员后台
 
 **注意（强制性）：**
-- 涉及日期（时间）字符串与时间戳的相互转换时，务必调用系统命令或脚本代码等外部工具进行处理，以确保转换的绝对准确。违者将导致严重的逻辑错误！
+- 涉及日期（时间）字符串与时间戳的相互转换时，务必调用系统命令或脚本代码等外部工具进行处理，以确保转换的绝对准确；换算**禁止依赖容器默认时区**（常为 UTC，会导致 8 小时偏移），必须显式指定目标时区。违者将导致严重的逻辑错误！
