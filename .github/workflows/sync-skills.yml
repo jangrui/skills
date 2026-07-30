@@ -61,9 +61,11 @@ jobs:
           if [ -n "$SELECTED" ]; then
             MATRIX=$(echo "$ALL" | jq -c --arg p "$SELECTED" 'map(select(.plugin == $p))')
           else
-            MATRIX="$ALL"
+            MATRIX=$(echo "$ALL" | jq -c '.')
           fi
-          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "matrix<<MATRIX_EOF" >> "$GITHUB_OUTPUT"
+          echo "$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "MATRIX_EOF" >> "$GITHUB_OUTPUT"
 
   sync:
     needs: matrix-config
