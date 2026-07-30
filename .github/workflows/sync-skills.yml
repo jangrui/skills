@@ -1,0 +1,165 @@
+name: Sync skills
+
+# 统一的 skill 同步 workflow（matrix 驱动，替代 11 个独立 workflow）
+# 每个矩阵项对应一个插件源：
+#   - plugin:    插件标识（baoyu / golang / lark …），用于分支名、label、脚本名
+#   - add_path:  git add 的路径（部分插件路径与名称不同，如 wpsnote → writing/wpsnote）
+#   - pr_hint:   PR 正文中给 review 者的路径提示
+#
+# 机制：跑 scripts/sync-<plugin>-skills.sh → 若有更新则自动开 PR 等待人工 review
+# 修 bug 只改这一个文件即可，不再维护 11 份副本
+"on":
+  schedule:
+    - cron: '0 21 * * *'
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: '只跑指定插件（留空跑全部）'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - baoyu
+          - dbx
+          - diagram
+          - golang
+          - grafana
+          - illustration
+          - lark
+          - mattpocock
+          - ppt
+          - wpsnote
+          - writing
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  matrix-config:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - id: gen
+        run: |
+          ALL='[
+            {"plugin":"baoyu","add_path":"plugins/baoyu/","pr_hint":"plugins/baoyu/<skill>/"},
+            {"plugin":"dbx","add_path":"plugins/dbx/","pr_hint":"plugins/dbx/<skill>/"},
+            {"plugin":"diagram","add_path":"plugins/diagram/","pr_hint":"plugins/diagram/<skill>/"},
+            {"plugin":"golang","add_path":"plugins/golang/","pr_hint":"plugins/golang/<skill>/"},
+            {"plugin":"grafana","add_path":"plugins/grafana/","pr_hint":"plugins/grafana/<category>/<skill>/"},
+            {"plugin":"illustration","add_path":"plugins/illustration/","pr_hint":"plugins/illustration/"},
+            {"plugin":"lark","add_path":"plugins/lark/","pr_hint":"plugins/lark/<skill>/"},
+            {"plugin":"mattpocock","add_path":"plugins/mattpocock/","pr_hint":"plugins/mattpocock/<bucket>/<skill>/"},
+            {"plugin":"ppt","add_path":"plugins/ppt/","pr_hint":"plugins/ppt/guizang-ppt/"},
+            {"plugin":"wpsnote","add_path":"plugins/writing/wpsnote/","pr_hint":"plugins/writing/wpsnote/<skill>/"},
+            {"plugin":"writing","add_path":"plugins/writing/","pr_hint":"plugins/writing/<skill>/"}
+          ]'
+          SELECTED="${{ github.event.inputs.plugin }}"
+          if [ -n "$SELECTED" ]; then
+            MATRIX=$(echo "$ALL" | jq -c --arg p "$SELECTED" 'map(select(.plugin == $p))')
+          else
+            MATRIX="$ALL"
+          fi
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  sync:
+    needs: matrix-config
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include: ${{ fromJson(needs.matrix-config.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: sync-${{ matrix.plugin }}-skills
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Run sync script
+        id: sync
+        env:
+          CI_CHANGES_FILE: /tmp/updated-skills.txt
+        run: |
+          bash ./scripts/sync-${{ matrix.plugin }}-skills.sh
+          if [ -f "$CI_CHANGES_FILE" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "updated<<EOF" >> "$GITHUB_OUTPUT"
+            cat "$CI_CHANGES_FILE" >> "$GITHUB_OUTPUT"
+            echo "EOF" >> "$GITHUB_OUTPUT"
+            count=$(wc -l < "$CI_CHANGES_FILE" | tr -d ' ')
+            echo "count=$count" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip if no changes
+        if: steps.sync.outputs.has_changes != 'true'
+        run: echo "✅ 所有 ${{ matrix.plugin }} skill 已是最新，无需 PR"
+
+      - name: Create branch & commit
+        if: steps.sync.outputs.has_changes == 'true'
+        env:
+          COUNT: ${{ steps.sync.outputs.count }}
+          UPDATED: ${{ steps.sync.outputs.updated }}
+        run: |
+          BRANCH="chore/sync-${{ matrix.plugin }}-${GITHUB_RUN_ID}"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+          git add ${{ matrix.add_path }}
+          git commit -m "$(cat <<COMMIT_EOF
+          chore(${{ matrix.plugin }}): sync ${COUNT} upstream skill(s)
+
+          Updated: $(echo "$UPDATED" | tr '\n' ' ')
+
+          Run ./scripts/sync-${{ matrix.plugin }}-skills.sh --check locally to reproduce.
+          COMMIT_EOF
+          )"
+          git push origin "$BRANCH"
+
+      - name: Create pull request
+        if: steps.sync.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COUNT: ${{ steps.sync.outputs.count }}
+          UPDATED: ${{ steps.sync.outputs.updated }}
+          PR_HINT: ${{ matrix.pr_hint }}
+          PLUGIN: ${{ matrix.plugin }}
+        run: |
+          PR_BODY=$(cat <<BODY
+          ## 上游同步
+
+          本次检测到 **${COUNT} 个** ${PLUGIN} skill 有上游更新，已自动 vendor 到 \`${{ matrix.add_path }}\`。
+
+          ### 更新的 skill
+          $(echo "$UPDATED" | sed 's/^/- /')
+
+          ### 校验
+          - ✅ 同步脚本执行完成
+          - ✅ 自包含性自检通过
+
+          ### 请人工 review
+          - 查看 \`${PR_HINT}\` 的 diff
+          - 确认 SKILL.md 行为变化可接受
+          - 合并即可
+
+          ---
+          _此 PR 由 GitHub Action [\`sync-skills\`](../actions/workflows/sync-skills.yml) 自动生成。_
+          BODY
+          )
+
+          gh pr create \
+            --title "chore(${PLUGIN}): sync ${COUNT} upstream skill(s) 🔄" \
+            --body "$PR_BODY" \
+            --base main \
+            --head "$BRANCH" \
+            --label "dependencies"
