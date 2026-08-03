@@ -129,6 +129,15 @@ XSD 中的 `title`、`headline`、`sub-headline`、`body`、`caption` 主要出�
 - `<a>`
 - `<shadow>`
 - `<outline>`
+- `<formula>`
+
+公式写法：
+
+```xml
+<p>公式：<formula><latex><![CDATA[ E = mc^2 ]]></latex></formula></p>
+```
+
+`<formula>` 是内联元素；当前只支持一个 `<latex>` 子元素。LaTeX 内容必须放在 `CDATA` 中，且 `CDATA` 内不要写 XML 转义；宏只使用服务端支持范围内的写法，优先用基础运算符、`\frac`、`\sqrt`、`matrix`。
 
 示例：
 
@@ -218,17 +227,17 @@ XSD 中的 `title`、`headline`、`sub-headline`、`body`、`caption` 主要出�
 ### img
 
 ```xml
-<img src="file_token_or_url" topLeftX="80" topLeftY="120" width="320" height="180"/>
+<img src="file_token_或_@本地路径" topLeftX="80" topLeftY="120" width="320" height="180"/>
 ```
 
 `img` 使用 `topLeftX` / `topLeftY`，不是 `x` / `y`。
 
-`src` 只支持：`slides +media-upload` 返回的 `file_token`，或 `@<本地路径>` 占位符（仅 `+create --slides` 自动上传并替换）。**禁止使用 http(s) 外链 URL**——飞书 slides 渲染端不会代理外链图，外链 src 在 PPT 里通常不显示。本地图片详见 [lark-slides-create.md](lark-slides-create.md#本地图片path-占位符) / [lark-slides-media-upload.md](lark-slides-media-upload.md)。
+`src` 只支持：`slides +media-upload` 返回的 `file_token`，或 `@<本地路径>` 占位符（`+create --slides` 和 `+add-slide` 会自动上传并替换）。**禁止使用 http(s) 外链 URL**——飞书 slides 渲染端不会代理外链图，外链 src 在 PPT 里通常不显示。本地图片详见 [lark-slides-create.md](lark-slides-create.md#本地图片path-占位符) / [lark-slides-media-upload.md](lark-slides-media-upload.md)。
 
 本地图片的两种姿势：
 
 - 新建带图 PPT：`+create --slides` 里直接写 `src="@./pic.png"`，CLI 在创空白 PPT 后、加 slides 前自动上传并替换 token
-- 给已有 PPT 加带图新页：先 `slides +media-upload --file ./pic.png --presentation $PID` 拿 token，再用 token 写进 `xml_presentation.slide create` 的 XML
+- 给已有 PPT 加带图新页：`+add-slide --slide` 的 XML 里直接写 `src="@./pic.png"`，CLI 上传后替换 token 再提交页面
 
 > **注意**：`width`/`height` 是**裁剪后**的显示尺寸。比例和原图不一致时会自动裁剪（无法靠属性关闭），想避免裁剪就让 `width:height` 对齐原图比例。
 
@@ -311,6 +320,36 @@ XSD 中的 `title`、`headline`、`sub-headline`、`body`、`caption` 主要出�
 图表语法十分复杂，必须阅读 [slides_chart_demo.xml](slides_chart_demo.xml)，直接照抄其中的柱状、条形、折线、面积、饼（环）、雷达、组合图。
 
 `<chart>` 直接子元素必须有 `<chartPlotArea>`（绘图区）和 `<chartData>`（数据）；`<chartTitle>`、`<chartSubTitle>`、`<chartStyle>`、`<chartLegend>`、`<chartTooltip>` 可选，如果想不展示标题、副标题、图例或悬浮提示，省略相应元素标签即可。
+
+`<chartStyle>` 常用子元素：
+
+- `<chartBackground>`：`color` 省略时由渲染端决定默认背景；需要完全透明请显式写 `color="rgba(0, 0, 0, 0)"`
+- `<chartBorder>`：无边框可写 `width="0"`，或直接不写 `<chartBorder>` 元素
+
+#### 图表渐变 `<fillGradient>` / `<strokeGradient>`
+
+图表支持渐变填充/描边，`<fillGradient>` 用于面积、柱子、数据点、扇区填充，`<strokeGradient>` 用于线条、数据点边框、柱子边框。渐变只能挂在系列级或单元素级，不要挂在 `<chartPlot>` 全局层。
+
+可挂载位置：
+
+- 系列级：`<chartBars>` / `<chartPoints>` 支持 `<fillGradient>` 与 `<strokeGradient>`；`<chartLine>` 只支持 `<strokeGradient>`；`<chartArea>` / `<chartSectors>` 只支持 `<fillGradient>`
+- 单元素级：`<chartBar index="...">` / `<chartPoint index="...">` / `<chartSector index="...">` 只支持 `<fillGradient>`
+- 全局级：`<chartPlot>` 下的 `<chartLines>` / `<chartAreas>` / `<chartBars>` / `<chartPoints>` 不支持渐变
+
+结构要点：`type` 必填，可为 `linear` 或 `radial`；`linear` 用 `x0` / `y0` / `x1` / `y1`，`radial` 用 `r0` / `r1`；`<stops>` 至少包含 2 个 `<stop>`，`offset` 与 `opacity` 取值均为 `[0, 1]`。
+
+```xml
+<chartSeries index="1">
+  <chartBars>
+    <fillGradient type="linear" x0="0" y0="0" x1="0" y1="1">
+      <stops>
+        <stop offset="0" color="rgb(28, 71, 120)"/>
+        <stop offset="1" color="rgb(28, 71, 120)" opacity="0.3"/>
+      </stops>
+    </fillGradient>
+  </chartBars>
+</chartSeries>
+```
 
 隐藏 `<chart>` 的图例只能通过不写或删除 `<chartLegend>` 实现，`<chartLegend>` 不支持 `position="none"`。
 
