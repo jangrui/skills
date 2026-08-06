@@ -312,6 +312,45 @@
       ]
     },
     {
+      "name": "golang-core",
+      "description": "Go 核心 Agent Skills 精简版（11 个）：how-to、error-handling、concurrency、context、testing、code-style、cobra、viper、samber-lo、lint、project-layout。覆盖日常 Go 工程高频场景，完整 46 个见 cc-skills-golang。",
+      "source": "./plugins/golang",
+      "category": "golang",
+      "author": {
+        "name": "Samuel Berthe",
+        "email": "hey@samuel-berthe.fr",
+        "url": "https://github.com/samber"
+      },
+      "homepage": "https://github.com/samber/cc-skills-golang",
+      "repository": "https://github.com/samber/cc-skills-golang",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "golang",
+        "go",
+        "core",
+        "essential",
+        "lightweight"
+      ],
+      "skills": [
+        "./golang-how-to",
+        "./golang-error-handling",
+        "./golang-concurrency",
+        "./golang-context",
+        "./golang-testing",
+        "./golang-code-style",
+        "./golang-spf13-cobra",
+        "./golang-spf13-viper",
+        "./golang-samber-lo",
+        "./golang-lint",
+        "./golang-project-layout"
+      ]
+    },
+    {
       "name": "dbx",
       "description": "DBX 数据库 Agent Skill：通过 dbx CLI 安全探索 schema、执行只读 SQL、生成 AI 友好 schema context，支持 70+ 数据库。需配合 npm 包 @dbx-app/cli 使用。",
       "source": "./plugins/dbx",
