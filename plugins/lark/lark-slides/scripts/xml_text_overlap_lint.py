@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import math
 import re
@@ -16,11 +17,13 @@ from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
 from typing import Any
 
+import sxsd_validator
+
 
 XS_NS = "{http://www.w3.org/2001/XMLSchema}"
 XML_NS = "{http://www.w3.org/XML/1998/namespace}"
 SVG_NS = "{http://www.w3.org/2000/svg}"
-SML_NAMESPACE = "http://www.larkoffice.com/sml/2.0"
+SML_NAMESPACE = "https://www.larkoffice.com/sml/2.0"
 SXSD_SCHEMA_PATH = Path(__file__).resolve().parents[1] / "references" / "slides_xml_schema_definition.xml"
 ICONPARK_INDEX_PATH = Path(__file__).resolve().parents[1] / "references" / "iconpark-index.json"
 SXSD_TAG_ALIASES = {
@@ -44,14 +47,32 @@ ROUNDTRIP_SXSD_ATTRS = {
     ("chartData", "isStaticData"),
 }
 # Slides readback echoes each chartField's CSV text as per-value <chartParsedValues> children;
-# it's server-emitted, absent from the write schema, and appears on virtually every chart-bearing
-# deck, so treating it as an unsupported tag would block per-slide linting document-wide.
-ROUNDTRIP_SXSD_TAGS = {"chartParsedValues"}
+# it is server-emitted and absent from the write schema, so it must not block page linting.
+ROUNDTRIP_SXSD_TAGS = {("chartField", "chartParsedValues")}
 DEFAULT_TABLE_COLUMN_WIDTH = 110
 DEFAULT_TABLE_ROW_HEIGHT = 37
+DEFAULT_TEXT_LINE_SPACING_MULTIPLE = 1.5
+TEXT_WRAP_WIDTH_TOLERANCE_PX = 1.0
+TEXT_HEIGHT_OVERFLOW_TOLERANCE_PX = 0.5
+SINGLE_LINE_METRIC_WIDTH_RATIO = 1.18
+CENTERED_SHORT_LABEL_WIDTH_RATIO = 1.12
+HEADLINE_NEAR_FIT_WIDTH_RATIO = 1.04
+DENSE_BODY_LINE_SPACING_MAX_MULTIPLE = 1.6
+GHOST_TEXT_MIN_FONT_SIZE = 96
+GHOST_TEXT_MAX_ALPHA = 0.5
+GHOST_TEXT_FAINT_MIN_FONT_SIZE = 36
+GHOST_TEXT_FAINT_MAX_ALPHA = 0.35
+# A <line> crossing text glyphs is a legibility defect (see line_crosses_text_glyphs). We erode the
+# glyph box by this margin before testing intersection so a line that only skims a glyph edge or the
+# padding-only text frame -- but does not actually cut through the letterforms -- is not flagged.
+LINE_TEXT_GRAZE_MIN_PX = 2.0
+LINE_TEXT_GRAZE_FONT_RATIO = 0.12
+# A line whose effective stroke alpha is below this is not visibly rendered, so it cannot occlude text.
+LINE_MIN_VISIBLE_ALPHA = 0.08
 # Sub-pixel canvas overflow is floating-point rounding noise (e.g. rotated-bbox math), not a
 # visible defect; keep this well under 1px so real overflow is still always caught.
 CANVAS_OVERFLOW_TOLERANCE = 0.5
+XML_PATH_HINT_PREFIX = "Locate via related_objects[].xml_path."
 _SXSD_TAG_ATTRIBUTES_CACHE: dict[str, set[str]] | None = None
 _ICONPARK_ICON_TYPES_CACHE: set[str] | None = None
 
@@ -104,6 +125,52 @@ def extract_numeric_attribute(tag_source: str, name: str) -> int | float | None:
     except ValueError:
         return None
     return int(value) if value.is_integer() else value
+
+
+def extract_bool_attribute(tag_source: str, name: str) -> bool:
+    value = extract_attribute(tag_source, name)
+    return value in {"true", "1", "yes"}
+
+
+def extract_color_alpha(color: str | None) -> int | float | None:
+    if color is None:
+        return None
+    normalized = re.sub(r"\s+", "", color).lower()
+    if normalized == "transparent":
+        return 0
+    rgba_match = re.fullmatch(
+        r"rgba\([^,]+,[^,]+,[^,]+,([+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+))\)",
+        normalized,
+    )
+    if rgba_match is None:
+        return None
+    try:
+        alpha = float(rgba_match.group(1))
+    except ValueError:
+        return None
+    return int(alpha) if alpha.is_integer() else alpha
+
+
+def effective_text_alpha(shape_alpha: int | float | None, text_color: str | None) -> int | float:
+    base_alpha = shape_alpha if isinstance(shape_alpha, (int, float)) else 1
+    color_alpha = extract_color_alpha(text_color)
+    if not isinstance(color_alpha, (int, float)):
+        return base_alpha
+    return base_alpha * color_alpha
+
+
+def detect_inline_style_presence(content_xml: str, style_tags: set[str]) -> bool:
+    for tag_name in style_tags:
+        if re.search(fr"<{re.escape(tag_name)}\b[\s>]", content_xml) is not None:
+            return True
+    return False
+
+
+def detect_any_span_bool_attribute(content_xml: str, attr_name: str) -> bool:
+    for attrs in re.findall(r"<span\b([^>]*)>", content_xml):
+        if extract_bool_attribute(attrs, attr_name):
+            return True
+    return False
 
 
 def sum_sizes(sizes: list[int | float]) -> int | float:
@@ -218,6 +285,7 @@ def extract_text_paragraphs(value: str, default_font_size: int | float) -> list[
                 "lineSpacing": extract_attribute(attrs, "lineSpacing"),
                 "beforeLineSpacing": extract_attribute(attrs, "beforeLineSpacing"),
                 "afterLineSpacing": extract_attribute(attrs, "afterLineSpacing"),
+                "letterSpacing": extract_numeric_attribute(attrs, "letterSpacing"),
             }
         )
     return paragraphs
@@ -245,77 +313,13 @@ def xml_namespace(tag: str) -> str | None:
     return tag.split("}", 1)[0] + "}" if tag.startswith("{") else None
 
 
-def strip_xsd_prefix(value: str | None) -> str | None:
-    if value is None:
-        return None
-    return value.rsplit(":", 1)[-1]
-
-
-def iter_direct_xsd_children(element: ET.Element, local_name: str) -> list[ET.Element]:
-    return [child for child in element if child.tag == f"{XS_NS}{local_name}"]
-
-
 def load_sxsd_tag_attributes() -> dict[str, set[str]]:
     global _SXSD_TAG_ATTRIBUTES_CACHE
     if _SXSD_TAG_ATTRIBUTES_CACHE is not None:
         return _SXSD_TAG_ATTRIBUTES_CACHE
 
-    schema_root = ET.parse(SXSD_SCHEMA_PATH).getroot()
-    named_complex_types = {
-        complex_type.attrib["name"]: complex_type
-        for complex_type in schema_root.findall(f"{XS_NS}complexType")
-        if complex_type.attrib.get("name")
-    }
-    resolving: set[str] = set()
-
-    def attributes_for_complex_type(complex_type: ET.Element) -> set[str]:
-        attrs: set[str] = {
-            attribute.attrib["name"]
-            for attribute in iter_direct_xsd_children(complex_type, "attribute")
-            if attribute.attrib.get("name")
-        }
-        for content_name in ("simpleContent", "complexContent"):
-            for complex_content in iter_direct_xsd_children(complex_type, content_name):
-                for extension in iter_direct_xsd_children(complex_content, "extension"):
-                    base_type = strip_xsd_prefix(extension.attrib.get("base"))
-                    if base_type:
-                        attrs.update(attributes_for_type(base_type))
-                    attrs.update(
-                        attribute.attrib["name"]
-                        for attribute in iter_direct_xsd_children(extension, "attribute")
-                        if attribute.attrib.get("name")
-                    )
-        return attrs
-
-    def attributes_for_type(type_name: str) -> set[str]:
-        if type_name in resolving:
-            return set()
-        complex_type = named_complex_types.get(type_name)
-        if complex_type is None:
-            return set()
-        resolving.add(type_name)
-        try:
-            return attributes_for_complex_type(complex_type)
-        finally:
-            resolving.remove(type_name)
-
-    tag_attributes: dict[str, set[str]] = {}
-    for element in schema_root.iter(f"{XS_NS}element"):
-        tag_name = element.attrib.get("name")
-        if not tag_name:
-            continue
-
-        attrs: set[str] = set()
-        type_name = strip_xsd_prefix(element.attrib.get("type"))
-        if type_name:
-            attrs.update(attributes_for_type(type_name))
-        for complex_type in iter_direct_xsd_children(element, "complexType"):
-            attrs.update(attributes_for_complex_type(complex_type))
-
-        tag_attributes.setdefault(tag_name, set()).update(attrs)
-
-    _SXSD_TAG_ATTRIBUTES_CACHE = tag_attributes
-    return tag_attributes
+    _SXSD_TAG_ATTRIBUTES_CACHE = sxsd_validator.load_tag_attributes(SXSD_SCHEMA_PATH)
+    return _SXSD_TAG_ATTRIBUTES_CACHE
 
 
 def load_iconpark_icon_types() -> set[str]:
@@ -345,20 +349,26 @@ def build_sxsd_tag_hint(tag_name: str, supported_tags: set[str]) -> str:
     if alias:
         return f"Use {alias} instead of <{tag_name}>."
     if tag_name == "svg":
-        return 'Inside <whiteboard>, write SVG as <svg xmlns="http://www.w3.org/2000/svg">...</svg>.'
+        return 'Inside <embed> or <whiteboard>, write SVG as <svg xmlns="http://www.w3.org/2000/svg">...</svg>.'
     close_matches = get_close_matches(tag_name, sorted(supported_tags), n=3, cutoff=0.72)
     if close_matches:
         return "Unsupported SXSD tag. Did you mean " + ", ".join(f"<{match}>" for match in close_matches) + "?"
     return "Unsupported SXSD tag. Use only tags defined in slides_xml_schema_definition.xml."
 
 
-def build_sxsd_attr_hint(tag_name: str, attr_name: str, allowed_attrs: set[str]) -> str:
+def suggest_sxsd_attrs(attr_name: str, allowed_attrs: set[str]) -> list[str]:
     alias = SXSD_ATTR_ALIASES.get(attr_name)
     if alias and alias in allowed_attrs:
-        return f'Use "{alias}" on <{tag_name}> instead of "{attr_name}".'
-    close_matches = get_close_matches(attr_name, sorted(allowed_attrs), n=3, cutoff=0.68)
-    if close_matches:
-        return "Unsupported SXSD attribute. Did you mean " + ", ".join(f'"{match}"' for match in close_matches) + "?"
+        return [alias]
+    return get_close_matches(attr_name, sorted(allowed_attrs), n=3, cutoff=0.68)
+
+
+def build_sxsd_attr_hint(tag_name: str, attr_name: str, allowed_attrs: set[str]) -> str:
+    suggestions = suggest_sxsd_attrs(attr_name, allowed_attrs)
+    if suggestions:
+        if SXSD_ATTR_ALIASES.get(attr_name) == suggestions[0]:
+            return f'Use "{suggestions[0]}" on <{tag_name}> instead of "{attr_name}".'
+        return "Unsupported SXSD attribute. Did you mean " + ", ".join(f'"{match}"' for match in suggestions) + "?"
     allowed_summary = ", ".join(sorted(allowed_attrs)[:8])
     if len(allowed_attrs) > 8:
         allowed_summary += ", ..."
@@ -366,17 +376,40 @@ def build_sxsd_attr_hint(tag_name: str, attr_name: str, allowed_attrs: set[str])
 
 
 def should_skip_sxsd_subtree(element: ET.Element, ancestors: list[str]) -> bool:
-    return "whiteboard" in ancestors and xml_namespace(element.tag) == SVG_NS
+    return ("whiteboard" in ancestors or "embed" in ancestors) and xml_namespace(element.tag) == SVG_NS
 
 
 def should_skip_sxsd_attribute(tag_name: str, attr_name: str) -> bool:
     return attr_name in SERVER_FILLED_SXSD_ATTRS or (tag_name, attr_name) in ROUNDTRIP_SXSD_ATTRS
 
 
-def validate_sxsd_tag_attributes(root: ET.Element) -> list[dict[str, Any]]:
+def should_skip_sxsd_tag(parent_name: str | None, tag_name: str) -> bool:
+    return (parent_name, tag_name) in ROUNDTRIP_SXSD_TAGS
+
+
+def without_server_filled_sxsd_fields(root: ET.Element) -> ET.Element:
+    sanitized_root = copy.deepcopy(root)
+
+    def sanitize(element: ET.Element) -> None:
+        tag_name = xml_local_name(element.tag)
+        for raw_attr_name in list(element.attrib):
+            if should_skip_sxsd_attribute(tag_name, xml_local_name(raw_attr_name)):
+                del element.attrib[raw_attr_name]
+        for child in list(element):
+            if should_skip_sxsd_tag(tag_name, xml_local_name(child.tag)):
+                element.remove(child)
+                continue
+            sanitize(child)
+
+    sanitize(sanitized_root)
+    return sanitized_root
+
+
+def validate_sxsd_document(xml: str, root: ET.Element) -> list[dict[str, Any]]:
     tag_attributes = load_sxsd_tag_attributes()
     supported_tags = set(tag_attributes)
     issues: list[dict[str, Any]] = []
+    suggested_attr_candidates: dict[tuple[str, str], list[set[str]]] = {}
 
     def visit(element: ET.Element, ancestors: list[str], path: str) -> None:
         if should_skip_sxsd_subtree(element, ancestors):
@@ -384,7 +417,8 @@ def validate_sxsd_tag_attributes(root: ET.Element) -> list[dict[str, Any]]:
 
         tag_name = xml_local_name(element.tag)
         current_path = f"{path}/{tag_name}" if path else tag_name
-        if tag_name in ROUNDTRIP_SXSD_TAGS:
+        parent_name = ancestors[-1] if ancestors else None
+        if should_skip_sxsd_tag(parent_name, tag_name):
             return
         if tag_name not in supported_tags:
             issues.append(
@@ -408,6 +442,11 @@ def validate_sxsd_tag_attributes(root: ET.Element) -> list[dict[str, Any]]:
                     continue
                 if attr_name in allowed_attrs:
                     continue
+                suggestions = suggest_sxsd_attrs(attr_name, allowed_attrs)
+                if suggestions:
+                    suggested_attr_candidates.setdefault((current_path, tag_name), []).append(
+                        set(suggestions)
+                    )
                 issues.append(
                     {
                         "level": "error",
@@ -422,6 +461,123 @@ def validate_sxsd_tag_attributes(root: ET.Element) -> list[dict[str, Any]]:
 
         for child in element:
             visit(child, [*ancestors, tag_name], current_path)
+
+    visit(root, [], "")
+    existing = {
+        (issue.get("code"), issue.get("path"), issue.get("tag"), issue.get("attr"))
+        for issue in issues
+    }
+    unsupported_tag_locations = {
+        (issue.get("path"), issue.get("tag"))
+        for issue in issues
+        if issue.get("code") == "sxsd_unsupported_tag"
+    }
+    schema_issues = _validate_sxsd_schema_constraints(xml, root)
+    missing_attrs_by_location: dict[tuple[str, str], set[str]] = {}
+    for schema_issue in schema_issues:
+        if schema_issue.get("code") != "sxsd_missing_required_attr":
+            continue
+        location = (schema_issue.get("path"), schema_issue.get("tag"))
+        missing_attrs_by_location.setdefault(location, set()).add(schema_issue.get("attr"))
+
+    suggested_attrs: set[tuple[str, str, str]] = set()
+    for location, candidate_groups in suggested_attr_candidates.items():
+        missing_attrs = missing_attrs_by_location.get(location, set())
+        for candidates in candidate_groups:
+            matching_missing_attrs = candidates & missing_attrs
+            if len(matching_missing_attrs) == 1:
+                suggested_attrs.add((*location, next(iter(matching_missing_attrs))))
+
+    for schema_issue in schema_issues:
+        if schema_issue.get("code") == "sxsd_unexpected_child" and (
+            schema_issue.get("path"),
+            schema_issue.get("tag"),
+        ) in unsupported_tag_locations:
+            continue
+        if schema_issue.get("code") == "sxsd_missing_required_attr" and (
+            schema_issue.get("path"),
+            schema_issue.get("tag"),
+            schema_issue.get("attr"),
+        ) in suggested_attrs:
+            continue
+        key = (
+            schema_issue.get("code"),
+            schema_issue.get("path"),
+            schema_issue.get("tag"),
+            schema_issue.get("attr"),
+        )
+        if key not in existing:
+            issues.append(schema_issue)
+    return issues
+
+
+def _validate_sxsd_schema_constraints(xml: str, root: ET.Element) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    if re.match(r"^\s*<\?xml\b", xml):
+        issues.append(
+            {
+                "level": "error",
+                "code": "sxsd_unsupported_declaration",
+                "path": xml_local_name(root.tag),
+                "tag": xml_local_name(root.tag),
+                "expected": "SXSD document without an XML declaration",
+                "actual": "<?xml ...?>",
+                "message": "XML declarations are not supported by the Slides SXSD write format",
+                "hint": "Remove the <?xml ...?> declaration and keep the SXSD root element.",
+            }
+        )
+
+    issues.extend(
+        sxsd_validator.validate_sxsd(
+            without_server_filled_sxsd_fields(root),
+            SXSD_SCHEMA_PATH,
+        )
+    )
+    issues.extend(validate_embed_svg_roots(root))
+    return issues
+
+
+def validate_embed_svg_roots(root: ET.Element) -> list[dict[str, Any]]:
+    issues: list[dict[str, Any]] = []
+    document_namespace = sxsd_validator.element_namespace(root.tag)
+    is_bare_slide_fragment = (
+        xml_local_name(root.tag) == "slide" and document_namespace is None
+    )
+    if (
+        document_namespace not in sxsd_validator.ACCEPTED_SML_NAMESPACES
+        and not is_bare_slide_fragment
+    ):
+        return issues
+
+    def visit(element: ET.Element, ancestors: list[str], parent_path: str) -> None:
+        if should_skip_sxsd_subtree(element, ancestors):
+            return
+
+        tag_name = xml_local_name(element.tag)
+        path = f"{parent_path}/{tag_name}" if parent_path else tag_name
+        if (
+            tag_name == "embed"
+            and sxsd_validator.element_namespace(element.tag) == document_namespace
+        ):
+            for child in element:
+                if xml_namespace(child.tag) != SVG_NS or xml_local_name(child.tag) == "svg":
+                    continue
+                child_name = xml_local_name(child.tag)
+                child_path = f"{path}/{child_name}"
+                issues.append(
+                    {
+                        "level": "error",
+                        "code": "sxsd_unexpected_child",
+                        "path": child_path,
+                        "tag": child_name,
+                        "expected": '<svg xmlns="http://www.w3.org/2000/svg">',
+                        "actual": child_name,
+                        "message": f"embedded SVG content must use an <svg> root at {child_path}",
+                        "hint": 'Wrap the SVG content in <svg xmlns="http://www.w3.org/2000/svg">...</svg>.',
+                    }
+                )
+        for child in element:
+            visit(child, [*ancestors, tag_name], path)
 
     visit(root, [], "")
     return issues
@@ -469,8 +625,11 @@ def validate_iconpark_icon_types(root: ET.Element) -> list[dict[str, Any]]:
             }
         )
 
-    def visit(element: ET.Element, path: str) -> None:
+    def visit(element: ET.Element, ancestors: list[str], path: str) -> None:
         nonlocal supported_icon_types
+        if should_skip_sxsd_subtree(element, ancestors):
+            return
+
         tag_name = xml_local_name(element.tag)
         current_path = f"{path}/{tag_name}" if path else tag_name
         if tag_name == "icon":
@@ -510,9 +669,9 @@ def validate_iconpark_icon_types(root: ET.Element) -> list[dict[str, Any]]:
                     }
                 )
         for child in element:
-            visit(child, current_path)
+            visit(child, [*ancestors, tag_name], current_path)
 
-    visit(root, "")
+    visit(root, [], "")
     return issues
 
 
@@ -575,7 +734,8 @@ def validate_sml_tag_prefixes(xml: str) -> list[dict[str, Any]]:
         if not prefix:
             return
 
-        if namespace_map.get(prefix) != SML_NAMESPACE:
+        actual_namespace = namespace_map.get(prefix)
+        if actual_namespace not in sxsd_validator.ACCEPTED_SML_NAMESPACES:
             return
         path = "/".join(element_stack)
         issues.append(
@@ -583,7 +743,7 @@ def validate_sml_tag_prefixes(xml: str) -> list[dict[str, Any]]:
                 "level": "error",
                 "code": "sml_prefixed_tag",
                 "tag": element_name,
-                "namespace": SML_NAMESPACE,
+                "namespace": actual_namespace,
                 "path": path,
                 "line": parser.CurrentLineNumber,
                 "column": parser.CurrentColumnNumber,
@@ -627,25 +787,141 @@ def validate_xml_well_formed(xml: str) -> dict[str, Any] | None:
     return xml_error
 
 
-def parse_presentation(xml: str) -> dict[str, Any]:
-    presentation_match = re.search(r"<presentation\b([^>]*)>", xml)
-    if presentation_match:
-        return {
-            "width": int(float(extract_attribute(presentation_match.group(1), "width") or 960)),
-            "height": int(float(extract_attribute(presentation_match.group(1), "height") or 540)),
-            "slides": re.findall(r"<slide\b[\s\S]*?</slide>", xml),
+def serialize_slide_for_layout(slide_root: ET.Element) -> str:
+    slide_copy = copy.deepcopy(slide_root)
+    for element in slide_copy.iter():
+        if not isinstance(element.tag, str):
+            continue
+        element.tag = xml_local_name(element.tag)
+        attributes = {
+            xml_local_name(attribute_name): value
+            for attribute_name, value in element.attrib.items()
         }
-    slide_match = re.findall(r"<slide\b[\s\S]*?</slide>", xml)
-    if slide_match:
-        return {"width": 960, "height": 540, "slides": slide_match}
-    fail("input must contain a <presentation> or <slide> root")
+        element.attrib.clear()
+        element.attrib.update(attributes)
+    return ET.tostring(slide_copy, encoding="unicode")
+
+
+def parse_presentation(root: ET.Element) -> dict[str, Any]:
+    root_name = xml_local_name(root.tag)
+    if root_name == "slide":
+        slide_roots = [root]
+        width = 960
+        height = 540
+    elif root_name == "presentation":
+        slide_roots = [child for child in root if xml_local_name(child.tag) == "slide"]
+        width = int(float(root.attrib.get("width", 960)))
+        height = int(float(root.attrib.get("height", 540)))
+    else:
+        fail("input must contain a <presentation> or <slide> root")
+    return {
+        "width": width,
+        "height": height,
+        "slides": [serialize_slide_for_layout(slide_root) for slide_root in slide_roots],
+        "slide_roots": slide_roots,
+    }
+
+
+def build_source_xml_paths(slide_xml: str, slide_number: int) -> dict[str, list[str]]:
+    root = ET.fromstring(slide_xml)
+    data = next((child for child in root if xml_local_name(child.tag) == "data"), None)
+    paths: dict[str, list[str]] = {}
+    if data is None:
+        return paths
+    counts: dict[str, int] = {}
+    for child in data:
+        kind = xml_local_name(child.tag)
+        counts[kind] = counts.get(kind, 0) + 1
+        paths.setdefault(kind, []).append(
+            f"slide[{slide_number}]/data/{kind}[{counts[kind]}]"
+        )
+    return paths
+
+
+def attach_source_xml_paths(
+    elements: list[dict[str, Any]], source_paths: dict[str, list[str]]
+) -> None:
+    offsets: dict[str, int] = {}
+    for element in elements:
+        kind = element["kind"]
+        source_kind_index = element.get("_source_kind_index")
+        offset = (
+            source_kind_index - 1
+            if isinstance(source_kind_index, int) and source_kind_index > 0
+            else offsets.get(kind, 0)
+        )
+        kind_paths = source_paths.get(kind, [])
+        if offset < len(kind_paths):
+            element["xml_path"] = kind_paths[offset]
+            element["_ref"] = kind_paths[offset]
+        offsets[kind] = max(offsets.get(kind, 0), offset + 1)
+
+
+def extract_source_id_elements(slide_xml: str, slide_number: int) -> list[dict[str, Any]]:
+    root = ET.fromstring(slide_xml)
+    elements: list[dict[str, Any]] = []
+    root_path = f"slide[{slide_number}]"
+
+    def walk(parent: ET.Element, parent_path: str) -> None:
+        child_counts: dict[str, int] = {}
+        for child in parent:
+            kind = xml_local_name(child.tag)
+            child_counts[kind] = child_counts.get(kind, 0) + 1
+            xml_path = (
+                f"{parent_path}/data"
+                if parent is root and kind == "data"
+                else f"{parent_path}/{kind}[{child_counts[kind]}]"
+            )
+            source_id = extract_attribute(
+                ET.tostring(child, encoding="unicode").split(">", 1)[0], "id"
+            )
+            if source_id:
+                elements.append(
+                    {
+                        "id": source_id,
+                        "_source_id": source_id,
+                        "kind": kind,
+                        "type": child.attrib.get("type") or kind,
+                        "xml_path": xml_path,
+                        "_ref": xml_path,
+                        "_slide_number": slide_number,
+                    }
+                )
+            walk(child, xml_path)
+
+    walk(root, root_path)
+    return elements
+
+
+def element_ref(element: dict[str, Any]) -> str:
+    ref = element.get("_ref") or element.get("xml_path")
+    if isinstance(ref, str) and ref:
+        return ref
+    # Low-level detector tests and external callers may pass already-extracted objects.
+    # The lint_xml pipeline always attaches the source path before issue detection.
+    fallback = element.get("id")
+    if isinstance(fallback, str) and fallback:
+        return fallback
+    raise AssertionError("lint element must have a source xml path or fallback id")
+
+
+def source_element_id(element: dict[str, Any]) -> str | None:
+    value = element.get("_source_id")
+    return value if isinstance(value, str) and value else None
+
+
+def element_label(element: dict[str, Any]) -> str:
+    return source_element_id(element) or element_ref(element)
 
 
 def extract_elements(slide_xml: str) -> list[dict[str, Any]]:
     elements: list[dict[str, Any]] = []
+    source_kind_counts: dict[str, int] = {}
 
-    for match in re.finditer(r"<(shape|img|table|chart|whiteboard)\b([^>]*)>", slide_xml):
+    for match in re.finditer(r"<(shape|img|table|chart|whiteboard|embed)\b([^>]*)>", slide_xml):
         kind, attrs = match.group(1), match.group(2)
+        source_kind_counts[kind] = source_kind_counts.get(kind, 0) + 1
+        source_kind_index = source_kind_counts[kind]
         is_self_closing = attrs.rstrip().endswith("/")
         content = ""
         if kind in {"shape", "table"} and not is_self_closing:
@@ -653,7 +929,8 @@ def extract_elements(slide_xml: str) -> list[dict[str, Any]]:
             if close_index != -1:
                 content = slide_xml[match.end() : close_index]
 
-        element_id = extract_attribute(attrs, "id") or f"{kind}-{len(elements) + 1}"
+        source_id = extract_attribute(attrs, "id") or None
+        element_id = source_id or f"{kind}-{len(elements) + 1}"
         x = extract_numeric_attribute(attrs, "topLeftX")
         y = extract_numeric_attribute(attrs, "topLeftY")
         width = extract_numeric_attribute(attrs, "width")
@@ -671,6 +948,7 @@ def extract_elements(slide_xml: str) -> list[dict[str, Any]]:
         if all(value is not None for value in [x, y, width, height]):
             element = {
                 "id": element_id,
+                "_source_id": source_id,
                 "kind": kind,
                 "type": extract_attribute(attrs, "type") or kind,
                 "x": x,
@@ -680,6 +958,7 @@ def extract_elements(slide_xml: str) -> list[dict[str, Any]]:
                 "rotation": rotation,
                 "alpha": alpha if alpha is not None else 1,
                 "order": len(elements),
+                "_source_kind_index": source_kind_index,
             }
             if kind == "table":
                 element.update(
@@ -694,6 +973,20 @@ def extract_elements(slide_xml: str) -> list[dict[str, Any]]:
                 font_size = extract_numeric_attribute(content_attrs, "fontSize")
                 if font_size is None:
                     font_size = extract_numeric_attribute(attrs, "fontSize")
+                font_family = extract_attribute(content_attrs, "fontFamily") or extract_attribute(attrs, "fontFamily")
+                text_color = extract_attribute(content_attrs, "color") or extract_attribute(attrs, "color")
+                bold = (
+                    extract_bool_attribute(content_attrs, "bold")
+                    or extract_bool_attribute(attrs, "bold")
+                    or detect_inline_style_presence(content, {"strong", "b"})
+                    or detect_any_span_bool_attribute(content, "bold")
+                )
+                italic = (
+                    extract_bool_attribute(content_attrs, "italic")
+                    or extract_bool_attribute(attrs, "italic")
+                    or detect_inline_style_presence(content, {"i", "em"})
+                    or detect_any_span_bool_attribute(content, "italic")
+                )
                 element.update(
                     {
                         "textType": extract_attribute(content_attrs, "textType"),
@@ -705,11 +998,17 @@ def extract_elements(slide_xml: str) -> list[dict[str, Any]]:
                         "lineSpacing": extract_attribute(content_attrs, "lineSpacing"),
                         "beforeLineSpacing": extract_attribute(content_attrs, "beforeLineSpacing"),
                         "afterLineSpacing": extract_attribute(content_attrs, "afterLineSpacing"),
+                        "letterSpacing": extract_numeric_attribute(content_attrs, "letterSpacing"),
                         "paddingTop": extract_numeric_attribute(content_attrs, "paddingTop") or 0,
                         "paddingRight": extract_numeric_attribute(content_attrs, "paddingRight") or 0,
                         "paddingBottom": extract_numeric_attribute(content_attrs, "paddingBottom") or 0,
                         "paddingLeft": extract_numeric_attribute(content_attrs, "paddingLeft") or 0,
                         "fontSize": font_size if font_size is not None else 16,
+                        "fontFamily": font_family or "",
+                        "color": text_color,
+                        "textAlpha": effective_text_alpha(alpha, text_color),
+                        "bold": bold,
+                        "italic": italic,
                         "text": strip_xml_paragraphs(content),
                         "paragraphs": extract_text_paragraphs(content, font_size if font_size is not None else 16),
                     }
@@ -745,7 +1044,11 @@ def is_vertical_text(element: dict[str, Any]) -> bool:
 
 def detect_image_text_occlusions(elements: list[dict[str, Any]]) -> list[dict[str, Any]]:
     issues: list[dict[str, Any]] = []
-    text_elements = [element for element in elements if is_text_element(element) and has_text_content(element)]
+    text_elements = [
+        element
+        for element in elements
+        if is_text_element(element) and has_text_content(element) and not is_ghost_text(element)
+    ]
     image_elements = [element for element in elements if element["kind"] == "img" and element["alpha"] > 0]
     for text_element in text_elements:
         for image_element in image_elements:
@@ -756,8 +1059,11 @@ def detect_image_text_occlusions(elements: list[dict[str, Any]]) -> list[dict[st
                     issues.append({
                         "level": "info",
                         "code": "image_may_cover_vertical_text",
-                        "elements": [image_element["id"], text_element["id"]],
-                        "message": f'image {image_element["id"]} may cover vertical text shape {text_element["id"]}',
+                        "elements": [element_ref(image_element), element_ref(text_element)],
+                        "message": (
+                            f"image {element_label(image_element)} may cover vertical text shape "
+                            f"{element_label(text_element)}"
+                        ),
                         "hint": "Inspect the rendered slide because vertical text layout is not statically modeled.",
                     })
                 continue
@@ -766,8 +1072,11 @@ def detect_image_text_occlusions(elements: list[dict[str, Any]]) -> list[dict[st
                 issues.append({
                     "level": "error",
                     "code": "image_covers_text",
-                    "elements": [image_element["id"], text_element["id"]],
-                    "message": f'image {image_element["id"]} covers text shape {text_element["id"]}',
+                    "elements": [element_ref(image_element), element_ref(text_element)],
+                    "message": (
+                        f"image {element_label(image_element)} covers text shape "
+                        f"{element_label(text_element)}"
+                    ),
                     "hint": "Move the image before the text shape in XML order, or adjust the image and text shape coordinates or dimensions.",
                 })
     return issues
@@ -782,22 +1091,135 @@ def normalize_text_for_overlap(text: str) -> str:
     return re.sub(r"\s+", "", text)
 
 
-def estimate_character_width(character: str, font_size: int | float) -> int | float:
+SERIF_FONT_PATTERNS = {
+    "song", "songti", "simsun", "ming", "mincho",
+    "georgia", "times", "caslon", "garamond", "sourcehan-serif",
+    "source han serif", "思源宋体", "宋体", "明体",
+}
+
+SANS_EXPLICIT_MARKERS = {"sans", "sans-serif", "sans serif", "sourcehan-sans", "source han sans", "思源黑体", "黑体",
+                         "helvetica", "arial", "inter", "roboto", "verdana", "tahoma", "calibri", "open sans"}
+
+
+def classify_font_family(font_family: str | None) -> str:
+    if not font_family:
+        return "sans"
+    family_lower = font_family.lower()
+    for marker in SANS_EXPLICIT_MARKERS:
+        if marker in family_lower:
+            return "sans"
+    serif_keywords = SERIF_FONT_PATTERNS | {"serif"}
+    for pattern in serif_keywords:
+        if pattern in family_lower:
+            return "serif"
+    return "sans"
+
+
+_FONT_CATEGORY_MULTIPLIERS: dict[str, dict[str, float]] = {
+    "sans": {"upper": 0.57, "lower": 0.51, "digit": 0.58, "punct": 0.50},
+    "serif": {"upper": 0.57, "lower": 0.53, "digit": 0.58, "punct": 0.50},
+}
+
+
+def estimate_character_width(
+    character: str,
+    font_size: int | float,
+    bold: bool = False,
+    font_family: str | None = None,
+) -> int | float:
+    bold_multiplier = 1.05 if bold else 1.0
     if character.isspace():
-        return font_size * 0.33
-    if unicodedata.east_asian_width(character) in {"F", "W"}:
-        return font_size
-    return font_size * 0.55
+        return font_size * 0.33 * bold_multiplier
+    ea_width = unicodedata.east_asian_width(character)
+    if ea_width in {"F", "W"}:
+        return font_size * bold_multiplier
+    category = classify_font_family(font_family)
+    coeffs = _FONT_CATEGORY_MULTIPLIERS[category]
+    if character.isupper():
+        return font_size * coeffs["upper"] * bold_multiplier
+    if character.islower():
+        return font_size * coeffs["lower"] * bold_multiplier
+    if character.isdigit():
+        return font_size * coeffs["digit"] * bold_multiplier
+    return font_size * coeffs["punct"] * bold_multiplier
 
 
-def estimate_text_width(text: str, font_size: int | float) -> int | float:
-    return sum(estimate_character_width(character, font_size) for character in text)
+def estimate_text_width(
+    text: str,
+    font_size: int | float,
+    letter_spacing: int | float = 0,
+    bold: bool = False,
+    font_family: str | None = None,
+) -> int | float:
+    base = sum(estimate_character_width(character, font_size, bold, font_family) for character in text)
+    return base + max(len(text) - 1, 0) * letter_spacing
+
+
+def resolve_letter_spacing(element: dict[str, Any], paragraph: dict[str, Any] | None = None) -> int | float:
+    if paragraph is not None:
+        value = paragraph.get("letterSpacing")
+        if isinstance(value, (int, float)):
+            return value
+    value = element.get("letterSpacing")
+    return value if isinstance(value, (int, float)) else 0
+
+
+def text_wrap_width_tolerance() -> int | float:
+    return TEXT_WRAP_WIDTH_TOLERANCE_PX
+
+
+def text_height_overflow_tolerance() -> int | float:
+    return TEXT_HEIGHT_OVERFLOW_TOLERANCE_PX
+
+
+def has_explicit_height_auto_fit(element: dict[str, Any]) -> bool:
+    return element.get("autoFit") in {"normal-auto-fit", "shape-auto-fit"}
+
+
+def is_short_metric_text(text: str) -> bool:
+    compact = re.sub(r"\s+", "", text)
+    if not compact or len(compact) > 16 or re.search(r"\d", compact) is None:
+        return False
+    if re.fullmatch(r"[+\-–—]?[0-9,.，]+[\u4e00-\u9fffA-Za-z]{1,4}", compact):
+        return True
+    if re.search(r"[,.，+\-–—/%％]", compact) is None:
+        return False
+    return re.fullmatch(r"[+\-–—]?[0-9A-Za-z,.，/%％\-–—\u4e00-\u9fff]+", compact) is not None
+
+
+def is_single_line_visual_candidate(
+    element: dict[str, Any],
+    paragraph: dict[str, Any] | None,
+    text: str,
+    logical_width: int | float,
+    effective_width: int | float,
+) -> bool:
+    if "\n" in text or logical_width <= effective_width:
+        return False
+    if is_short_metric_text(text):
+        return logical_width <= effective_width * SINGLE_LINE_METRIC_WIDTH_RATIO
+
+    text_align = (paragraph or {}).get("textAlign") or element.get("textAlign")
+    compact_len = len(re.sub(r"\s+", "", text))
+    if text_align == "center" and compact_len <= 32:
+        return logical_width <= effective_width * CENTERED_SHORT_LABEL_WIDTH_RATIO
+
+    font_size = element["fontSize"] if isinstance(element["fontSize"], (int, float)) else 16
+    if element.get("textType") in {"headline", "title"} and font_size <= 30 and compact_len <= 40:
+        return logical_width <= effective_width * HEADLINE_NEAR_FIT_WIDTH_RATIO
+    return False
 
 
 def estimate_text_max_line_width(element: dict[str, Any]) -> int | float:
     font_size = element["fontSize"] if isinstance(element["fontSize"], (int, float)) else 16
+    bold = element.get("bold", False)
+    font_family = element.get("fontFamily", "")
+    letter_spacing = resolve_letter_spacing(element)
     paragraphs = [paragraph for paragraph in re.split(r"\n+", element["text"]) if paragraph]
-    return max([estimate_text_width(paragraph, font_size) for paragraph in paragraphs] or [1])
+    return max(
+        [estimate_text_width(paragraph, font_size, letter_spacing, bold, font_family) for paragraph in paragraphs]
+        or [1]
+    )
 
 
 def is_similar_text_overlay(left: dict[str, Any], right: dict[str, Any]) -> bool:
@@ -810,8 +1232,14 @@ def is_similar_text_overlay(left: dict[str, Any], right: dict[str, Any]) -> bool
     return SequenceMatcher(None, left_text, right_text).ratio() >= 0.75
 
 
-def estimate_text_line_count_for_text(element: dict[str, Any], text: str) -> int:
+def estimate_text_line_count_for_text(
+    element: dict[str, Any], text: str, paragraph: dict[str, Any] | None = None
+) -> int:
     font_size = element["fontSize"] if isinstance(element["fontSize"], (int, float)) else 16
+    bold = element.get("bold", False)
+    font_family = element.get("fontFamily", "")
+    letter_spacing = resolve_letter_spacing(element, paragraph)
+    available_width = max(element["width"] - element.get("paddingLeft", 0) - element.get("paddingRight", 0), 1)
     hard_lines = text.split("\n")
     if not text:
         return 0
@@ -820,8 +1248,12 @@ def estimate_text_line_count_for_text(element: dict[str, Any], text: str) -> int
         if element.get("wrap") in {"false", "0"}:
             line_count += 1
             continue
-        logical_width = max(estimate_text_width(hard_line, font_size), 1)
-        line_count += max(1, math.ceil(logical_width / max(element["width"], 1)))
+        logical_width = max(estimate_text_width(hard_line, font_size, letter_spacing, bold, font_family), 1)
+        effective_width = available_width + text_wrap_width_tolerance()
+        if is_single_line_visual_candidate(element, paragraph, hard_line, logical_width, effective_width):
+            line_count += 1
+            continue
+        line_count += max(1, math.ceil(logical_width / effective_width))
     return line_count
 
 
@@ -831,7 +1263,8 @@ def estimate_text_line_count(element: dict[str, Any]) -> int:
 
 def estimate_text_line_height(element: dict[str, Any], line_spacing: str | None = None) -> int | float | None:
     font_size = element["fontSize"] if isinstance(element["fontSize"], (int, float)) else 16
-    line_spacing = line_spacing or "multiple:1.5"
+    if line_spacing is None:
+        return font_size * DEFAULT_TEXT_LINE_SPACING_MULTIPLE
     match = re.fullmatch(r"(multiple|fixed):([0-9]+(?:\.[0-9]+)?)", line_spacing)
     if match is None:
         return None
@@ -839,12 +1272,27 @@ def estimate_text_line_height(element: dict[str, Any], line_spacing: str | None 
     return font_size * float(value) if spacing_type == "multiple" else float(value)
 
 
+def adjust_dense_body_line_height(
+    element: dict[str, Any],
+    line_spacing: str | None,
+    line_height: int | float,
+    paragraph_count: int,
+) -> int | float:
+    font_size = element["fontSize"] if isinstance(element["fontSize"], (int, float)) else 16
+    if paragraph_count < 4 or font_size > 14 or not line_spacing:
+        return line_height
+    match = re.fullmatch(r"multiple:([0-9]+(?:\.[0-9]+)?)", line_spacing)
+    if match is None:
+        return line_height
+    return min(line_height, font_size * min(float(match.group(1)), DENSE_BODY_LINE_SPACING_MAX_MULTIPLE))
+
+
 def detect_text_may_overflow_shapes(elements: list[dict[str, Any]]) -> list[dict[str, Any]]:
     issues: list[dict[str, Any]] = []
     for element in elements:
         if not is_text_element(element) or not has_text_content(element):
             continue
-        if element.get("autoFit") in {"normal-auto-fit", "shape-auto-fit"}:
+        if has_explicit_height_auto_fit(element):
             continue
 
         font_size = element["fontSize"] if isinstance(element["fontSize"], (int, float)) else 16
@@ -860,10 +1308,11 @@ def detect_text_may_overflow_shapes(elements: list[dict[str, Any]]) -> list[dict
         estimated_height = 0.0
         line_heights: list[int | float] = []
         for paragraph in paragraphs:
-            paragraph_line_count = estimate_text_line_count_for_text(element, paragraph["text"])
+            paragraph_line_count = estimate_text_line_count_for_text(element, paragraph["text"], paragraph)
             if paragraph_line_count == 0:
                 continue
-            line_height = estimate_text_line_height(element, paragraph["lineSpacing"] or element["lineSpacing"])
+            resolved_line_spacing = paragraph["lineSpacing"] or element["lineSpacing"]
+            line_height = estimate_text_line_height(element, resolved_line_spacing)
             before_spacing = estimate_text_line_height(
                 element, paragraph["beforeLineSpacing"] or element["beforeLineSpacing"] or "fixed:0"
             )
@@ -873,6 +1322,7 @@ def detect_text_may_overflow_shapes(elements: list[dict[str, Any]]) -> list[dict
             if line_height is None or before_spacing is None or after_spacing is None:
                 line_count = 0
                 break
+            line_height = adjust_dense_body_line_height(element, resolved_line_spacing, line_height, len(paragraphs))
             first_line_height = font_size if line_count == 0 else line_height
             line_count += paragraph_line_count
             line_heights.append(line_height)
@@ -883,24 +1333,32 @@ def detect_text_may_overflow_shapes(elements: list[dict[str, Any]]) -> list[dict
             continue
         available_height = max(element["height"] - element["paddingTop"] - element["paddingBottom"], 0)
         overflow = estimated_height - available_height
-        if overflow <= 0:
+        if overflow <= text_height_overflow_tolerance():
             continue
 
+        is_background = is_background_decorative_text(element, elements)
+        if is_background:
+            level = "info"
+        else:
+            level = "error" if overflow > 10 else "warning"
+        message = (
+            f"text shape {element_label(element)} may overflow its own content box "
+            f'(estimated {estimated_height:g}px, available {available_height:g}px); '
+            'consider setting content wrap="true" autoFit="normal-auto-fit"'
+        )
+        if is_background:
+            message += " (likely background decoration: large font, low alpha, underneath other text)"
         issues.append(
             {
-                "level": "warning",
+                "level": level,
                 "code": "text_may_overflow_shape",
-                "elements": [element["id"]],
+                "elements": [element_ref(element)],
                 "line_count": line_count,
                 "line_height": max(line_heights),
                 "estimated_height": estimated_height,
                 "available_height": available_height,
                 "overflow": overflow,
-                "message": (
-                    f'text shape {element["id"]} may overflow its own content box '
-                    f'(estimated {estimated_height:g}px, available {available_height:g}px); '
-                    'consider setting content wrap="true" autoFit="normal-auto-fit"'
-                ),
+                "message": message,
                 "hint": (
                     "Increase shape.height, reduce the text, or set content wrap=\"true\" "
                     "autoFit=\"normal-auto-fit\". "
@@ -909,6 +1367,38 @@ def detect_text_may_overflow_shapes(elements: list[dict[str, Any]]) -> list[dict
             }
         )
     return issues
+
+
+def is_background_decorative_text(
+    element: dict[str, Any], elements: list[dict[str, Any]]
+) -> bool:
+    if not is_ghost_text(element):
+        return False
+    for other in elements:
+        if other is element:
+            continue
+        if not is_text_element(other) or not has_text_content(other):
+            continue
+        foreground_alpha = other.get("textAlpha", other.get("alpha", 1))
+        if not isinstance(foreground_alpha, (int, float)) or foreground_alpha <= 0:
+            continue
+        if other["order"] <= element["order"]:
+            continue
+        if intersects(element, other):
+            return True
+    return False
+
+
+def is_ghost_text(element: dict[str, Any]) -> bool:
+    if not is_text_element(element) or not has_text_content(element):
+        return False
+    font_size = element["fontSize"] if isinstance(element["fontSize"], (int, float)) else 16
+    text_alpha = element.get("textAlpha", element.get("alpha", 1))
+    if not isinstance(text_alpha, (int, float)):
+        return False
+    if font_size > GHOST_TEXT_MIN_FONT_SIZE and text_alpha < GHOST_TEXT_MAX_ALPHA:
+        return True
+    return font_size >= GHOST_TEXT_FAINT_MIN_FONT_SIZE and text_alpha < GHOST_TEXT_FAINT_MAX_ALPHA
 
 
 def estimate_text_visual_bbox(element: dict[str, Any]) -> dict[str, int | float] | None:
@@ -1022,6 +1512,8 @@ def should_flag_horizontal_text_overflow(left: dict[str, Any], right: dict[str, 
         return False
     if not (has_text_content(left) and has_text_content(right)):
         return False
+    if is_ghost_text(left) or is_ghost_text(right):
+        return False
     if is_template_text_stack(left, right) or is_similar_text_overlay(left, right):
         return False
 
@@ -1038,13 +1530,16 @@ def should_flag_horizontal_text_overflow(left: dict[str, Any], right: dict[str, 
         return False
 
     font_size = source["fontSize"] if isinstance(source["fontSize"], (int, float)) else 16
+    padding_left = source.get("paddingLeft", 0)
+    padding_right = source.get("paddingRight", 0)
+    available_width = max(source["width"] - padding_left - padding_right, 1)
     visual_width = estimate_text_max_line_width(source)
-    overflow_width = visual_width - source["width"]
-    min_overflow = max(font_size * 1.5, source["width"] * 0.08)
+    overflow_width = visual_width - available_width
+    min_overflow = max(font_size * 1.5, available_width * 0.08)
     if overflow_width < min_overflow:
         return False
 
-    intrusion_width = source["x"] + visual_width - target["x"]
+    intrusion_width = source["x"] + padding_left + visual_width - target["x"]
     min_intrusion = max(font_size * 1.5, target["width"] * 0.08)
     if intrusion_width < min_intrusion:
         return False
@@ -1056,8 +1551,9 @@ def should_flag_horizontal_text_overflow(left: dict[str, Any], right: dict[str, 
 
 def horizontal_text_overflow_measurement(left: dict[str, Any], right: dict[str, Any]) -> dict[str, int | float]:
     source, target = sorted([left, right], key=lambda element: element["x"])
+    padding_left = source.get("paddingLeft", 0)
     visual_width = estimate_text_max_line_width(source)
-    source_visual_bbox = {"x": source["x"], "y": source["y"], "width": visual_width, "height": source["height"]}
+    source_visual_bbox = {"x": source["x"] + padding_left, "y": source["y"], "width": visual_width, "height": source["height"]}
     width = intersection_width(source_visual_bbox, target)
     height = intersection_height(source_visual_bbox, target)
     return {
@@ -1071,6 +1567,8 @@ def should_flag_overlap(left: dict[str, Any], right: dict[str, Any]) -> bool:
     if is_text_element(left) and not has_text_content(left):
         return False
     if is_text_element(right) and not has_text_content(right):
+        return False
+    if is_ghost_text(left) or is_ghost_text(right):
         return False
     if is_template_text_stack(left, right):
         return False
@@ -1095,12 +1593,15 @@ def should_flag_overlap(left: dict[str, Any], right: dict[str, Any]) -> bool:
 def build_whiteboard_external_overlap_issue(
     whiteboard: dict[str, Any], overlap_details: list[dict[str, Any]]
 ) -> dict[str, Any]:
-    element_ids = [detail["element"] for detail in overlap_details]
+    element_refs = [detail["element"] for detail in overlap_details]
     return {
         "level": "warning",
         "code": "whiteboard_external_overlap",
-        "elements": [whiteboard["id"], *element_ids],
-        "message": f'whiteboard {whiteboard["id"]} overlaps {len(element_ids)} sibling elements across its boundary',
+        "elements": [element_ref(whiteboard), *element_refs],
+        "message": (
+            f"whiteboard {element_label(whiteboard)} overlaps {len(element_refs)} "
+            "sibling elements across its boundary"
+        ),
         "hint": (
             "Treat this as a static whiteboard container-bbox risk, not final visual proof. "
             "After moving or accepting the overlap, use screenshot QA or equivalent rendered visual inspection as "
@@ -1117,6 +1618,8 @@ def should_report_whiteboard_overlap(
     slide_height: int | float,
 ) -> dict[str, Any] | None:
     if other is whiteboard or not intersects(whiteboard, other):
+        return None
+    if is_ghost_text(other):
         return None
     if contains(whiteboard, other):
         return None
@@ -1139,7 +1642,7 @@ def should_report_whiteboard_overlap(
         return None
 
     return {
-        "element": other["id"],
+        "element": element_ref(other),
         "kind": other["kind"],
         "type": other.get("type"),
         "overlap_width": overlap_width,
@@ -1149,16 +1652,16 @@ def should_report_whiteboard_overlap(
 
 
 def prune_contained_text_overlap_details(
-    overlap_details: list[dict[str, Any]], elements_by_id: dict[str, dict[str, Any]]
+    overlap_details: list[dict[str, Any]], elements_by_ref: dict[str, dict[str, Any]]
 ) -> list[dict[str, Any]]:
     pruned: list[dict[str, Any]] = []
     for detail in overlap_details:
-        element = elements_by_id[detail["element"]]
+        element = elements_by_ref[detail["element"]]
         if is_text_element(element):
             has_reported_container = any(
                 detail["element"] != other_detail["element"]
-                and not is_text_element(elements_by_id[other_detail["element"]])
-                and contains(elements_by_id[other_detail["element"]], element)
+                and not is_text_element(elements_by_ref[other_detail["element"]])
+                and contains(elements_by_ref[other_detail["element"]], element)
                 for other_detail in overlap_details
             )
             if has_reported_container:
@@ -1171,7 +1674,7 @@ def detect_whiteboard_external_overlaps(
     elements: list[dict[str, Any]], slide_width: int | float, slide_height: int | float
 ) -> list[dict[str, Any]]:
     issues: list[dict[str, Any]] = []
-    elements_by_id = {element["id"]: element for element in elements}
+    elements_by_ref = {element_ref(element): element for element in elements}
     for whiteboard in [element for element in elements if is_whiteboard_element(element)]:
         overlap_details = [
             detail
@@ -1186,7 +1689,7 @@ def detect_whiteboard_external_overlaps(
             )
             is not None
         ]
-        overlap_details = prune_contained_text_overlap_details(overlap_details, elements_by_id)
+        overlap_details = prune_contained_text_overlap_details(overlap_details, elements_by_ref)
         if overlap_details:
             issues.append(build_whiteboard_external_overlap_issue(whiteboard, overlap_details))
     return issues
@@ -1194,6 +1697,8 @@ def detect_whiteboard_external_overlaps(
 
 def element_canvas_bbox(element: dict[str, Any]) -> dict[str, int | float]:
     bbox = {key: element[key] for key in ("x", "y", "width", "height")}
+    if element["kind"] != "chart" and not (element["kind"] == "shape" and element["type"] == "text"):
+        return bbox
     rotation = element["rotation"]
     if not isinstance(rotation, (int, float)) or not math.isfinite(rotation):
         rotation = 0
@@ -1219,7 +1724,12 @@ def detect_elements_out_of_canvas(
     elements: list[dict[str, Any]], slide_width: int | float, slide_height: int | float
 ) -> list[dict[str, Any]]:
     issues: list[dict[str, Any]] = []
-    for element in elements:
+    for element in (
+        element
+        for element in elements
+        if element["kind"] in {"table", "chart"}
+        or (element["kind"] == "shape" and element["type"] in {"rect", "text"})
+    ):
         bbox = element_canvas_bbox(element)
         overflow = {
             "left": max(-bbox["x"], 0),
@@ -1238,12 +1748,12 @@ def detect_elements_out_of_canvas(
             {
                 "level": "error",
                 "code": f'{element["kind"]}_out_of_canvas',
-                "elements": [element["id"]],
+                "elements": [element_ref(element)],
                 "canvas": {"width": slide_width, "height": slide_height},
                 "bbox": bbox,
                 "overflow": overflow,
                 "message": (
-                    f'{element["kind"]} {element["id"]} exceeds the {slide_width:g}x{slide_height:g} canvas '
+                    f'{element["kind"]} {element_label(element)} exceeds the {slide_width:g}x{slide_height:g} canvas '
                     f'({", ".join(overflow_details)})'
                 ),
                 "hint": (
@@ -1311,13 +1821,13 @@ def detect_table_layout_size_mismatches(elements: list[dict[str, Any]]) -> list[
                 {
                     "level": "info",
                     "code": "table_resolved_size_mismatch",
-                    "elements": [table["id"]],
+                    "elements": [element_ref(table)],
                     "dimension": dimension,
                     "declared_size": target_size,
                     "resolved_size": actual_size,
                     "resolved_sizes": layout["final_sizes"],
                     "message": (
-                        f'table {table["id"]} declares {dimension}={format_size(target_size)}px, but its '
+                        f'table {element_label(table)} declares {dimension}={format_size(target_size)}px, but its '
                         f"{child_description} resolve to {format_size(actual_size)}px"
                     ),
                     "hint": (
@@ -1329,16 +1839,108 @@ def detect_table_layout_size_mismatches(elements: list[dict[str, Any]]) -> list[
     return issues
 
 
+def segment_intersects_rect(
+    x1: float, y1: float, x2: float, y2: float, rect: dict[str, int | float]
+) -> bool:
+    """True when segment (x1,y1)-(x2,y2) enters the axis-aligned rect (Liang-Barsky clip)."""
+    left = rect["x"]
+    top = rect["y"]
+    right = rect["x"] + rect["width"]
+    bottom = rect["y"] + rect["height"]
+    if right <= left or bottom <= top:
+        return False
+    dx = x2 - x1
+    dy = y2 - y1
+    if dx == 0 and dy == 0:
+        return left <= x1 <= right and top <= y1 <= bottom
+    t_enter, t_exit = 0.0, 1.0
+    for delta, distance in ((-dx, x1 - left), (dx, right - x1), (-dy, y1 - top), (dy, bottom - y1)):
+        if delta == 0:
+            if distance < 0:
+                return False
+            continue
+        t = distance / delta
+        if delta < 0:
+            t_enter = max(t_enter, t)
+        else:
+            t_exit = min(t_exit, t)
+        if t_enter > t_exit:
+            return False
+    return True
+
+
+def line_text_graze_margin(text_element: dict[str, Any]) -> float:
+    font_size = text_element["fontSize"] if isinstance(text_element.get("fontSize"), (int, float)) else 16
+    return max(font_size * LINE_TEXT_GRAZE_FONT_RATIO, LINE_TEXT_GRAZE_MIN_PX)
+
+
+def erode_rect(rect: dict[str, int | float], margin: float) -> dict[str, int | float] | None:
+    width = rect["width"] - 2 * margin
+    height = rect["height"] - 2 * margin
+    if width <= 0 or height <= 0:
+        return None
+    return {"x": rect["x"] + margin, "y": rect["y"] + margin, "width": width, "height": height}
+
+
+def line_crosses_text(line: dict[str, Any], text_element: dict[str, Any]) -> bool:
+    if not is_visually_rendered(line) or line.get("alpha", 1) < LINE_MIN_VISIBLE_ALPHA:
+        return False
+    if not is_text_element(text_element) or not has_text_content(text_element):
+        return False
+    if is_ghost_text(text_element) or is_decorative_text(text_element):
+        return False
+    glyph_bbox = estimate_text_visual_bbox(text_element)
+    if glyph_bbox is None:
+        return False
+    # Erode the glyph box so a line skimming the letter edge or only clipping the padding-only text
+    # frame is exempt; only a line that actually cuts through the letterforms is a crossing.
+    target = erode_rect(glyph_bbox, line_text_graze_margin(text_element))
+    if target is None:
+        return False
+    return segment_intersects_rect(
+        line["startX"], line["startY"], line["endX"], line["endY"], target
+    )
+
+
+def detect_line_text_crossings(
+    slide_xml: str, elements: list[dict[str, Any]], slide_number: int
+) -> list[dict[str, Any]]:
+    lines = extract_line_elements(slide_xml)
+    if not lines:
+        return []
+    attach_source_xml_paths(lines, build_source_xml_paths(slide_xml, slide_number))
+    text_elements = [element for element in elements if is_text_element(element)]
+    issues: list[dict[str, Any]] = []
+    for line in lines:
+        for text_element in text_elements:
+            if not line_crosses_text(line, text_element):
+                continue
+            issues.append(
+                {
+                    "level": "error",
+                    "code": "bbox_overlap",
+                    "elements": [element_ref(line), element_ref(text_element)],
+                    "message": (
+                        f"line {element_label(line)} crosses text {element_label(text_element)}"
+                    ),
+                    "hint": "Move the line off the text glyphs so it no longer cuts through the letterforms.",
+                }
+            )
+    return issues
+
+
 def lint_slide(
     slide_xml: str, slide_number: int, slide_width: int | float = 960, slide_height: int | float = 540
 ) -> dict[str, Any]:
     elements = extract_elements(slide_xml)
+    attach_source_xml_paths(elements, build_source_xml_paths(slide_xml, slide_number))
     issues: list[dict[str, Any]] = [
         *detect_whiteboard_external_overlaps(elements, slide_width, slide_height),
         *detect_elements_out_of_canvas(elements, slide_width, slide_height),
         *detect_table_layout_size_mismatches(elements),
         *detect_text_may_overflow_shapes(elements),
         *detect_image_text_occlusions(elements),
+        *detect_line_text_crossings(slide_xml, elements, slide_number),
     ]
 
     for index, left in enumerate(elements):
@@ -1350,8 +1952,8 @@ def lint_slide(
                 {
                     "level": "error",
                     "code": "bbox_overlap",
-                    "elements": [left["id"], right["id"]],
-                    "message": f'{left["id"]} overlaps {right["id"]}',
+                    "elements": [element_ref(left), element_ref(right)],
+                    "message": f"{element_label(left)} overlaps {element_label(right)}",
                     "hint": "Move or resize the elements so their visual bounds no longer intersect.",
                     **(
                         {"measurement": horizontal_text_overflow_measurement(left, right)}
@@ -1495,14 +2097,22 @@ def is_nested_in_layout_panel(
     )
 
 
-def extract_density_elements(slide_xml: str) -> list[dict[str, Any]]:
+def extract_density_elements(slide_xml: str, slide_number: int = 1) -> list[dict[str, Any]]:
     elements = extract_elements(slide_xml)
-    elements_by_id = {element["id"]: element for element in elements}
+    source_paths = build_source_xml_paths(slide_xml, slide_number)
+    attach_source_xml_paths(elements, source_paths)
+    shape_elements_by_index = {
+        element["_source_kind_index"]: element
+        for element in elements
+        if element["kind"] == "shape"
+    }
     root = ET.fromstring(slide_xml)
+    shape_index = 0
     for node in root.iter():
         if xml_local_name(node.tag) != "shape":
             continue
-        element = elements_by_id.get(node.attrib.get("id", ""))
+        shape_index += 1
+        element = shape_elements_by_index.get(shape_index)
         if element is None:
             continue
         content_node = next(
@@ -1547,8 +2157,11 @@ def extract_density_elements(slide_xml: str) -> list[dict[str, Any]]:
                 continue
         if declared_font_sizes:
             element["fontSize"] = max(declared_font_sizes)
-    for match in re.finditer(r"<icon\b([^>]*)>", slide_xml):
+    for source_kind_index, match in enumerate(
+        re.finditer(r"<icon\b([^>]*)>", slide_xml), start=1
+    ):
         attrs = match.group(1)
+        source_id = extract_attribute(attrs, "id") or None
         x = extract_numeric_attribute(attrs, "topLeftX")
         y = extract_numeric_attribute(attrs, "topLeftY")
         width = extract_numeric_attribute(attrs, "width")
@@ -1558,7 +2171,8 @@ def extract_density_elements(slide_xml: str) -> list[dict[str, Any]]:
         icon_alpha = extract_numeric_attribute(attrs, "alpha")
         elements.append(
             {
-                "id": extract_attribute(attrs, "id") or f"icon-{len(elements) + 1}",
+                "id": source_id or f"icon-{len(elements) + 1}",
+                "_source_id": source_id,
                 "kind": "icon",
                 "type": "icon",
                 "x": x,
@@ -1568,9 +2182,12 @@ def extract_density_elements(slide_xml: str) -> list[dict[str, Any]]:
                 "rotation": extract_numeric_attribute(attrs, "rotation") or 0,
                 "alpha": icon_alpha if icon_alpha is not None else 1,
                 "order": len(elements),
+                "_source_kind_index": source_kind_index,
             }
         )
-    for match in re.finditer(r"<polyline\b([^>]*)>", slide_xml):
+    for source_kind_index, match in enumerate(
+        re.finditer(r"<polyline\b([^>]*)>", slide_xml), start=1
+    ):
         attrs = match.group(1)
         x = extract_numeric_attribute(attrs, "topLeftX")
         y = extract_numeric_attribute(attrs, "topLeftY")
@@ -1579,9 +2196,11 @@ def extract_density_elements(slide_xml: str) -> list[dict[str, Any]]:
         if any(value is None for value in (x, y, width, height)):
             continue
         polyline_alpha = extract_numeric_attribute(attrs, "alpha")
+        source_id = extract_attribute(attrs, "id") or None
         elements.append(
             {
-                "id": extract_attribute(attrs, "id") or f"polyline-{len(elements) + 1}",
+                "id": source_id or f"polyline-{len(elements) + 1}",
+                "_source_id": source_id,
                 "kind": "polyline",
                 "type": "polyline",
                 "x": x,
@@ -1591,11 +2210,15 @@ def extract_density_elements(slide_xml: str) -> list[dict[str, Any]]:
                 "rotation": extract_numeric_attribute(attrs, "rotation") or 0,
                 "alpha": polyline_alpha if polyline_alpha is not None else 1,
                 "order": len(elements),
+                "_source_kind_index": source_kind_index,
             }
         )
     for line_element in extract_line_elements(slide_xml):
         line_element["order"] = len(elements)
         elements.append(line_element)
+    attach_source_xml_paths(elements, source_paths)
+    for element in elements:
+        element["_slide_number"] = slide_number
     return elements
 
 
@@ -1635,7 +2258,7 @@ def slide_content_visual_bbox(
         # a straight horizontal/vertical line has zero width or height in one axis; clipped_bbox
         # treats zero-area rects as invisible, so pad to its rendered stroke thickness instead.
         return clipped_bbox(line_stroke_bbox(element), slide_bbox)
-    if element["kind"] in {"img", "chart", "table", "whiteboard", "icon", "polyline"}:
+    if element["kind"] in {"img", "chart", "table", "whiteboard", "embed", "icon", "polyline"}:
         return clipped_bbox(element, slide_bbox)
     return None
 
@@ -1673,7 +2296,7 @@ def is_slide_content_present(
 
 
 def is_large_visual_child(element: dict[str, Any], container: dict[str, Any]) -> bool:
-    if element["kind"] not in {"img", "chart", "table", "whiteboard"}:
+    if element["kind"] not in {"img", "chart", "table", "whiteboard", "embed"}:
         return False
     if not is_visually_rendered(element):
         return False
@@ -1715,7 +2338,12 @@ def detect_sparse_container_content(
                 "code": "sparse_container_content",
                 "target": {
                     "slide_number": slide_number,
-                    "container_id": container["id"],
+                    **(
+                        {"container_id": source_element_id(container)}
+                        if source_element_id(container) is not None
+                        else {}
+                    ),
+                    "container_xml_path": element_ref(container),
                     "container_type": container["type"],
                     "bbox": {key: container[key] for key in ("x", "y", "width", "height")},
                 },
@@ -1730,7 +2358,10 @@ def detect_sparse_container_content(
                     "content_coverage_ratio": round(coverage_ratio, 3),
                     "content_element_count": len(children) + (1 if own_text_bbox else 0),
                 },
-                "elements": [container["id"], *[child["id"] for child in children]],
+                "elements": [
+                    element_ref(container),
+                    *[element_ref(child) for child in children],
+                ],
             }
         )
     return issues
@@ -1771,7 +2402,7 @@ def detect_sparse_slide_content(
                 "content_coverage_ratio": round(coverage_ratio, 3),
                 "content_element_count": len(content),
             },
-            "elements": [element["id"] for element, _ in content],
+            "elements": [element_ref(element) for element, _ in content],
         }
     ]
 
@@ -1802,12 +2433,44 @@ def detect_blank_slide(
                 "visible_element_count": 0,
                 "declared_element_count": len(elements),
             },
-            "elements": [element["id"] for element in elements],
+            "elements": [element_ref(element) for element in elements],
             "message": "slide has no visible content beyond empty layout shapes",
             "hint": "Add visible text, an image, a chart, a table, a whiteboard, or an icon before creating the slide.",
         }
     ]
 
+
+def detect_duplicate_element_ids(
+    elements: list[dict[str, Any]], *, cross_slide_only: bool = False
+) -> list[dict[str, Any]]:
+    elements_by_source_id: dict[str, list[dict[str, Any]]] = {}
+    for element in elements:
+        source_id = source_element_id(element)
+        if source_id is not None:
+            elements_by_source_id.setdefault(source_id, []).append(element)
+    return [
+        {
+            "level": "error",
+            "code": "duplicate_element_id",
+            "elements": [element_ref(element) for element in duplicates],
+            "measurement": {
+                "element_id": source_id,
+                "duplicate_count": len(duplicates),
+            },
+            "message": f'element id "{source_id}" is used by {len(duplicates)} elements',
+            "hint": (
+                "Do not invent replacement IDs. For newly authored elements, remove the id attribute. "
+                "When updating read-back XML, keep the server ID on the original element only and remove it "
+                "from copied or new elements."
+            ),
+        }
+        for source_id, duplicates in elements_by_source_id.items()
+        if len(duplicates) > 1
+        and (
+            not cross_slide_only
+            or len({element.get("_slide_number") for element in duplicates}) > 1
+        )
+    ]
 
 
 RULE_METADATA: dict[str, dict[str, Any]] = {
@@ -1867,6 +2530,10 @@ RULE_METADATA: dict[str, dict[str, Any]] = {
         "name": "slide_has_visible_content",
         "comparison": "visible_element_count > 0",
     },
+    "duplicate_element_id": {
+        "name": "element_ids_are_unique",
+        "comparison": "duplicate_count == 0",
+    },
 }
 
 
@@ -1889,13 +2556,13 @@ def issue_rule(issue: dict[str, Any]) -> dict[str, Any]:
 
 
 def issue_measurement(
-    issue: dict[str, Any], elements_by_id: dict[str, dict[str, Any]]
+    issue: dict[str, Any], elements_by_ref: dict[str, dict[str, Any]]
 ) -> dict[str, Any]:
     if issue.get("measurement") is not None:
         return issue["measurement"]
     if issue["code"] == "bbox_overlap" and len(issue.get("elements", [])) == 2:
-        left = elements_by_id.get(issue["elements"][0])
-        right = elements_by_id.get(issue["elements"][1])
+        left = elements_by_ref.get(issue["elements"][0])
+        right = elements_by_ref.get(issue["elements"][1])
         if left and right:
             left_box = (estimate_text_visual_bbox(left) if is_text_element(left) else None) or left
             right_box = (estimate_text_visual_bbox(right) if is_text_element(right) else None) or right
@@ -1934,18 +2601,27 @@ def issue_measurement(
 
 
 def related_object(element: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "element_id": element["id"],
+    related = {
         "kind": element["kind"],
         "type": element["type"],
-        "bbox": {key: element[key] for key in ("x", "y", "width", "height")},
     }
+    bbox_keys = ("x", "y", "width", "height")
+    if all(key in element for key in bbox_keys):
+        related["bbox"] = {key: element[key] for key in bbox_keys}
+    if source_element_id(element) is not None:
+        related["element_id"] = source_element_id(element)
+    if element.get("xml_path"):
+        related["xml_path"] = element["xml_path"]
+    return related
 
 
 def extract_line_elements(slide_xml: str) -> list[dict[str, Any]]:
     elements: list[dict[str, Any]] = []
-    for match in re.finditer(r"<line\b([^>]*)>", slide_xml):
+    for source_kind_index, match in enumerate(
+        re.finditer(r"<line\b([^>]*?)(/?)>", slide_xml), start=1
+    ):
         attrs = match.group(1)
+        source_id = extract_attribute(attrs, "id") or None
         start_x = extract_numeric_attribute(attrs, "startX")
         start_y = extract_numeric_attribute(attrs, "startY")
         end_x = extract_numeric_attribute(attrs, "endX")
@@ -1953,18 +2629,33 @@ def extract_line_elements(slide_xml: str) -> list[dict[str, Any]]:
         if any(value is None for value in (start_x, start_y, end_x, end_y)):
             continue
         line_alpha = extract_numeric_attribute(attrs, "alpha")
+        base_alpha = line_alpha if line_alpha is not None else 1
+        border_alpha = 1
+        if match.group(2) != "/":
+            close_index = slide_xml.find("</line>", match.end())
+            body = slide_xml[match.end() : close_index] if close_index != -1 else ""
+            border_attrs = extract_tag_attributes(body, "border")
+            color_alpha = extract_color_alpha(extract_attribute(border_attrs, "color"))
+            if isinstance(color_alpha, (int, float)):
+                border_alpha = color_alpha
         elements.append(
             {
-                "id": extract_attribute(attrs, "id") or f"line-{len(elements) + 1}",
+                "id": source_id or f"line-{len(elements) + 1}",
+                "_source_id": source_id,
                 "kind": "line",
                 "type": "line",
                 "x": min(start_x, end_x),
                 "y": min(start_y, end_y),
                 "width": abs(end_x - start_x),
                 "height": abs(end_y - start_y),
+                "startX": start_x,
+                "startY": start_y,
+                "endX": end_x,
+                "endY": end_y,
                 "rotation": 0,
-                "alpha": line_alpha if line_alpha is not None else 1,
+                "alpha": base_alpha * border_alpha,
                 "order": len(elements),
+                "_source_kind_index": source_kind_index,
             }
         )
     return elements
@@ -1973,32 +2664,47 @@ def extract_line_elements(slide_xml: str) -> list[dict[str, Any]]:
 def normalize_issue(
     issue: dict[str, Any],
     slide_number: int | None,
-    elements_by_id: dict[str, dict[str, Any]],
+    elements_by_ref: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     normalized = dict(issue)
-    if normalized.get("level") == "info":
-        normalized["level"] = "warning"
-    element_ids = list(dict.fromkeys(normalized.get("elements", [])))
+    element_refs = list(dict.fromkeys(normalized.get("elements", [])))
+    resolved_elements = [
+        elements_by_ref[element_ref]
+        for element_ref in element_refs
+        if element_ref in elements_by_ref
+    ]
+    element_locators = [
+        source_element_id(elements_by_ref[element_ref]) or element_ref
+        if element_ref in elements_by_ref
+        else element_ref
+        for element_ref in element_refs
+    ]
+    element_ids = [
+        source_id
+        for element in resolved_elements
+        if (source_id := source_element_id(element)) is not None
+    ]
     normalized["schema_version"] = "2.0"
+    normalized["elements"] = element_locators
     normalized["element_ids"] = element_ids
     normalized["target"] = {
         **({"slide_number": slide_number} if slide_number is not None else {}),
         **normalized.get("target", {}),
     }
     normalized["rule"] = issue_rule(normalized)
-    normalized["measurement"] = issue_measurement(normalized, elements_by_id)
-    normalized["related_objects"] = [
-        related_object(elements_by_id[element_id])
-        for element_id in element_ids
-        if element_id in elements_by_id
-    ]
+    normalized["measurement"] = issue_measurement(issue, elements_by_ref)
+    normalized["related_objects"] = [related_object(element) for element in resolved_elements]
     if normalized["code"] == "sparse_container_content":
         ratio = normalized["measurement"]["content_coverage_ratio"]
         threshold = normalized["rule"]["threshold"]
-        container_id = normalized["target"].get("container_id", "unknown")
+        container_locator = (
+            normalized["target"].get("container_id")
+            or normalized["target"].get("container_xml_path")
+            or "unknown"
+        )
         normalized.setdefault(
             "message",
-            f"large card {container_id} content coverage {ratio:.1%} is below {threshold:.1%}",
+            f"large card {container_locator} content coverage {ratio:.1%} is below {threshold:.1%}",
         )
         normalized.setdefault(
             "hint",
@@ -2020,6 +2726,10 @@ def normalize_issue(
     normalized.setdefault(
         "hint", "Inspect the reported elements and adjust them to satisfy the rule comparison."
     )
+    if any(related.get("xml_path") for related in normalized["related_objects"]):
+        hint = normalized["hint"]
+        if not hint.startswith(XML_PATH_HINT_PREFIX):
+            normalized["hint"] = f"{XML_PATH_HINT_PREFIX} {hint}"
     return normalized
 
 
@@ -2031,6 +2741,21 @@ def slide_status(errors: list[dict[str, Any]], warnings: list[dict[str, Any]]) -
     return "passed"
 
 
+def is_slide_scoped_sxsd_issue(issue: dict[str, Any], root_name: str) -> bool:
+    if issue.get("code") == "sxsd_unsupported_declaration":
+        return False
+    if root_name == "slide":
+        return True
+    path = issue.get("path")
+    if not isinstance(path, str):
+        return False
+    if path.startswith("presentation/slide/"):
+        return True
+    return path == "presentation/slide" and (
+        issue.get("attr") is not None or issue.get("code") == "sxsd_invalid_namespace"
+    )
+
+
 def build_result(
     source_path: str | None,
     slide_size: dict[str, int | float],
@@ -2039,8 +2764,10 @@ def build_result(
 ) -> dict[str, Any]:
     document_errors = [issue for issue in top_level_issues if issue["level"] == "error"]
     document_warnings = [issue for issue in top_level_issues if issue["level"] == "warning"]
+    document_infos = [issue for issue in top_level_issues if issue["level"] == "info"]
     error_count = len(document_errors) + sum(len(slide["errors"]) for slide in slides)
     warning_count = len(document_warnings) + sum(len(slide["warnings"]) for slide in slides)
+    info_count = len(document_infos) + sum(len(slide["infos"]) for slide in slides)
     all_errors = document_errors + [issue for slide in slides for issue in slide["errors"]]
     all_warnings = document_warnings + [issue for slide in slides for issue in slide["warnings"]]
     status = slide_status(all_errors, all_warnings)
@@ -2053,6 +2780,7 @@ def build_result(
             "slide_count": len(slides),
             "error_count": error_count,
             "warning_count": warning_count,
+            "info_count": info_count,
             "status": status,
             "release_ready": error_count == 0,
             "screenshot_review_required": warning_count > 0,
@@ -2060,6 +2788,7 @@ def build_result(
         "document": {
             "errors": document_errors,
             "warnings": document_warnings,
+            "infos": document_infos,
         },
         "slides": slides,
     }
@@ -2082,11 +2811,20 @@ def lint_xml(xml: str, source_path: str | None = None) -> dict[str, Any]:
         raise AssertionError("parse_xml_root must return a root or error")
 
     namespace_issues = validate_sml_tag_prefixes(xml)
-    sxsd_issues = validate_sxsd_tag_attributes(root)
+    root_name = xml_local_name(root.tag)
+    sxsd_issues = validate_sxsd_document(xml, root)
     iconpark_issues = validate_iconpark_icon_types(root)
     top_level_issues = [
         normalize_issue(issue, None, {})
-        for issue in [*namespace_issues, *sxsd_issues, *iconpark_issues]
+        for issue in [
+            *namespace_issues,
+            *[
+                issue
+                for issue in sxsd_issues
+                if not is_slide_scoped_sxsd_issue(issue, root_name)
+            ],
+            *iconpark_issues,
+        ]
     ]
     if any(issue["level"] == "error" for issue in top_level_issues):
         return build_result(
@@ -2096,27 +2834,68 @@ def lint_xml(xml: str, source_path: str | None = None) -> dict[str, Any]:
             [],
         )
 
-    presentation = parse_presentation(xml)
+    presentation = parse_presentation(root)
+    slide_roots = presentation["slide_roots"]
     slides: list[dict[str, Any]] = []
+    presentation_id_elements: list[dict[str, Any]] = []
+    presentation_elements_by_ref: dict[str, dict[str, Any]] = {}
     for index, slide_xml in enumerate(presentation["slides"]):
         slide_number = index + 1
+        slide_root = slide_roots[index]
+        slide_sxsd_issues = [
+            normalize_issue(issue, slide_number, {})
+            for issue in validate_sxsd_document(slide_xml, slide_root)
+        ]
+        slide_sxsd_errors = [
+            issue for issue in slide_sxsd_issues if issue["level"] == "error"
+        ]
+        if slide_sxsd_errors:
+            slide_sxsd_warnings = [
+                issue for issue in slide_sxsd_issues if issue["level"] == "warning"
+            ]
+            slides.append(
+                {
+                    "slide_number": slide_number,
+                    "status": slide_status(slide_sxsd_errors, slide_sxsd_warnings),
+                    "element_count": 0,
+                    "errors": slide_sxsd_errors,
+                    "warnings": slide_sxsd_warnings,
+                    "infos": [],
+                    "issues": slide_sxsd_issues,
+                }
+            )
+            continue
+
         geometry = lint_slide(
             slide_xml,
             slide_number,
             presentation["width"],
             presentation["height"],
         )
-        density_elements = extract_density_elements(slide_xml)
+        density_elements = extract_density_elements(slide_xml, slide_number)
+        id_elements = extract_source_id_elements(slide_xml, slide_number)
+        presentation_id_elements.extend(id_elements)
         extra_elements = [
             element for element in density_elements if element["kind"] in {"icon", "polyline", "line"}
         ]
-        elements_by_id = {
-            element["id"]: element for element in [*density_elements, *extra_elements]
+        elements_by_ref = {
+            element_ref(element): element for element in density_elements
         }
+        visible_element_count = len(elements_by_ref)
+        for element in id_elements:
+            elements_by_ref.setdefault(element_ref(element), element)
         # geometry["elements"] are the exact objects should_flag_overlap/detect_elements_out_of_canvas
-        # decided with inside lint_slide; prefer them so measurement/related_objects stay consistent
+        # selected inside lint_slide; prefer them so measurement/related_objects stay consistent
         # with whatever actually triggered the issue, instead of density_elements' separate re-parse.
-        elements_by_id.update({element["id"]: element for element in geometry["elements"]})
+        elements_by_ref.update(
+            {element_ref(element): element for element in geometry["elements"]}
+        )
+        presentation_elements_by_ref.update(
+            {
+                element_ref(element): elements_by_ref[element_ref(element)]
+                for element in id_elements
+            }
+        )
         extra_overflow_issues = detect_elements_out_of_canvas(
             extra_elements,
             presentation["width"],
@@ -2125,6 +2904,7 @@ def lint_xml(xml: str, source_path: str | None = None) -> dict[str, Any]:
         raw_issues = [
             *geometry["issues"],
             *extra_overflow_issues,
+            *detect_duplicate_element_ids(id_elements),
             *detect_blank_slide(
                 density_elements,
                 slide_number,
@@ -2145,21 +2925,33 @@ def lint_xml(xml: str, source_path: str | None = None) -> dict[str, Any]:
             ),
         ]
         issues = [
-            normalize_issue(issue, slide_number, elements_by_id)
-            for issue in raw_issues
+            *slide_sxsd_issues,
+            *[
+                normalize_issue(issue, slide_number, elements_by_ref)
+                for issue in raw_issues
+            ],
         ]
         errors = [issue for issue in issues if issue["level"] == "error"]
         warnings = [issue for issue in issues if issue["level"] == "warning"]
+        infos = [issue for issue in issues if issue["level"] == "info"]
         slides.append(
             {
                 "slide_number": slide_number,
                 "status": slide_status(errors, warnings),
-                "element_count": len(elements_by_id),
+                "element_count": visible_element_count,
                 "errors": errors,
                 "warnings": warnings,
+                "infos": infos,
                 "issues": issues,
             }
         )
+
+    top_level_issues.extend(
+        normalize_issue(issue, None, presentation_elements_by_ref)
+        for issue in detect_duplicate_element_ids(
+            presentation_id_elements, cross_slide_only=True
+        )
+    )
 
     return build_result(
         source_path,
@@ -2181,8 +2973,9 @@ def run_cli(argv: list[str] | None = None) -> None:
     if not options.get("input"):
         print_usage()
         fail("--input is required")
-    input_path = Path(options["input"]).resolve()
-    result = lint_xml(read_file(input_path), str(input_path))
+    requested_path = options["input"]
+    resolved_path = Path(requested_path).resolve()
+    result = lint_xml(read_file(resolved_path), requested_path)
     print(json.dumps(result, ensure_ascii=False, indent=2))
     if result["summary"]["error_count"] > 0:
         raise SystemExit(1)
