@@ -11,7 +11,7 @@
 # 下载到指定路径
 lark-cli drive +download --file-token boxbc_xxx --output ./report.pdf
 
-# 只提供 token，默认保存为当前目录下同名文件
+# 只提供 token，默认保存到当前目录
 lark-cli drive +download --file-token boxbc_xxx
 ```
 
@@ -24,6 +24,11 @@ https://xxx.feishu.cn/drive/file/boxbc_xxx
                                   ^^^^^^^^^
                                   file_token
 ```
+
+## 排障
+
+- 如果返回 `permission_denied`，或最终下载返回 `HTTP 403`，按错误 `hint` 使用 `lark-cli drive +preview --file-token <FILE_TOKEN> --type source_file --output <path>` 获取预览产物。
+- 如果返回限流错误，停止立即重试，稍后按指数退避重试。
 
 ## 参考
 
