@@ -1,13 +1,13 @@
 name: Sync skills
 
-# 统一的 skill 同步 workflow（matrix 驱动，替代 11 个独立 workflow）
+# 统一的 skill 同步 workflow（matrix 驱动，替代 12 个独立 workflow）
 # 每个矩阵项对应一个插件源：
 #   - plugin:    插件标识（baoyu / golang / lark …），用于分支名、label、脚本名
 #   - add_path:  git add 的路径（部分插件路径与名称不同，如 wpsnote → writing/wpsnote）
 #   - pr_hint:   PR 正文中给 review 者的路径提示
 #
 # 机制：跑 scripts/sync-<plugin>-skills.sh → 若有更新则自动开 PR 等待人工 review
-# 修 bug 只改这一个文件即可，不再维护 11 份副本
+# 修 bug 只改这一个文件即可，不再维护 12 份副本
 "on":
   schedule:
     - cron: '0 21 * * *'
@@ -27,6 +27,7 @@ name: Sync skills
           - grafana
           - illustration
           - lark
+          - libtv
           - mattpocock
           - ppt
           - wpsnote
@@ -52,6 +53,7 @@ jobs:
             {"plugin":"grafana","add_path":"plugins/grafana/","pr_hint":"plugins/grafana/<category>/<skill>/"},
             {"plugin":"illustration","add_path":"plugins/illustration/","pr_hint":"plugins/illustration/"},
             {"plugin":"lark","add_path":"plugins/lark/","pr_hint":"plugins/lark/<skill>/"},
+            {"plugin":"libtv","add_path":"plugins/libtv/","pr_hint":"plugins/libtv/<skill>/"},
             {"plugin":"mattpocock","add_path":"plugins/mattpocock/","pr_hint":"plugins/mattpocock/<bucket>/<skill>/"},
             {"plugin":"ppt","add_path":"plugins/ppt/","pr_hint":"plugins/ppt/guizang-ppt/"},
             {"plugin":"wpsnote","add_path":"plugins/writing/wpsnote/","pr_hint":"plugins/writing/wpsnote/<skill>/"},

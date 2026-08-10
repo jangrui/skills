@@ -3,8 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#claude-codemarketplace)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#codex-cli目录拷贝)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-212-informational)](#技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-16-informational)](#claude-codemarketplace)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-213-informational)](#技能目录)
+[![Plugins](https://img.shields.io/badge/Plugins-17-informational)](#claude-codemarketplace)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2006%3A00%20UTC-success)](#同步上游)
 
 面向 **Claude Code** 与 **Codex CLI** 的 AI 编程助手 skill 聚合仓库。
@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**16 个 marketplace 插件**，涵盖 **212 个 SKILL.md**，分布在 **11 个主题分类**。
+当前规模：**17 个 marketplace 插件**，涵盖 **213 个 SKILL.md**，分布在 **12 个主题分类**。
 
 ---
 
@@ -39,6 +39,7 @@
 /plugin install grafana-k6@jangrui       # k6 负载测试
 /plugin install grafana-datasources@jangrui
 /plugin install dbx@jangrui              # 数据库 CLI
+/plugin install libtv@jangrui            # AI 生图/生视频（需 LIBTV_ACCESS_KEY）
 /plugin install mattpocock-skills@jangrui
 ```
 
@@ -71,6 +72,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 可观测性 | `grafana-*`（×7） | `plugins/grafana/` | 48 | grafana/skills |
 | AI 创作 | `baoyu-skills` | `plugins/baoyu/` | 21 | JimLiu/baoyu-skills |
 | 数据库 | `dbx` | `plugins/dbx/` | 1 | t8y2/dbx |
+| AI 生图/生视频 | `libtv` | `plugins/libtv/` | 1 | libtv-labs/libtv-skills |
 | 工程实践 | `mattpocock-skills` | `plugins/mattpocock/` | 22 | mattpocock/skills |
 
 Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
@@ -82,6 +84,7 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 | `lark` | `lark-cli`（npm） | `npx @larksuite/cli@latest install && lark-cli auth login --recommend` |
 | `baoyu-skills` | Bun | `brew install oven-sh/bun/bun` |
 | `dbx` | `@dbx-app/cli`（npm） | `npm i -g @dbx-app/cli` |
+| `libtv` | `python3`（macOS 自带） | 设置环境变量 `LIBTV_ACCESS_KEY` |
 | 其余 | 无 | 拷贝即用 |
 
 ---
@@ -106,9 +109,10 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   │   ├── grafana-plugins/  grafana-app-sdk/  grafana-k6/
 │   │   └── grafana-datasources/
 │   ├── dbx/                           ← 1 个 skill
+│   ├── libtv/                         ← 1 个 skill（AI 生图/生视频）
 │   └── mattpocock/                    ← 22 个 skill
 │       ├── engineering/  productivity/
-├── scripts/                           ← 11 个同步脚本
+├── scripts/                           ← 12 个同步脚本
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
 │   ├── sync-ppt-skills.sh
@@ -119,7 +123,8 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   ├── sync-baoyu-skills.sh
 │   ├── sync-mattpocock-skills.sh
 │   ├── sync-wpsnote-skills.sh
-│   └── sync-dbx-skills.sh
+│   ├── sync-dbx-skills.sh
+│   └── sync-libtv-skills.sh
 └── .github/workflows/                 ← 每日自动同步
 ```
 
@@ -221,6 +226,7 @@ lark-cli auth login --recommend
 - [JimLiu/baoyu-skills](https://github.com/JimLiu/baoyu-skills) — 21 个 AI 创作技能
 - [wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) — 37 个 WPS 笔记技能
 - [t8y2/dbx](https://github.com/t8y2/dbx) — 数据库 CLI 技能
+- [libtv-labs/libtv-skills](https://github.com/libtv-labs/libtv-skills) — LibLib.tv 生图/生视频技能
 - [mattpocock/skills](https://github.com/mattpocock/skills) — 工程实践技能
 
 ---

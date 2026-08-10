@@ -379,6 +379,33 @@
       "category": "productivity"
     },
     {
+      "name": "libtv",
+      "description": "LibLib.tv AI 生图/生视频 Agent Skill：创建会话、发送生图/生视频/编辑消息、上传参考文件、查询进展、批量下载结果，支持 Seedance、Kling、Wan 等模型。需 python3 与 LIBTV_ACCESS_KEY 环境变量。",
+      "source": "./plugins/libtv",
+      "author": {
+        "name": "libtv-labs"
+      },
+      "homepage": "https://github.com/libtv-labs/libtv-skills",
+      "repository": "https://github.com/libtv-labs/libtv-skills",
+      "license": "MIT",
+      "keywords": [
+        "claude-code",
+        "claude-code-plugin",
+        "plugin",
+        "ai-agent",
+        "skills",
+        "libtv",
+        "liblib",
+        "image-generation",
+        "video-generation",
+        "aigc",
+        "seedance",
+        "kling",
+        "wan"
+      ],
+      "category": "productivity"
+    },
+    {
       "name": "mattpocock-skills",
       "description": "Matt Pocock 的工程实践 Agent Skills 合集（22 个 skill）：grilling、TDD、code review、spec/ticket、领域建模、wayfinder 等。",
       "source": "./plugins/mattpocock",
