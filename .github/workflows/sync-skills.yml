@@ -30,6 +30,7 @@ name: Sync skills
           - libtv
           - mattpocock
           - ppt
+          - taste
           - wpsnote
           - writing
 
@@ -56,9 +57,9 @@ jobs:
             {"plugin":"libtv","add_path":"plugins/libtv/","pr_hint":"plugins/libtv/<skill>/"},
             {"plugin":"mattpocock","add_path":"plugins/mattpocock/","pr_hint":"plugins/mattpocock/<bucket>/<skill>/"},
             {"plugin":"ppt","add_path":"plugins/ppt/","pr_hint":"plugins/ppt/guizang-ppt/"},
+            {"plugin":"taste","add_path":"plugins/taste/","pr_hint":"plugins/taste/<skill>/"},
             {"plugin":"wpsnote","add_path":"plugins/writing/wpsnote/","pr_hint":"plugins/writing/wpsnote/<skill>/"},
-            {"plugin":"writing","add_path":"plugins/writing/","pr_hint":"plugins/writing/<skill>/"},
-            {"plugin":"taste","add_path":"plugins/taste/","pr_hint":"plugins/taste/<skill>/"}
+            {"plugin":"writing","add_path":"plugins/writing/","pr_hint":"plugins/writing/<skill>/"}
           ]'
           SELECTED="${{ github.event.inputs.plugin }}"
           if [ -n "$SELECTED" ]; then
