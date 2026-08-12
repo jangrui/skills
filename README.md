@@ -41,6 +41,7 @@
 /plugin install dbx@jangrui              # 数据库 CLI
 /plugin install libtv@jangrui            # AI 生图/生视频（需 LIBTV_ACCESS_KEY）
 /plugin install mattpocock-skills@jangrui
+/plugin install taste@jangrui            # Anti-slop 前端设计
 ```
 
 ### Codex CLI（目录拷贝）
@@ -74,6 +75,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 数据库 | `dbx` | `plugins/dbx/` | 1 | t8y2/dbx |
 | AI 生图/生视频 | `libtv` | `plugins/libtv/` | 1 | libtv-labs/libtv-skills |
 | 工程实践 | `mattpocock-skills` | `plugins/mattpocock/` | 22 | mattpocock/skills |
+| 前端设计 | `taste` | `plugins/taste/` | 13 | Leonxlnx/taste-skill |
 
 Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 
@@ -110,9 +112,10 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   │   └── grafana-datasources/
 │   ├── dbx/                           ← 1 个 skill
 │   ├── libtv/                         ← 1 个 skill（AI 生图/生视频）
-│   └── mattpocock/                    ← 22 个 skill
-│       ├── engineering/  productivity/
-├── scripts/                           ← 12 个同步脚本
+│   ├── mattpocock/                    ← 22 个 skill
+│   │   ├── engineering/  productivity/
+│   └── taste/                         ← 13 个前端设计 skill（扁平）
+├── scripts/                           ← 13 个同步脚本
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
 │   ├── sync-ppt-skills.sh
@@ -124,7 +127,8 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   ├── sync-mattpocock-skills.sh
 │   ├── sync-wpsnote-skills.sh
 │   ├── sync-dbx-skills.sh
-│   └── sync-libtv-skills.sh
+│   ├── sync-libtv-skills.sh
+│   └── sync-taste-skills.sh
 └── .github/workflows/                 ← 每日自动同步
 ```
 
@@ -228,6 +232,7 @@ lark-cli auth login --recommend
 - [t8y2/dbx](https://github.com/t8y2/dbx) — 数据库 CLI 技能
 - [libtv-labs/libtv-skills](https://github.com/libtv-labs/libtv-skills) — LibLib.tv 生图/生视频技能
 - [mattpocock/skills](https://github.com/mattpocock/skills) — 工程实践技能
+- [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — 13 个 anti-slop 前端设计技能
 
 ---
 
