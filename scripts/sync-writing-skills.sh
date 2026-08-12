@@ -2,7 +2,7 @@
 # ============================================================================
 # sync-writing-skills.sh — 同步写作润色类 skill 的上游更新到 vendor 目录
 #
-# 当前覆盖：humanizer-zh (op7418/Humanizer-zh)
+# 当前覆盖：humanizer-zh (op7418/Humanizer-zh)、stop-slop (hardikpandya/stop-slop)
 #
 # 与 sync-diagram-skills.sh 的差异：
 #   - humanizer-zh 上游是「根目录即 skill」（SKILL.md 在仓库根，无 skills/ 子目录）
@@ -39,7 +39,7 @@ PLUGIN_DIR="$REPO_ROOT/plugins/writing"
 #     subdir = 上游 skills/<name>/ 下（如 baoyu 那种，预留）
 # 注：humanizer (blader/humanizer) 虽本身是标准 plugin，但为与 humanizer-zh 共用
 #     writing 聚合项，按 B 方案 vendor 进来（只取 SKILL.md，排除上游 plugin 声明）
-SKILL_NAMES=(humanizer humanizer-zh)
+SKILL_NAMES=(humanizer humanizer-zh stop-slop)
 meta_for() {
   case "$1" in
     humanizer)
@@ -48,6 +48,9 @@ meta_for() {
       ;;
     humanizer-zh)
       echo "humanizer-zh|op7418|Humanizer-zh|root"
+      ;;
+    stop-slop)
+      echo "stop-slop|hardikpandya|stop-slop|root"
       ;;
     *) return 1 ;;
   esac
@@ -162,6 +165,7 @@ sync_one() {
     --exclude='scripts' \
     --exclude='AGENTS.md' \
     --exclude='LICENSE' \
+    --exclude='CHANGELOG.md' \
     --exclude='README.md' \
     --exclude='README.zh.md' \
     --exclude='package.json' \

@@ -64,7 +64,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 主题 | 插件 | 本地路径 | 技能数 | 上游 |
 |---|---|---|---|---|
 | 绘图 | `diagram` | `plugins/diagram/` | 5 | Agents365-ai |
-| 写作润色 | `writing` | `plugins/writing/humanizer*` | 2 | blader/humanizer, op7418/Humanizer-zh |
+| 写作润色 | `writing` | `plugins/writing/humanizer*`、`stop-slop` | 3 | blader/humanizer, op7418/Humanizer-zh, hardikpandya/stop-slop |
 | WPS 笔记 | writing（子集） | `plugins/writing/wpsnote/` | 37 | wpsnote/wpsnote-skills |
 | 演示文稿 | `ppt` | `plugins/ppt/` | 1 | op7418/guizang-ppt-skill |
 | 插画 | `illustration` | `plugins/illustration/` | 2 | helloianneo, op7418 |
@@ -98,8 +98,8 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 ├── plugins/
 │   ├── diagram/                       ← 5 个 skill
 │   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/
-│   ├── writing/                       ← 2 润色 + 37 wpsnote
-│   │   ├── humanizer/  humanizer-zh/
+│   ├── writing/                       ← 3 润色 + 37 wpsnote
+│   │   ├── humanizer/  humanizer-zh/  stop-slop/
 │   │   └── wpsnote/                   ← 37 个 skill
 │   ├── ppt/                           ← guizang-ppt
 │   ├── illustration/                  ← 插画 + 社交卡片
@@ -223,6 +223,7 @@ lark-cli auth login --recommend
 
 - [Agents365-ai](https://github.com/Agents365-ai) — diagram skills
 - [blader/humanizer](https://github.com/blader/humanizer) — 英文去 AI 痕迹
+- [hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop) — 反 AI 腔写作
 - [op7418](https://github.com/op7418) — humanizer-zh / guizang-ppt / guizang-social-card
 - [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) — 46 个 Go 生产级技能
 - [larksuite/cli](https://github.com/larksuite/cli) — 飞书 27 个 skill

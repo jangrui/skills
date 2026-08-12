@@ -28,7 +28,7 @@
     },
     {
       "name": "writing",
-      "description": "写作润色 Skill（humanizer 中英文去 AI 痕迹）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
+      "description": "写作润色 Skill（humanizer 中英文去 AI 痕迹、stop-slop 反 AI 腔）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
       "source": "./plugins/writing",
       "category": "writing",
       "keywords": [
@@ -39,6 +39,8 @@
         "skills",
         "writing",
         "humanizer",
+        "anti-slop",
+        "stop-slop",
         "polish",
         "english",
         "chinese",
