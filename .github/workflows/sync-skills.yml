@@ -113,6 +113,7 @@ jobs:
         run: echo "✅ 所有 ${{ matrix.plugin }} skill 已是最新，无需 PR"
 
       - name: Create branch & commit
+        id: commit
         if: steps.sync.outputs.has_changes == 'true'
         env:
           COUNT: ${{ steps.sync.outputs.count }}
@@ -122,6 +123,12 @@ jobs:
           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
           git checkout -b "$BRANCH"
           git add ${{ matrix.add_path }}
+          # 防御 sync 脚本误报：仅在确有可提交变化时才 commit/PR，避免空提交致 PR 失败
+          if git diff --cached --quiet; then
+            echo "pr_ready=false" >> "$GITHUB_OUTPUT"
+            echo "[SKIP] ${{ matrix.plugin }}: 脚本报告有更新但 git 无实际差异，跳过 PR"
+            exit 0
+          fi
           git commit -m "$(cat <<COMMIT_EOF
           chore(${{ matrix.plugin }}): sync ${COUNT} upstream skill(s)
 
@@ -131,9 +138,10 @@ jobs:
           COMMIT_EOF
           )"
           git push origin "$BRANCH"
+          echo "pr_ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
-        if: steps.sync.outputs.has_changes == 'true'
+        if: steps.commit.outputs.pr_ready == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COUNT: ${{ steps.sync.outputs.count }}
