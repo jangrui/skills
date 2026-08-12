@@ -28,7 +28,7 @@
     },
     {
       "name": "writing",
-      "description": "写作润色 Skill（humanizer 中英文去 AI 痕迹、stop-slop 反 AI 腔）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
+      "description": "写作润色（humanizer/stop-slop）+ taste anti-slop 前端设计（13 skill）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
       "source": "./plugins/writing",
       "category": "writing",
       "keywords": [
@@ -432,36 +432,6 @@
         "productivity"
       ],
       "category": "productivity"
-    },
-    {
-      "name": "taste",
-      "description": "Anti-slop 前端设计 Agent Skills 合集（13 个 skill）：taste（审计+实现）、minimalist、brutalist、soft、redesign、output 完整输出、gpt-taste GSAP 动效、image-to-code、imagegen-frontend-web/mobile、brandkit 品牌板、stitch DESIGN.md。升级 AI 生成 UI 的排版/间距/动效，消除模板感。",
-      "source": "./plugins/taste",
-      "author": {
-        "name": "Leonxlnx"
-      },
-      "homepage": "https://github.com/Leonxlnx/taste-skill",
-      "repository": "https://github.com/Leonxlnx/taste-skill",
-      "license": "MIT",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "taste",
-        "frontend",
-        "ui",
-        "design",
-        "anti-slop",
-        "css",
-        "react",
-        "tailwind",
-        "minimalist",
-        "brutalist",
-        "branding"
-      ],
-      "category": "design"
     }
   ]
 }

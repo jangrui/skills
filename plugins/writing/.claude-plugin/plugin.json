@@ -1,7 +1,7 @@
 {
   "name": "writing",
   "version": "0.1.0",
-  "description": "写作润色 Skill（humanizer 中英文去 AI 痕迹）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
+  "description": "写作润色（humanizer/stop-slop）+ taste anti-slop 前端设计（13 skill）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
   "author": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
@@ -26,6 +26,20 @@
   "skills": [
     "./humanizer",
     "./humanizer-zh",
-    "./wpsnote"
+    "./stop-slop",
+    "./wpsnote",
+    "./taste/brandkit",
+    "./taste/brutalist-skill",
+    "./taste/gpt-tasteskill",
+    "./taste/image-to-code-skill",
+    "./taste/imagegen-frontend-mobile",
+    "./taste/imagegen-frontend-web",
+    "./taste/minimalist-skill",
+    "./taste/output-skill",
+    "./taste/redesign-skill",
+    "./taste/soft-skill",
+    "./taste/stitch-skill",
+    "./taste/taste-skill",
+    "./taste/taste-skill-v1"
   ]
 }

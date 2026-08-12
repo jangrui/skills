@@ -41,7 +41,6 @@
 /plugin install dbx@jangrui              # 数据库 CLI
 /plugin install libtv@jangrui            # AI 生图/生视频（需 LIBTV_ACCESS_KEY）
 /plugin install mattpocock-skills@jangrui
-/plugin install taste@jangrui            # Anti-slop 前端设计
 ```
 
 ### Codex CLI（目录拷贝）
@@ -64,7 +63,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 主题 | 插件 | 本地路径 | 技能数 | 上游 |
 |---|---|---|---|---|
 | 绘图 | `diagram` | `plugins/diagram/` | 5 | Agents365-ai |
-| 写作润色 | `writing` | `plugins/writing/humanizer*`、`stop-slop` | 3 | blader/humanizer, op7418/Humanizer-zh, hardikpandya/stop-slop |
+| 写作润色 + 前端设计 | `writing` | `plugins/writing/humanizer*`、`stop-slop`、`taste/` | 16 | blader/humanizer, op7418/Humanizer-zh, hardikpandya/stop-slop, Leonxlnx/taste-skill |
 | WPS 笔记 | writing（子集） | `plugins/writing/wpsnote/` | 37 | wpsnote/wpsnote-skills |
 | 演示文稿 | `ppt` | `plugins/ppt/` | 1 | op7418/guizang-ppt-skill |
 | 插画 | `illustration` | `plugins/illustration/` | 2 | helloianneo, op7418 |
@@ -75,7 +74,6 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 数据库 | `dbx` | `plugins/dbx/` | 1 | t8y2/dbx |
 | AI 生图/生视频 | `libtv` | `plugins/libtv/` | 1 | libtv-labs/libtv-skills |
 | 工程实践 | `mattpocock-skills` | `plugins/mattpocock/` | 22 | mattpocock/skills |
-| 前端设计 | `taste` | `plugins/taste/` | 13 | Leonxlnx/taste-skill |
 
 Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 
@@ -98,8 +96,9 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 ├── plugins/
 │   ├── diagram/                       ← 5 个 skill
 │   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/
-│   ├── writing/                       ← 3 润色 + 37 wpsnote
+│   ├── writing/                       ← 3 润色 + 13 前端设计 + 37 wpsnote
 │   │   ├── humanizer/  humanizer-zh/  stop-slop/
+│   │   ├── taste/                     ← 13 个前端设计 skill
 │   │   └── wpsnote/                   ← 37 个 skill
 │   ├── ppt/                           ← guizang-ppt
 │   ├── illustration/                  ← 插画 + 社交卡片
@@ -112,9 +111,8 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   │   └── grafana-datasources/
 │   ├── dbx/                           ← 1 个 skill
 │   ├── libtv/                         ← 1 个 skill（AI 生图/生视频）
-│   ├── mattpocock/                    ← 22 个 skill
-│   │   ├── engineering/  productivity/
-│   └── taste/                         ← 13 个前端设计 skill（扁平）
+│   └── mattpocock/                    ← 22 个 skill
+│       ├── engineering/  productivity/
 ├── scripts/                           ← 13 个同步脚本
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh

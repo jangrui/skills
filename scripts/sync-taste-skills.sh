@@ -33,7 +33,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/taste"
+PLUGIN_DIR="$REPO_ROOT/plugins/writing/taste"
 UPSTREAM_OWNER="Leonxlnx"
 UPSTREAM_REPO="taste-skill"
 UPSTREAM_SUBDIR="skills"
