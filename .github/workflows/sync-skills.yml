@@ -119,9 +119,9 @@ jobs:
           COUNT: ${{ steps.sync.outputs.count }}
           UPDATED: ${{ steps.sync.outputs.updated }}
         run: |
-          BRANCH="chore/sync-${{ matrix.plugin }}-${GITHUB_RUN_ID}"
+          BRANCH="chore/sync-${{ matrix.plugin }}"
           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
-          git checkout -b "$BRANCH"
+          git checkout -B "$BRANCH"
           git add ${{ matrix.add_path }}
           # 防御 sync 脚本误报：仅在确有可提交变化时才 commit/PR，避免空提交致 PR 失败
           if git diff --cached --quiet; then
@@ -137,7 +137,7 @@ jobs:
           Run ./scripts/sync-${{ matrix.plugin }}-skills.sh --check locally to reproduce.
           COMMIT_EOF
           )"
-          git push origin "$BRANCH"
+          git push origin "$BRANCH" --force
           echo "pr_ready=true" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
@@ -170,6 +170,13 @@ jobs:
           _此 PR 由 GitHub Action [\`sync-skills\`](../actions/workflows/sync-skills.yml) 自动生成。_
           BODY
           )
+
+          # 幂等：每插件固定分支，已有 open PR 则仅 force-push 更新内容（PR 自动跟随），跳过重复创建
+          EXISTING=$(gh pr list --head "${BRANCH}" --base main --state open --json number --jq '.[0].number // empty')
+          if [ -n "${EXISTING}" ]; then
+            echo "已存在 open PR #${EXISTING}，已通过 force-push 更新内容，跳过重复创建"
+            exit 0
+          fi
 
           gh pr create \
             --title "chore(${PLUGIN}): sync ${COUNT} upstream skill(s) 🔄" \
