@@ -188,7 +188,7 @@ jobs:
             --label "dependencies"
 
       - name: Auto-review & merge
-        if: steps.commit.outputs.pr_ready == 'true'
+        # 总是运行：既合并本次新建 PR，也清理本插件遗留 open sync PR（无 PR 则跳过）
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
