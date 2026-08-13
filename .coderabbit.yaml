@@ -1,0 +1,9 @@
+# CodeRabbit AI 评审配置
+# 文档: https://docs.coderabbit.ai/reference/configuration
+language: zh-CN
+reviews:
+  review_status: false   # 不 post review 状态标记 → 纯建议，绝不阻塞 PR 合并
+  auto_review:
+    enabled: true
+    base_branches:
+      - main
