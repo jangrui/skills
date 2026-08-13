@@ -6,7 +6,9 @@ name: Sync skills
 #   - add_path:  git add 的路径（部分插件路径与名称不同，如 wpsnote → writing/wpsnote）
 #   - pr_hint:   PR 正文中给 review 者的路径提示
 #
-# 机制：跑 scripts/sync-<plugin>-skills.sh → 若有更新则自动开 PR 等待人工 review
+# 机制：跑 scripts/sync-<plugin>-skills.sh → 若有更新则自动开 PR → 自动审核 → 自动合并
+# 自动审核门禁（本 workflow）：diff 仅限 plugins/、无 SKILL.md 被删、JSON 合法
+# AI 审核：由 CodeRabbit GitHub App 独立评审（非阻塞，仅建议）
 # 修 bug 只改这一个文件即可，不再维护 12 份副本
 "on":
   schedule:
@@ -161,10 +163,10 @@ jobs:
           - ✅ 同步脚本执行完成
           - ✅ 自包含性自检通过
 
-          ### 请人工 review
-          - 查看 \`${PR_HINT}\` 的 diff
-          - 确认 SKILL.md 行为变化可接受
-          - 合并即可
+          ### 自动审核 & 合并
+          - 门禁：diff 仅限 \`plugins/\`、无 \`SKILL.md\` 删除、JSON 合法
+          - 通过即自动 squash 合并；不通过会评论原因并留人工
+          - AI 评审（CodeRabbit）为非阻塞建议
 
           ---
           _此 PR 由 GitHub Action [\`sync-skills\`](../actions/workflows/sync-skills.yml) 自动生成。_
@@ -184,3 +186,68 @@ jobs:
             --base main \
             --head "$BRANCH" \
             --label "dependencies"
+
+      - name: Auto-review & merge
+        if: steps.commit.outputs.pr_ready == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLUGIN: ${{ matrix.plugin }}
+        run: |
+          set -euo pipefail
+          BRANCH="chore/sync-${PLUGIN}"
+          # 定位本插件的 open PR（固定分支，新建/复用两种情形统一处理）
+          PR=$(gh pr list --head "${BRANCH}" --base main --state open --json number --jq '.[0].number // empty')
+          if [ -z "${PR}" ]; then
+            echo "未找到 ${BRANCH} 的 open PR，跳过自动合并"
+            exit 0
+          fi
+          echo "🎯 自动审核 PR #${PR} (${PLUGIN})"
+
+          # 拉取 main 做两点 diff（仅比树，浅克隆安全）
+          git fetch origin main --depth=1
+          CHANGED=$(git diff --name-only origin/main HEAD)
+          echo "变更文件："; echo "${CHANGED}" | sed 's/^/  /'
+
+          # 门禁 1：diff 仅允许落在 plugins/ 下，防止 sync 脚本误伤仓库基础设施
+          OUT_OF_SCOPE=$(echo "${CHANGED}" | grep -v '^plugins/' || true)
+          if [ -n "${OUT_OF_SCOPE}" ]; then
+            MSG=$(printf '⛔ **自动审核未通过**：检测到 `plugins/` 之外的变更，已阻止自动合并，需人工介入：\n\n```\n%s\n```' "${OUT_OF_SCOPE}")
+            gh pr comment "${PR}" --body "${MSG}"
+            exit 1
+          fi
+
+          # 门禁 2：不允许删除 SKILL.md（上游删除需人工确认，防止 skill 静默丢失）
+          DELETED_SKILL=$(git diff --name-only --diff-filter=D origin/main HEAD | grep 'SKILL.md$' || true)
+          if [ -n "${DELETED_SKILL}" ]; then
+            MSG=$(printf '⛔ **自动审核未通过**：检测到 SKILL.md 被删除，需人工确认：\n\n```\n%s\n```' "${DELETED_SKILL}")
+            gh pr comment "${PR}" --body "${MSG}"
+            exit 1
+          fi
+
+          # 门禁 3：受影响的 JSON 必须可解析（plugin.json / marketplace.json 等）
+          JSON_FILES=$(echo "${CHANGED}" | grep -E '\.json$' || true)
+          if [ -n "${JSON_FILES}" ]; then
+            while IFS= read -r f; do
+              [ -f "$f" ] || continue
+              if ! jq empty "$f" 2>/dev/null; then
+                MSG=$(printf '⛔ **自动审核未通过**：JSON 文件 `%s` 解析失败。' "$f")
+                gh pr comment "${PR}" --body "${MSG}"
+                exit 1
+              fi
+            done <<< "${JSON_FILES}"
+          fi
+
+          echo "✅ 三道门禁通过，准备 squash 合并"
+          if gh pr merge "${PR}" --squash --delete-branch; then
+            echo "🎉 PR #${PR} 已自动合并到 main"
+          else
+            echo "⚠️ 直接合并失败，可能 main 启用了 required reviews 等分支保护"
+            # 降级：尝试 GitHub 原生 auto-merge（需 repo settings 开启该功能）
+            if gh pr merge "${PR}" --squash --auto --delete-branch 2>/dev/null; then
+              gh pr comment "${PR}" --body "ℹ️ 自动合并被分支保护阻挡，已开启 auto-merge，待条件满足后自动合并。"
+            else
+              gh pr comment "${PR}" --body "⚠️ 自动合并失败。请检查 main 分支保护（是否要求 required reviews）或 CodeRabbit 等 required check 未通过。"
+              exit 1
+            fi
+          fi
