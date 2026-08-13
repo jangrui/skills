@@ -1,7 +1,7 @@
 {
   "name": "writing",
   "version": "0.1.0",
-  "description": "写作润色（humanizer/stop-slop/shuorenhua）+ taste anti-slop 前端设计（13 skill）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
+  "description": "写作润色（humanizer/stop-slop/no-ai-slop/shuorenhua）+ taste anti-slop 前端设计（13 skill）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
   "author": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
@@ -28,6 +28,7 @@
     "./humanizer",
     "./humanizer-zh",
     "./stop-slop",
+    "./no-ai-slop",
     "./shuorenhua",
     "./wpsnote",
     "./taste/brandkit",

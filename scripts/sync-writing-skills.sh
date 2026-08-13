@@ -3,7 +3,8 @@
 # sync-writing-skills.sh — 同步写作润色类 skill 的上游更新到 vendor 目录
 #
 # 当前覆盖：humanizer (blader/humanizer)、humanizer-zh (op7418/Humanizer-zh)、
-#           stop-slop (hardikpandya/stop-slop)、shuorenhua (MrGeDiao/shuorenhua)
+#           stop-slop (hardikpandya/stop-slop)、shuorenhua (MrGeDiao/shuorenhua)、
+#           no-ai-slop (petergyang/no-ai-slop)
 #
 # 与 sync-diagram-skills.sh 的差异：
 #   - humanizer-zh 上游是「根目录即 skill」（SKILL.md 在仓库根，无 skills/ 子目录）
@@ -40,7 +41,7 @@ PLUGIN_DIR="$REPO_ROOT/plugins/writing"
 #     subdir = 上游 skills/<name>/ 下（如 baoyu 那种，预留）
 # 注：humanizer (blader/humanizer) 虽本身是标准 plugin，但为与 humanizer-zh 共用
 #     writing 聚合项，按 B 方案 vendor 进来（只取 SKILL.md，排除上游 plugin 声明）
-SKILL_NAMES=(humanizer humanizer-zh stop-slop shuorenhua)
+SKILL_NAMES=(humanizer humanizer-zh stop-slop shuorenhua no-ai-slop)
 meta_for() {
   case "$1" in
     humanizer)
@@ -55,6 +56,9 @@ meta_for() {
       ;;
     shuorenhua)
       echo "shuorenhua|MrGeDiao|shuorenhua|root"
+      ;;
+    no-ai-slop)
+      echo "no-ai-slop|petergyang|no-ai-slop|subdir"
       ;;
     *) return 1 ;;
   esac
@@ -182,6 +186,9 @@ sync_one() {
     --exclude='evals/benchmark*.md' \
     --exclude='evals/results-*.md' \
     --exclude='evals/run-*.md' \
+    --exclude='PRIVACY.md' \
+    --exclude='TERMS.md' \
+    --exclude='plugin-submission.md' \
     "$src/" "$vendor_dir/"
   echo "$new_commit" > "$commit_file"
   echo "  ✅ 已更新到 $new_commit"

@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**17 个 marketplace 插件**，涵盖 **213 个 SKILL.md**，分布在 **12 个主题分类**。
+当前规模：**17 个 marketplace 插件**，涵盖 **214 个 SKILL.md**，分布在 **12 个主题分类**。
 
 ---
 
@@ -63,7 +63,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 主题 | 插件 | 本地路径 | 技能数 | 上游 |
 |---|---|---|---|---|
 | 绘图 | `diagram` | `plugins/diagram/` | 5 | Agents365-ai |
-| 写作润色 + 前端设计 | `writing` | `plugins/writing/humanizer*`、`stop-slop`、`shuorenhua`、`taste/` | 17 | blader/humanizer, op7418/Humanizer-zh, hardikpandya/stop-slop, MrGeDiao/shuorenhua, Leonxlnx/taste-skill |
+| 写作润色 + 前端设计 | `writing` | `plugins/writing/humanizer*`、`stop-slop`、`no-ai-slop`、`shuorenhua`、`taste/` | 18 | blader/humanizer, op7418/Humanizer-zh, hardikpandya/stop-slop, petergyang/no-ai-slop, MrGeDiao/shuorenhua, Leonxlnx/taste-skill |
 | WPS 笔记 | writing（子集） | `plugins/writing/wpsnote/` | 37 | wpsnote/wpsnote-skills |
 | 演示文稿 | `ppt` | `plugins/ppt/` | 1 | op7418/guizang-ppt-skill |
 | 插画 | `illustration` | `plugins/illustration/` | 2 | helloianneo, op7418 |
@@ -96,8 +96,8 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 ├── plugins/
 │   ├── diagram/                       ← 5 个 skill
 │   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/
-│   ├── writing/                       ← 4 润色 + 13 前端设计 + 37 wpsnote
-│   │   ├── humanizer/  humanizer-zh/  stop-slop/  shuorenhua/
+│   ├── writing/                       ← 5 润色 + 13 前端设计 + 37 wpsnote
+│   │   ├── humanizer/  humanizer-zh/  stop-slop/  no-ai-slop/  shuorenhua/
 │   │   ├── taste/                     ← 13 个前端设计 skill
 │   │   └── wpsnote/                   ← 37 个 skill
 │   ├── ppt/                           ← guizang-ppt
@@ -222,6 +222,7 @@ lark-cli auth login --recommend
 - [Agents365-ai](https://github.com/Agents365-ai) — diagram skills
 - [blader/humanizer](https://github.com/blader/humanizer) — 英文去 AI 痕迹
 - [hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop) — 反 AI 腔写作
+- [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) — 移除 20+ AI slop 模式
 - [op7418](https://github.com/op7418) — humanizer-zh / guizang-ppt / guizang-social-card
 - [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) — 46 个 Go 生产级技能
 - [larksuite/cli](https://github.com/larksuite/cli) — 飞书 27 个 skill
