@@ -63,7 +63,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 主题 | 插件 | 本地路径 | 技能数 | 上游 |
 |---|---|---|---|---|
 | 绘图 | `diagram` | `plugins/diagram/` | 5 | Agents365-ai |
-| 写作润色 + 前端设计 | `writing` | `plugins/writing/humanizer*`、`stop-slop`、`taste/` | 16 | blader/humanizer, op7418/Humanizer-zh, hardikpandya/stop-slop, Leonxlnx/taste-skill |
+| 写作润色 + 前端设计 | `writing` | `plugins/writing/humanizer*`、`stop-slop`、`shuorenhua`、`taste/` | 17 | blader/humanizer, op7418/Humanizer-zh, hardikpandya/stop-slop, MrGeDiao/shuorenhua, Leonxlnx/taste-skill |
 | WPS 笔记 | writing（子集） | `plugins/writing/wpsnote/` | 37 | wpsnote/wpsnote-skills |
 | 演示文稿 | `ppt` | `plugins/ppt/` | 1 | op7418/guizang-ppt-skill |
 | 插画 | `illustration` | `plugins/illustration/` | 2 | helloianneo, op7418 |
@@ -96,8 +96,8 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 ├── plugins/
 │   ├── diagram/                       ← 5 个 skill
 │   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/
-│   ├── writing/                       ← 3 润色 + 13 前端设计 + 37 wpsnote
-│   │   ├── humanizer/  humanizer-zh/  stop-slop/
+│   ├── writing/                       ← 4 润色 + 13 前端设计 + 37 wpsnote
+│   │   ├── humanizer/  humanizer-zh/  stop-slop/  shuorenhua/
 │   │   ├── taste/                     ← 13 个前端设计 skill
 │   │   └── wpsnote/                   ← 37 个 skill
 │   ├── ppt/                           ← guizang-ppt
