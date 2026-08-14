@@ -40,6 +40,7 @@
 /plugin install grafana-datasources@jangrui
 /plugin install dbx@jangrui              # 数据库 CLI
 /plugin install libtv@jangrui            # AI 生图/生视频（需 LIBTV_ACCESS_KEY）
+/plugin install khazix-skills@jangrui    # 卡兹克 6 skill（资讯/研究/写作/任务书/收尾/存储）
 /plugin install mattpocock-skills@jangrui
 ```
 
@@ -73,6 +74,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | AI 创作 | `baoyu-skills` | `plugins/baoyu/` | 21 | JimLiu/baoyu-skills |
 | 数据库 | `dbx` | `plugins/dbx/` | 1 | t8y2/dbx |
 | AI 生图/生视频 | `libtv` | `plugins/libtv/` | 1 | libtv-labs/libtv-skills |
+| 卡兹克工具箱 | `khazix-skills` | `plugins/khazix/` | 6 | KKKKhazix/khazix-skills |
 | 工程实践 | `mattpocock-skills` | `plugins/mattpocock/` | 22 | mattpocock/skills |
 
 Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
@@ -85,6 +87,7 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 | `baoyu-skills` | Bun | `brew install oven-sh/bun/bun` |
 | `dbx` | `@dbx-app/cli`（npm） | `npm i -g @dbx-app/cli` |
 | `libtv` | `python3`（macOS 自带） | 设置环境变量 `LIBTV_ACCESS_KEY` |
+| `khazix-skills`（hv-analysis） | Python 3 + `weasyprint`、`markdown`（pip） | `pip install weasyprint markdown`；其余 5 个 skill 零依赖（storage-analyzer 纯标准库） |
 | 其余 | 无 | 拷贝即用 |
 
 ---
@@ -111,9 +114,12 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   │   └── grafana-datasources/
 │   ├── dbx/                           ← 1 个 skill
 │   ├── libtv/                         ← 1 个 skill（AI 生图/生视频）
+│   ├── khazix/                        ← 6 个卡兹克 skill（扁平）
+│   │   ├── aihot/  hv-analysis/  khazix-writer/
+│   │   ├── leader/  neat-freak/  storage-analyzer/
 │   └── mattpocock/                    ← 22 个 skill
 │       ├── engineering/  productivity/
-├── scripts/                           ← 13 个同步脚本
+├── scripts/                           ← 14 个同步脚本
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
 │   ├── sync-ppt-skills.sh
@@ -126,6 +132,7 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   ├── sync-wpsnote-skills.sh
 │   ├── sync-dbx-skills.sh
 │   ├── sync-libtv-skills.sh
+│   ├── sync-khazix-skills.sh
 │   └── sync-taste-skills.sh
 └── .github/workflows/                 ← 每日自动同步
 ```
@@ -231,6 +238,7 @@ lark-cli auth login --recommend
 - [wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) — 37 个 WPS 笔记技能
 - [t8y2/dbx](https://github.com/t8y2/dbx) — 数据库 CLI 技能
 - [libtv-labs/libtv-skills](https://github.com/libtv-labs/libtv-skills) — LibLib.tv 生图/生视频技能
+- [KKKKhazix/khazix-skills](https://github.com/KKKKhazix/khazix-skills) — 卡兹克 6 个技能：AI 资讯、横纵分析研究、公众号写作、agent 任务书、知识库收尾、存储分析
 - [mattpocock/skills](https://github.com/mattpocock/skills) — 工程实践技能
 - [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — 13 个 anti-slop 前端设计技能
 

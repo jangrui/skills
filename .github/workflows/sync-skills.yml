@@ -55,6 +55,7 @@ jobs:
             {"plugin":"golang","add_path":"plugins/golang/","pr_hint":"plugins/golang/<skill>/"},
             {"plugin":"grafana","add_path":"plugins/grafana/","pr_hint":"plugins/grafana/<category>/<skill>/"},
             {"plugin":"illustration","add_path":"plugins/illustration/","pr_hint":"plugins/illustration/"},
+            {"plugin":"khazix","add_path":"plugins/khazix/","pr_hint":"plugins/khazix/<skill>/"},
             {"plugin":"lark","add_path":"plugins/lark/","pr_hint":"plugins/lark/<skill>/"},
             {"plugin":"libtv","add_path":"plugins/libtv/","pr_hint":"plugins/libtv/<skill>/"},
             {"plugin":"mattpocock","add_path":"plugins/mattpocock/","pr_hint":"plugins/mattpocock/<bucket>/<skill>/"},
