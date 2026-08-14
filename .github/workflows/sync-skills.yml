@@ -22,6 +22,7 @@ name: Sync skills
         type: choice
         options:
           - ''
+          - anydoc
           - baoyu
           - dbx
           - diagram
@@ -49,6 +50,7 @@ jobs:
       - id: gen
         run: |
           ALL='[
+            {"plugin":"anydoc","add_path":"plugins/anydoc/","pr_hint":"plugins/anydoc/<skill>/"},
             {"plugin":"baoyu","add_path":"plugins/baoyu/","pr_hint":"plugins/baoyu/<skill>/"},
             {"plugin":"dbx","add_path":"plugins/dbx/","pr_hint":"plugins/dbx/<skill>/"},
             {"plugin":"diagram","add_path":"plugins/diagram/","pr_hint":"plugins/diagram/<skill>/"},
