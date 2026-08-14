@@ -1,0 +1,42 @@
+{
+  "name": "opc",
+  "version": "0.1.0",
+  "description": "ReScienceLab opc-skills 全集（10 个）：面向 solopreneur / indie hacker 的营销与设计技能——Gemini 生图（nanobanana）、logo/banner 制作、Reddit/Twitter/ProductHunt 抓取、需求调研（requesthunt）、SEO/GEO、域名选购、会话知识归档（archive）。多数需对应 API key；生图需 google-genai + pillow。",
+  "author": {
+    "name": "ReScienceLab",
+    "url": "https://github.com/ReScienceLab"
+  },
+  "homepage": "https://github.com/ReScienceLab/opc-skills",
+  "repository": "https://github.com/ReScienceLab/opc-skills",
+  "license": "MIT",
+  "keywords": [
+    "opc",
+    "solopreneur",
+    "indie-hacker",
+    "marketing",
+    "image-generation",
+    "gemini",
+    "logo",
+    "banner",
+    "reddit",
+    "twitter",
+    "producthunt",
+    "requesthunt",
+    "seo",
+    "geo",
+    "domain"
+  ],
+  "category": "integration",
+  "skills": [
+    "./nanobanana",
+    "./logo-creator",
+    "./banner-creator",
+    "./reddit",
+    "./twitter",
+    "./producthunt",
+    "./requesthunt",
+    "./seo-geo",
+    "./domain-hunter",
+    "./archive"
+  ]
+}

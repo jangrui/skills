@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**17 个精选 marketplace 插件**（6 大分类，共 70 个 skill），vendor 全集 **258 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
+当前规模：**20 个精选 marketplace 插件**（6 大分类，共 81 个 skill），vendor 全集 **270 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
 
 ---
 
@@ -89,9 +89,11 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | design | `gzh-design` | `plugins/gzh/` | 1/1 | isjiamu/gzh-design-skill |
 | design | `illustration` | `plugins/illustration/` | 2/2 | helloianneo, op7418 |
 | design | `libtv` | `plugins/libtv/` | 1/1 | libtv-labs/libtv-skills |
+| design | `opc-design` | `plugins/opc/` | 3/10 | ReScienceLab/opc-skills |
 | integration | `lark-core` | `plugins/lark/` | 8/27 | larksuite/cli |
 | integration | `wpsnote-core` | `plugins/writing/wpsnote/` | 6/37 | wpsnote/wpsnote-skills |
 | integration | `neat-freak` | `plugins/khazix/` | 1/6 | KKKKhazix/khazix-skills |
+| integration | `opc-research` | `plugins/opc/` | 6/10 | ReScienceLab/opc-skills |
 
 不上市场的全集（如 grafana-k6 / grafana-cloud / 插件开发、anthropic 其余 13 个、wpsnote 其余 30 个等）仍完整保留在 `plugins/` 下，可按 Codex 目录拷贝方式自取。
 
@@ -133,6 +135,10 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │   │   └── grafana-datasources/
 │   ├── dbx/                           ← 1 个 skill
 │   ├── libtv/                         ← 1 个 skill（AI 生图/生视频）
+│   ├── opc/                           ← 10 个 solopreneur 营销/设计 skill（扁平）
+│   │   ├── nanobanana/  logo-creator/  banner-creator/  ← Gemini 生图设计
+│   │   ├── reddit/  twitter/  producthunt/  requesthunt/  ← 平台调研
+│   │   └── seo-geo/  domain-hunter/  archive/
 │   ├── khazix/                        ← 6 个卡兹克 skill（扁平）
 │   │   ├── aihot/  hv-analysis/  khazix-writer/
 │   │   ├── leader/  neat-freak/  storage-analyzer/

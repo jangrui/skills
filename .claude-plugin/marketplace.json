@@ -390,6 +390,34 @@
       ]
     },
     {
+      "name": "opc-design",
+      "displayName": "OPC 生图设计三件套",
+      "description": "ReScienceLab opc-skills 设计精选（3 个）：nanobanana（Gemini 3 Pro Image 生图/改图，2K/4K）、logo-creator（logo/图标/favicon，迭代改稿+去底+SVG 导出）、banner-creator（banner/封面图，迭代改稿+裁剪）。需 GEMINI_API_KEY（logo 另需 REMOVE_BG_API_KEY、RECRAFT_API_KEY），pip 安装 google-genai pillow。上游全量 10 个见 plugins/opc/ 目录自取。",
+      "source": "./",
+      "category": "design",
+      "author": {
+        "name": "ReScienceLab",
+        "url": "https://github.com/ReScienceLab"
+      },
+      "homepage": "https://github.com/ReScienceLab/opc-skills",
+      "repository": "https://github.com/ReScienceLab/opc-skills",
+      "license": "MIT",
+      "keywords": [
+        "opc",
+        "nanobanana",
+        "gemini",
+        "image-generation",
+        "logo",
+        "banner",
+        "solopreneur"
+      ],
+      "skills": [
+        "./plugins/opc/nanobanana",
+        "./plugins/opc/logo-creator",
+        "./plugins/opc/banner-creator"
+      ]
+    },
+    {
       "name": "lark-core",
       "displayName": "飞书精选",
       "description": "飞书 / Lark Agent Skills 精选（8 个）：认证基础、即时通讯、云文档、多维表格、电子表格、日历、任务、邮箱。需配合 npm 包 lark-cli 使用。上游全量 27 个见 plugins/lark/ 目录自取。",
@@ -462,6 +490,40 @@
       ],
       "skills": [
         "./plugins/khazix/neat-freak"
+      ]
+    },
+    {
+      "name": "opc-research",
+      "displayName": "OPC 市场调研精选",
+      "description": "ReScienceLab opc-skills 调研精选（6 个）：reddit（公开 JSON API 免 key）、twitter（twitterapi.io）、producthunt（GraphQL API）、requesthunt（多平台用户需求挖掘，需装其 CLI）、seo-geo（SEO + AI 搜索引擎引用优化，DataForSEO）、domain-hunter（域名比价选购）。各自需对应 API key。上游全量 10 个见 plugins/opc/ 目录自取。",
+      "source": "./",
+      "category": "integration",
+      "author": {
+        "name": "ReScienceLab",
+        "url": "https://github.com/ReScienceLab"
+      },
+      "homepage": "https://github.com/ReScienceLab/opc-skills",
+      "repository": "https://github.com/ReScienceLab/opc-skills",
+      "license": "MIT",
+      "keywords": [
+        "opc",
+        "market-research",
+        "reddit",
+        "twitter",
+        "producthunt",
+        "requesthunt",
+        "seo",
+        "geo",
+        "domain",
+        "solopreneur"
+      ],
+      "skills": [
+        "./plugins/opc/reddit",
+        "./plugins/opc/twitter",
+        "./plugins/opc/producthunt",
+        "./plugins/opc/requesthunt",
+        "./plugins/opc/seo-geo",
+        "./plugins/opc/domain-hunter"
       ]
     }
   ]
