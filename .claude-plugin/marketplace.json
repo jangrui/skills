@@ -1,323 +1,17 @@
 {
   "name": "jangrui",
+  "description": "jangrui 精选 Agent Skills 市场：从各上游 vendor 全集中精选的 Claude Code 插件（Go 工程、可观测、文档处理、写作、设计、集成六大类）。全量合集不上市场，见仓库 plugins/ 目录自取。",
   "owner": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
   },
   "plugins": [
     {
-      "name": "diagram",
-      "description": "5 种图表技能合集：drawio / mermaid / excalidraw / tldraw / plantuml。把自然语言、源码或架构描述转成专业图表（导出 PNG/SVG/PDF）。",
-      "source": "./plugins/diagram",
-      "category": "diagram",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "diagram",
-        "drawio",
-        "mermaid",
-        "excalidraw",
-        "tldraw",
-        "plantuml",
-        "visualization",
-        "uml"
-      ]
-    },
-    {
-      "name": "writing",
-      "description": "写作润色（humanizer/stop-slop）+ taste anti-slop 前端设计（13 skill）+ WPS 笔记全家桶（36 skill）。需配合 wpsnote-cli 使用。",
-      "source": "./plugins/writing",
-      "category": "writing",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "writing",
-        "humanizer",
-        "anti-slop",
-        "stop-slop",
-        "polish",
-        "english",
-        "chinese",
-        "wpsnote",
-        "wps-note",
-        "笔记"
-      ]
-    },
-    {
-      "name": "lark",
-      "description": "飞书 / Lark 官方 Agent Skills 合集（27 个 skill）：IM、文档、多维表格、日历、邮箱、任务、知识库、视频会议、审批、OKR 等。需配合 npm 包 lark-cli 使用。",
-      "source": "./plugins/lark",
-      "category": "lark",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "lark",
-        "feishu",
-        "飞书",
-        "lark-cli",
-        "im",
-        "doc",
-        "base",
-        "bitable",
-        "calendar",
-        "sheets",
-        "slides",
-        "mail",
-        "task"
-      ]
-    },
-    {
-      "name": "ppt",
-      "description": "网页 PPT 生成技能：生成横向翻页单文件 HTML 网页 PPT，含 WebGL 背景、电子杂志风/瑞士国际主义风双模板系统（22 种版式、截图美化、数据大字报等）。",
-      "source": "./plugins/ppt",
-      "category": "ppt",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "presentation",
-        "ppt",
-        "guizang",
-        "swiss-style",
-        "web-deck",
-        "horizontal-swipe"
-      ]
-    },
-    {
-      "name": "illustration",
-      "description": "文章配图与社交媒体卡片生成合集：小黑手绘插画（白底黑线描中文文章配图）+ 归藏风格社交卡片（小红书图文/公众号封面，Editorial + Swiss 双排版系统）。",
-      "source": "./plugins/illustration",
-      "category": "illustration",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "illustration",
-        "article-illustration",
-        "social-card",
-        "xiaohongshu",
-        "rednote",
-        "wechat-cover",
-        "xiaohei",
-        "hand-drawn",
-        "guizang",
-        "black-ink"
-      ]
-    },
-    {
-      "name": "grafana-core",
-      "description": "Grafana 核心 Agent Skills（8 个）：Dashboard 建模、PromQL、Alloy/Beyla/OpenTelemetry 采集、告警 IRM、Grafana OSS、skill 编写规范。",
-      "source": "./plugins/grafana",
-      "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "grafana",
-        "promql",
-        "alloy",
-        "beyla",
-        "opentelemetry",
-        "alerting",
-        "dashboard"
-      ]
-    },
-    {
-      "name": "grafana-cloud",
-      "description": "Grafana Cloud Agent Skills（18 个）：Fleet Management、Adaptive Metrics、成本治理、Admin（SSO/RBAC/Terraform）、AI/ML、基础设施监控、私有连接、应用/数据库可观测性等。",
-      "source": "./plugins/grafana",
-      "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "grafana-cloud",
-        "fleet-management",
-        "adaptive-metrics",
-        "cost-management",
-        "sso",
-        "terraform",
-        "kubernetes"
-      ]
-    },
-    {
-      "name": "grafana-lgtm",
-      "description": "LGTM 开源栈 Agent Skills（5 个）：Loki（日志）、Tempo（追踪）、Mimir（长期 Prometheus 指标）、Prometheus、Pyroscope（持续 profiling）。",
-      "source": "./plugins/grafana",
-      "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "loki",
-        "tempo",
-        "mimir",
-        "prometheus",
-        "pyroscope",
-        "lgtm",
-        "tracing",
-        "logging",
-        "profiling"
-      ]
-    },
-    {
-      "name": "grafana-plugins",
-      "description": "Grafana 插件开发 Agent Skills（5 个）：bundle 体积优化、React 19 迁移、@grafana/scenes 框架、npm 供应链加固、依赖瘦身。",
-      "source": "./plugins/grafana",
-      "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "grafana",
-        "plugins",
-        "bundle-size",
-        "react-19",
-        "grafana-scenes",
-        "webpack"
-      ]
-    },
-    {
-      "name": "grafana-app-sdk",
-      "description": "Grafana App SDK Agent Skills（4 个）：在 Grafana App Platform 上构建应用——CUE kind 定义、reconciler 逻辑、admission control、核心概念。",
-      "source": "./plugins/grafana",
-      "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "grafana",
-        "app-sdk",
-        "app-platform",
-        "cue",
-        "kubernetes",
-        "reconciler"
-      ]
-    },
-    {
-      "name": "grafana-k6",
-      "description": "k6 负载测试 Agent Skills（7 个）：脚本生成/校验、性能测试网站、Cloud k6 排查与趋势分析、测试维护、文档编写。",
-      "source": "./plugins/grafana",
-      "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "k6",
-        "load-testing",
-        "performance",
-        "testing",
-        "stress-test"
-      ]
-    },
-    {
-      "name": "grafana-datasources",
-      "description": "Grafana 数据源 Agent Skills（1 个）：生成数据源 provisioning 文件（YAML/Terraform）。",
-      "source": "./plugins/grafana",
-      "category": "grafana",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "grafana",
-        "datasources",
-        "provisioning",
-        "terraform"
-      ]
-    },
-    {
-      "name": "baoyu-skills",
-      "description": "宝玉的 21 个 AI 创作技能合集：AI 绘图/配图/漫画/封面/信息图生成、URL→Markdown、Markdown 格式化/转 HTML、翻译、幻灯片、X/微博/微信发文、YouTube 字幕、小红书图片、网页抓取等。",
-      "source": "./plugins/baoyu",
-      "author": {
-        "name": "Jim Liu (宝玉)",
-        "email": "junminliu@gmail.com"
-      },
-      "homepage": "https://github.com/JimLiu/baoyu-skills",
-      "repository": "https://github.com/JimLiu/baoyu-skills",
-      "license": "MIT",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "baoyu",
-        "宝玉",
-        "image-generation",
-        "wechat",
-        "weibo",
-        "markdown",
-        "translate",
-        "slides",
-        "youtube",
-        "xiaohongshu",
-        "article-illustrator",
-        "comic",
-        "infographic"
-      ],
-      "category": "productivity"
-    },
-    {
-      "name": "cc-skills-golang",
-      "description": "生产级 Go 项目 Agent Skills 合集（46 个 skill）：并发、错误处理、slog、samber 全家桶、cobra/viper、测试、性能、安全、可观测性、grpc、graphql 等。",
-      "source": "./plugins/golang",
-      "category": "golang",
-      "author": {
-        "name": "Samuel Berthe",
-        "email": "hey@samuel-berthe.fr",
-        "url": "https://github.com/samber"
-      },
-      "homepage": "https://github.com/samber/cc-skills-golang",
-      "repository": "https://github.com/samber/cc-skills-golang",
-      "license": "MIT",
-      "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "golang",
-        "go",
-        "agentic",
-        "engineering",
-        "developer",
-        "coding",
-        "productivity"
-      ]
-    },
-    {
       "name": "golang-core",
-      "description": "Go 核心 Agent Skills 精简版（11 个）：how-to、error-handling、concurrency、context、testing、code-style、cobra、viper、samber-lo、lint、project-layout。覆盖日常 Go 工程高频场景，完整 46 个见 cc-skills-golang。",
-      "source": "./plugins/golang",
-      "category": "golang",
+      "displayName": "Go 工程精选",
+      "description": "Go 工程 Agent Skills 精选（11 个）：how-to 调度、错误处理、并发、context、测试、代码风格、cobra、viper、samber-lo、lint、项目布局。上游全量 46 个见 plugins/golang/ 目录自取。",
+      "source": "./",
+      "category": "engineering",
       "author": {
         "name": "Samuel Berthe",
         "email": "hey@samuel-berthe.fr",
@@ -327,35 +21,66 @@
       "repository": "https://github.com/samber/cc-skills-golang",
       "license": "MIT",
       "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
         "golang",
         "go",
-        "core",
-        "essential",
-        "lightweight"
+        "error-handling",
+        "concurrency",
+        "testing",
+        "cobra",
+        "viper",
+        "samber-lo",
+        "lint",
+        "project-layout"
       ],
       "skills": [
-        "./golang-how-to",
-        "./golang-error-handling",
-        "./golang-concurrency",
-        "./golang-context",
-        "./golang-testing",
-        "./golang-code-style",
-        "./golang-spf13-cobra",
-        "./golang-spf13-viper",
-        "./golang-samber-lo",
-        "./golang-lint",
-        "./golang-project-layout"
+        "./plugins/golang/golang-how-to",
+        "./plugins/golang/golang-error-handling",
+        "./plugins/golang/golang-concurrency",
+        "./plugins/golang/golang-context",
+        "./plugins/golang/golang-testing",
+        "./plugins/golang/golang-code-style",
+        "./plugins/golang/golang-spf13-cobra",
+        "./plugins/golang/golang-spf13-viper",
+        "./plugins/golang/golang-samber-lo",
+        "./plugins/golang/golang-lint",
+        "./plugins/golang/golang-project-layout"
+      ]
+    },
+    {
+      "name": "mattpocock-core",
+      "displayName": "Matt Pocock 工程实践精选",
+      "description": "Matt Pocock 工程 Agent Skills 精选（5 个）：tdd、code-review、diagnosing-bugs、grilling、handoff。上游全量 26 个见 plugins/mattpocock/ 目录自取。",
+      "source": "./",
+      "category": "engineering",
+      "author": {
+        "name": "Matt Pocock",
+        "url": "https://www.aihero.dev"
+      },
+      "homepage": "https://github.com/mattpocock/skills",
+      "repository": "https://github.com/mattpocock/skills",
+      "license": "MIT",
+      "keywords": [
+        "tdd",
+        "code-review",
+        "debugging",
+        "grilling",
+        "handoff",
+        "engineering"
+      ],
+      "skills": [
+        "./plugins/mattpocock/engineering/tdd",
+        "./plugins/mattpocock/engineering/code-review",
+        "./plugins/mattpocock/engineering/diagnosing-bugs",
+        "./plugins/mattpocock/productivity/grilling",
+        "./plugins/mattpocock/productivity/handoff"
       ]
     },
     {
       "name": "dbx",
+      "displayName": "DBX 数据库",
       "description": "DBX 数据库 Agent Skill：通过 dbx CLI 安全探索 schema、执行只读 SQL、生成 AI 友好 schema context，支持 70+ 数据库。需配合 npm 包 @dbx-app/cli 使用。",
-      "source": "./plugins/dbx",
+      "source": "./",
+      "category": "engineering",
       "author": {
         "name": "t8y2 (skyler)"
       },
@@ -363,12 +88,6 @@
       "repository": "https://github.com/t8y2/dbx",
       "license": "Apache-2.0",
       "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "dbx",
         "database",
         "sql",
         "schema",
@@ -378,94 +97,93 @@
         "redis",
         "mongodb"
       ],
-      "category": "productivity"
+      "skills": [
+        "./plugins/dbx/dbx"
+      ]
     },
     {
-      "name": "libtv",
-      "description": "LibLib.tv AI 生图/生视频 Agent Skill：创建会话、发送生图/生视频/编辑消息、上传参考文件、查询进展、批量下载结果，支持 Seedance、Kling、Wan 等模型。需 python3 与 LIBTV_ACCESS_KEY 环境变量。",
-      "source": "./plugins/libtv",
-      "author": {
-        "name": "libtv-labs"
-      },
-      "homepage": "https://github.com/libtv-labs/libtv-skills",
-      "repository": "https://github.com/libtv-labs/libtv-skills",
-      "license": "MIT",
+      "name": "grafana-core",
+      "displayName": "Grafana 核心",
+      "description": "Grafana 核心 Agent Skills 精选（5 个）：Dashboard 建模、PromQL、告警 IRM、OpenTelemetry 采集、Alloy。上游全量见 plugins/grafana/ 目录自取。",
+      "source": "./",
+      "category": "observability",
       "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "libtv",
-        "liblib",
-        "image-generation",
-        "video-generation",
-        "aigc",
-        "seedance",
-        "kling",
-        "wan"
+        "grafana",
+        "promql",
+        "dashboard",
+        "alerting",
+        "opentelemetry",
+        "alloy"
       ],
-      "category": "productivity"
+      "skills": [
+        "./plugins/grafana/grafana-core/dashboarding",
+        "./plugins/grafana/grafana-core/promql",
+        "./plugins/grafana/grafana-core/alerting-irm",
+        "./plugins/grafana/grafana-core/opentelemetry",
+        "./plugins/grafana/grafana-core/alloy"
+      ]
     },
     {
-      "name": "khazix-skills",
-      "description": "数字生命卡兹克的 6 个 Agent Skills：aihot 中文 AI 资讯查询、hv-analysis 横纵分析法深度研究报告（PDF）、khazix-writer 公众号长文写作、leader 想法拆解为 agent 任务书、neat-freak 会话收尾知识库同步、storage-analyzer 只读存储分析与清理报告。",
-      "source": "./plugins/khazix",
-      "author": {
-        "name": "Khazix",
-        "url": "https://github.com/KKKKhazix"
-      },
-      "homepage": "https://github.com/KKKKhazix/khazix-skills",
-      "repository": "https://github.com/KKKKhazix/khazix-skills",
-      "license": "MIT",
+      "name": "grafana-lgtm",
+      "displayName": "LGTM 开源栈",
+      "description": "LGTM 开源栈 Agent Skills（5 个）：Loki（日志）、Tempo（追踪）、Mimir（长期 Prometheus 指标）、Prometheus、Pyroscope（持续 profiling）。",
+      "source": "./",
+      "category": "observability",
       "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "khazix",
-        "卡兹克",
-        "ai-news",
-        "research",
-        "writing",
-        "wechat-article",
-        "goal",
-        "docs-sync",
-        "storage-analysis"
+        "loki",
+        "tempo",
+        "mimir",
+        "prometheus",
+        "pyroscope",
+        "lgtm",
+        "logging",
+        "tracing",
+        "profiling"
       ],
-      "category": "productivity"
+      "skills": [
+        "./plugins/grafana/grafana-lgtm/loki",
+        "./plugins/grafana/grafana-lgtm/tempo",
+        "./plugins/grafana/grafana-lgtm/mimir",
+        "./plugins/grafana/grafana-lgtm/prometheus",
+        "./plugins/grafana/grafana-lgtm/pyroscope"
+      ]
     },
     {
-      "name": "mattpocock-skills",
-      "description": "Matt Pocock 的工程实践 Agent Skills 合集（22 个 skill）：grilling、TDD、code review、spec/ticket、领域建模、wayfinder 等。",
-      "source": "./plugins/mattpocock",
+      "name": "anthropic-docs",
+      "displayName": "Anthropic 文档四件套",
+      "description": "Anthropic 官方文档 Agent Skills（4 个）：docx / pdf / pptx / xlsx 的创建、读取与编辑。上游全量 17 个见 plugins/anthropic/ 目录自取。",
+      "source": "./",
+      "category": "documents",
       "author": {
-        "name": "Matt Pocock",
-        "url": "https://www.aihero.dev"
+        "name": "Anthropic",
+        "url": "https://github.com/anthropics"
       },
-      "homepage": "https://github.com/mattpocock/skills",
-      "repository": "https://github.com/mattpocock/skills",
-      "license": "MIT",
+      "homepage": "https://github.com/anthropics/skills",
+      "repository": "https://github.com/anthropics/skills",
+      "license": "docx/pdf/pptx/xlsx 为 Anthropic 专属条款，见各 skill 目录 LICENSE.txt",
       "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
-        "engineering",
-        "tdd",
-        "code-review",
-        "grilling",
-        "domain-modeling",
-        "productivity"
+        "docx",
+        "pdf",
+        "pptx",
+        "xlsx",
+        "word",
+        "powerpoint",
+        "excel",
+        "documents"
       ],
-      "category": "productivity"
+      "skills": [
+        "./plugins/anthropic/docx",
+        "./plugins/anthropic/pdf",
+        "./plugins/anthropic/pptx",
+        "./plugins/anthropic/xlsx"
+      ]
     },
     {
       "name": "anydoc",
+      "displayName": "Firecrawl anydoc",
       "description": "Firecrawl anydoc 文档转换 Agent Skill：把 Word / PowerPoint / Excel / OpenDocument / RTF / EPUB / CSV / PDF 转成 GitHub-Flavored Markdown。需 Node 20+，通过 npx @firecrawl/anydoc 免安装运行。",
-      "source": "./plugins/anydoc",
+      "source": "./",
+      "category": "documents",
       "author": {
         "name": "firecrawl",
         "url": "https://github.com/firecrawl"
@@ -474,11 +192,6 @@
       "repository": "https://github.com/firecrawl/anydoc",
       "license": "MIT",
       "keywords": [
-        "claude-code",
-        "claude-code-plugin",
-        "plugin",
-        "ai-agent",
-        "skills",
         "anydoc",
         "firecrawl",
         "markdown",
@@ -486,12 +199,242 @@
         "pptx",
         "xlsx",
         "pdf",
-        "rtf",
-        "epub",
-        "odt",
         "document-conversion"
       ],
-      "category": "productivity"
+      "skills": [
+        "./plugins/anydoc/convert-documents-to-markdown"
+      ]
+    },
+    {
+      "name": "writing-polish",
+      "displayName": "写作去 AI 味",
+      "description": "写作润色 Agent Skills（5 个）：humanizer（英）、humanizer-zh（中）、stop-slop、no-ai-slop、shuorenhua，去 AI 味、改写自然文风。",
+      "source": "./",
+      "category": "writing",
+      "keywords": [
+        "writing",
+        "humanizer",
+        "anti-slop",
+        "stop-slop",
+        "polish",
+        "english",
+        "chinese"
+      ],
+      "skills": [
+        "./plugins/writing/humanizer",
+        "./plugins/writing/humanizer-zh",
+        "./plugins/writing/stop-slop",
+        "./plugins/writing/no-ai-slop",
+        "./plugins/writing/shuorenhua"
+      ]
+    },
+    {
+      "name": "baoyu-core",
+      "displayName": "宝玉 AI 创作精选",
+      "description": "宝玉 AI 创作技能精选（7 个）：生图、文章配图、封面图、信息图、翻译、URL→Markdown、YouTube 字幕。多数需 Bun。上游全量 21 个见 plugins/baoyu/ 目录自取。",
+      "source": "./",
+      "category": "writing",
+      "author": {
+        "name": "Jim Liu (宝玉)",
+        "email": "junminliu@gmail.com"
+      },
+      "homepage": "https://github.com/JimLiu/baoyu-skills",
+      "repository": "https://github.com/JimLiu/baoyu-skills",
+      "license": "MIT",
+      "keywords": [
+        "baoyu",
+        "宝玉",
+        "image-generation",
+        "illustration",
+        "infographic",
+        "translate",
+        "youtube",
+        "markdown"
+      ],
+      "skills": [
+        "./plugins/baoyu/baoyu-image-gen",
+        "./plugins/baoyu/baoyu-article-illustrator",
+        "./plugins/baoyu/baoyu-cover-image",
+        "./plugins/baoyu/baoyu-infographic",
+        "./plugins/baoyu/baoyu-translate",
+        "./plugins/baoyu/baoyu-url-to-markdown",
+        "./plugins/baoyu/baoyu-youtube-transcript"
+      ]
+    },
+    {
+      "name": "diagram-core",
+      "displayName": "绘图三件套",
+      "description": "图表生成 Agent Skills 精选（3 个）：mermaid、drawio、plantuml，把自然语言、源码或架构描述转成专业图表（导出 PNG/SVG）。上游 5 个见 plugins/diagram/ 目录自取。",
+      "source": "./",
+      "category": "design",
+      "keywords": [
+        "diagram",
+        "drawio",
+        "mermaid",
+        "plantuml",
+        "uml",
+        "visualization"
+      ],
+      "skills": [
+        "./plugins/diagram/mermaid",
+        "./plugins/diagram/drawio",
+        "./plugins/diagram/plantuml"
+      ]
+    },
+    {
+      "name": "taste-core",
+      "displayName": "taste 前端设计精选",
+      "description": "Leonxlnx anti-slop 前端设计精选（4 个）：taste-skill 主入口、imagegen-frontend-web/mobile 生图方向、redesign-skill 改版。上游 13 个见 plugins/writing/taste/ 目录自取。",
+      "source": "./",
+      "category": "design",
+      "keywords": [
+        "taste",
+        "anti-slop",
+        "frontend",
+        "design",
+        "redesign",
+        "image-generation"
+      ],
+      "skills": [
+        "./plugins/writing/taste/taste-skill",
+        "./plugins/writing/taste/imagegen-frontend-web",
+        "./plugins/writing/taste/imagegen-frontend-mobile",
+        "./plugins/writing/taste/redesign-skill"
+      ]
+    },
+    {
+      "name": "ppt",
+      "displayName": "归藏网页 PPT",
+      "description": "网页 PPT 生成技能：生成横向翻页单文件 HTML 网页 PPT，含 WebGL 背景、电子杂志风/瑞士国际主义风双模板系统（22 种版式、截图美化、数据大字报等）。",
+      "source": "./",
+      "category": "design",
+      "keywords": [
+        "presentation",
+        "ppt",
+        "guizang",
+        "web-deck",
+        "swiss-style"
+      ],
+      "skills": [
+        "./plugins/ppt/guizang-ppt"
+      ]
+    },
+    {
+      "name": "illustration",
+      "displayName": "插画 + 社交卡片",
+      "description": "文章配图与社交媒体卡片生成合集：小黑手绘插画（白底黑线描中文文章配图）+ 归藏风格社交卡片（小红书图文/公众号封面）。",
+      "source": "./",
+      "category": "design",
+      "keywords": [
+        "illustration",
+        "social-card",
+        "xiaohongshu",
+        "wechat-cover",
+        "hand-drawn"
+      ],
+      "skills": [
+        "./plugins/illustration/ian-xiaohei-illustrations",
+        "./plugins/illustration/guizang-social-card"
+      ]
+    },
+    {
+      "name": "libtv",
+      "displayName": "LibLib.tv 生图生视频",
+      "description": "LibLib.tv AI 生图/生视频 Agent Skill：创建会话、发送生图/生视频/编辑消息、上传参考文件、查询进展、批量下载结果，支持 Seedance、Kling、Wan 等模型。需 python3 与 LIBTV_ACCESS_KEY 环境变量。",
+      "source": "./",
+      "category": "design",
+      "author": {
+        "name": "libtv-labs"
+      },
+      "homepage": "https://github.com/libtv-labs/libtv-skills",
+      "repository": "https://github.com/libtv-labs/libtv-skills",
+      "license": "MIT",
+      "keywords": [
+        "libtv",
+        "liblib",
+        "image-generation",
+        "video-generation",
+        "seedance",
+        "kling"
+      ],
+      "skills": [
+        "./plugins/libtv/libtv-skill"
+      ]
+    },
+    {
+      "name": "lark-core",
+      "displayName": "飞书精选",
+      "description": "飞书 / Lark Agent Skills 精选（8 个）：认证基础、即时通讯、云文档、多维表格、电子表格、日历、任务、邮箱。需配合 npm 包 lark-cli 使用。上游全量 27 个见 plugins/lark/ 目录自取。",
+      "source": "./",
+      "category": "integration",
+      "keywords": [
+        "lark",
+        "feishu",
+        "飞书",
+        "lark-cli",
+        "im",
+        "doc",
+        "base",
+        "sheets",
+        "calendar",
+        "task",
+        "mail"
+      ],
+      "skills": [
+        "./plugins/lark/lark-shared",
+        "./plugins/lark/lark-im",
+        "./plugins/lark/lark-doc",
+        "./plugins/lark/lark-base",
+        "./plugins/lark/lark-sheets",
+        "./plugins/lark/lark-calendar",
+        "./plugins/lark/lark-task",
+        "./plugins/lark/lark-mail"
+      ]
+    },
+    {
+      "name": "wpsnote-core",
+      "displayName": "WPS 笔记精选",
+      "description": "WPS 笔记 Agent Skills 精选（6 个）：笔记读写基础、内容提炼成笔记、文档导入、网页导入、智能搜索、公众号发布。需配合 wpsnote-cli 使用。上游全量 36 个见 plugins/writing/wpsnote/ 目录自取。",
+      "source": "./",
+      "category": "integration",
+      "keywords": [
+        "wpsnote",
+        "wps-note",
+        "笔记",
+        "knowledge-base",
+        "wechat-publisher"
+      ],
+      "skills": [
+        "./plugins/writing/wpsnote/wps-note",
+        "./plugins/writing/wpsnote/content-digest",
+        "./plugins/writing/wpsnote/doc-importer",
+        "./plugins/writing/wpsnote/web-importer",
+        "./plugins/writing/wpsnote/wps-note-intelligent-search",
+        "./plugins/writing/wpsnote/wechat-publisher"
+      ]
+    },
+    {
+      "name": "neat-freak",
+      "displayName": "会话收尾知识库同步",
+      "description": "数字生命卡兹克的 neat-freak：会话收尾时把本次结论、决策与产物同步进知识库。上游全量 6 个见 plugins/khazix/ 目录自取。",
+      "source": "./",
+      "category": "integration",
+      "author": {
+        "name": "Khazix",
+        "url": "https://github.com/KKKKhazix"
+      },
+      "homepage": "https://github.com/KKKKhazix/khazix-skills",
+      "repository": "https://github.com/KKKKhazix/khazix-skills",
+      "license": "MIT",
+      "keywords": [
+        "khazix",
+        "neat-freak",
+        "session-summary",
+        "knowledge-sync"
+      ],
+      "skills": [
+        "./plugins/khazix/neat-freak"
+      ]
     }
   ]
 }
