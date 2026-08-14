@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**20 个精选 marketplace 插件**（6 大分类，共 81 个 skill），vendor 全集 **270 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
+当前规模：**21 个精选 marketplace 插件**（6 大分类，共 86 个 skill），vendor 全集 **275 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
 
 ---
 
@@ -41,6 +41,7 @@
 # writing
 /plugin install writing-polish@jangrui   # 去 AI 味润色（中英 5 个）
 /plugin install baoyu-core@jangrui       # AI 创作精选（需 Bun）
+/plugin install shuohao@jangrui          # AI 短剧制作（小说→角色/大纲/美术/剧本/分镜，需 Node 20+）
 
 # design
 /plugin install diagram-core@jangrui     # mermaid / drawio / plantuml / archify
@@ -83,6 +84,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | documents | `anydoc` | `plugins/anydoc/` | 1/1 | firecrawl/anydoc |
 | writing | `writing-polish` | `plugins/writing/`（润色 5 个） | 5/5 | blader/humanizer, hardikpandya/stop-slop, petergyang/no-ai-slop, MrGeDiao/shuorenhua 等 |
 | writing | `baoyu-core` | `plugins/baoyu/` | 7/21 | JimLiu/baoyu-skills |
+| writing | `shuohao` | `plugins/shuohao/` | 5/5 | eternityspring/shuohao-skills |
 | design | `diagram-core` | `plugins/diagram/` | 4/6 | Agents365-ai, tt-a1i/archify |
 | design | `taste-core` | `plugins/writing/taste/` | 4/13 | Leonxlnx/taste-skill |
 | design | `ppt` | `plugins/ppt/` | 1/1 | op7418/guizang-ppt-skill |
@@ -107,6 +109,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | `libtv` | `python3`（macOS 自带） | 设置环境变量 `LIBTV_ACCESS_KEY` |
 | `neat-freak` | 无 | 即装即用（khazix 全集中 hv-analysis 自取需 `pip install weasyprint markdown`） |
 | `anydoc` | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
+| `shuohao` | Node 20+（质量门/报告渲染脚本只用内置模块） | 免安装，脚本随 skill 自带 |
 | `anthropic-docs` | 文档四件套零额外依赖 | 自取其余 skill 按需 pip（slack-gif-creator 需 `pip install pillow imageio numpy`，webapp-testing 需 `pip install playwright && playwright install chromium`，mcp-builder 脚本需 `pip install anthropic mcp`） |
 | 其余 | 无 | 拷贝即用 |
 
@@ -129,6 +132,8 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │   ├── golang/                        ← 46 个 Go skill（扁平）
 │   ├── lark/                          ← 27 个飞书 skill（扁平）
 │   ├── baoyu/                         ← 21 个 AI 创作 skill（扁平）
+│   ├── shuohao/                       ← 5 个 AI 短剧制作 skill（小说→角色/大纲/美术/剧本/分镜）
+│   │   └── novel-characters/  novel-outline/  novel-art/  novel-script/  novel-storyboard/
 │   ├── grafana/                       ← 49 个 skill，7 个 category
 │   │   ├── grafana-core/  grafana-cloud/  grafana-lgtm/
 │   │   ├── grafana-plugins/  grafana-app-sdk/  grafana-k6/
@@ -150,7 +155,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │       ├── docx/  pdf/  pptx/  xlsx/  ← Office 文档处理
 │       ├── claude-api/  mcp-builder/  skill-creator/
 │       └── algorithmic-art/  canvas-design/  theme-factory/ 等
-├── scripts/                           ← 17 个同步脚本
+├── scripts/                           ← 19 个同步脚本
 │   ├── sync-anthropic-skills.sh
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
@@ -167,7 +172,9 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │   ├── sync-libtv-skills.sh
 │   ├── sync-khazix-skills.sh
 │   ├── sync-taste-skills.sh
-│   └── sync-anydoc-skills.sh
+│   ├── sync-anydoc-skills.sh
+│   ├── sync-opc-skills.sh
+│   └── sync-shuohao-skills.sh
 └── .github/workflows/                 ← 每日自动同步
 ```
 
@@ -275,6 +282,7 @@ lark-cli auth login --recommend
 - [larksuite/cli](https://github.com/larksuite/cli) — 飞书 27 个 skill
 - [grafana/skills](https://github.com/grafana/skills) — 49 个可观测性技能
 - [JimLiu/baoyu-skills](https://github.com/JimLiu/baoyu-skills) — 21 个 AI 创作技能
+- [eternityspring/shuohao-skills](https://github.com/eternityspring/shuohao-skills) — 5 个 AI 短剧制作技能：角色设定集、改编大纲、美术设定、剧本、分镜（Apache-2.0）
 - [wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) — 37 个 WPS 笔记技能
 - [t8y2/dbx](https://github.com/t8y2/dbx) — 数据库 CLI 技能
 - [libtv-labs/libtv-skills](https://github.com/libtv-labs/libtv-skills) — LibLib.tv 生图/生视频技能
