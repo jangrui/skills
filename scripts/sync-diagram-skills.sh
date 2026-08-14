@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # ============================================================================
-# sync-diagram-skills.sh — 同步绘图五件套上游更新到 vendor 目录
+# sync-diagram-skills.sh — 同步绘图六件套上游更新到 vendor 目录
 #
 # 机制：
-#   - 用 git sparse-checkout 只拉上游仓库的 skills/<name>/ 子目录（不要 .git/tests/docs）
+#   - 用 git sparse-checkout 只拉上游仓库的 skill 子目录（不要 .git/tests/docs）
 #   - 用 .upstream-commit 记录当前 vendor 的上游 commit，秒判是否最新
 #   - 同步后自动跑「自包含性自检」，防止上游引入兄弟包依赖导致 vendor 断裂
 #
 # 用法：
-#   ./scripts/sync-diagram-skills.sh             # 检查并同步全部 5 个
+#   ./scripts/sync-diagram-skills.sh             # 检查并同步全部 6 个
 #   ./scripts/sync-diagram-skills.sh drawio      # 只同步 drawio
 #   ./scripts/sync-diagram-skills.sh --check     # 仅检查不修改（dry-run）
 #
@@ -25,14 +25,21 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 PLUGIN_DIR="$REPO_ROOT/plugins/diagram"
 SKILLS_DIR="$PLUGIN_DIR"          # skill 直接放在 plugin 根下，无中间 skills/ 层
-UPSTREAM_OWNER="Agents365-ai"
+UPSTREAM_OWNER="Agents365-ai"     # 5 个图表 skill 的默认上游 org
 
 # skill 的三个名字（B 方案：本地目录名去掉 -skill 后缀）：
 #   - skill key:     drawio              (用户传参、日志显示)
 #   - 本地目录名:     drawio              (vendor 后的目录，已去后缀)
 #   - 上游仓库名:     drawio-skill        (clone 用的 repo 名)
 #   - 上游子目录名:   skills/drawio-skill (sparse-checkout 路径)
-SKILL_NAMES=(drawio mermaid excalidraw tldraw plantuml)
+# 例外：archify 来自 tt-a1i/archify 单仓库，skill 在 archify/ 子目录
+SKILL_NAMES=(drawio mermaid excalidraw tldraw plantuml archify)
+owner_for() {                # skill key → 上游 owner（默认 UPSTREAM_OWNER）
+  case "$1" in
+    archify)    echo "tt-a1i" ;;
+    *)          echo "$UPSTREAM_OWNER" ;;
+  esac
+}
 repo_for() {                # skill key → 上游仓库名
   case "$1" in
     drawio)     echo "drawio-skill" ;;
@@ -40,7 +47,14 @@ repo_for() {                # skill key → 上游仓库名
     excalidraw) echo "excalidraw-skill" ;;
     tldraw)     echo "tldraw-skill" ;;
     plantuml)   echo "plantuml-skill" ;;
+    archify)    echo "archify" ;;
     *) echo "$1-skill" ;;
+  esac
+}
+srcdir_for() {               # skill key → 上游仓库内 skill 子目录（sparse-checkout 路径）
+  case "$1" in
+    archify)    echo "archify" ;;
+    *)          echo "skills/$(repo_for "$1")" ;;
   esac
 }
 local_name() {              # skill key → 本地 vendor 目录名（= skill key，去后缀）
@@ -81,34 +95,36 @@ done
 # ---------- 同步单个 skill ----------
 sync_one() {
   local skill="$1"
-  local repo
+  local repo owner subdir
   repo=$(repo_for "$skill")
+  owner=$(owner_for "$skill")
+  subdir=$(srcdir_for "$skill")
   local localdir
   localdir=$(local_name "$skill")
   local vendor_dir="$SKILLS_DIR/$localdir"
   local commit_file="$vendor_dir/.upstream-commit"
 
-  echo "▶ $skill  (upstream: $UPSTREAM_OWNER/$repo → local: $localdir)"
+  echo "▶ $skill  (upstream: $owner/$repo → local: $localdir)"
 
-  # 抓取上游（sparse 只取 skills/<repo>/）
+  # 抓取上游（sparse 只取 skill 子目录）
   local tmp
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' RETURN
 
   if ! git clone --depth 1 --filter=blob:none --sparse \
-       "https://github.com/$UPSTREAM_OWNER/$repo.git" "$tmp/$repo" >/dev/null 2>&1; then
-    echo "  ❌ clone 失败：$UPSTREAM_OWNER/$repo"
+       "https://github.com/$owner/$repo.git" "$tmp/$repo" >/dev/null 2>&1; then
+    echo "  ❌ clone 失败：$owner/$repo"
     return 1
   fi
   # 不要吞掉 sparse-checkout 失败：空源 + rsync --delete 会清空已有 vendor
-  if ! (cd "$tmp/$repo" && git sparse-checkout set "skills/$repo") >/dev/null 2>&1; then
-    echo "  ❌ sparse-checkout 失败：skills/$repo"
+  if ! (cd "$tmp/$repo" && git sparse-checkout set "$subdir") >/dev/null 2>&1; then
+    echo "  ❌ sparse-checkout 失败：$subdir"
     return 1
   fi
 
-  local src="$tmp/$repo/skills/$repo"
+  local src="$tmp/$repo/$subdir"
   if [ ! -d "$src" ] || [ ! -f "$src/SKILL.md" ]; then
-    echo "  ❌ 上游无 skills/$repo/SKILL.md，请检查仓库结构是否变更"
+    echo "  ❌ 上游无 $subdir/SKILL.md，请检查仓库结构是否变更"
     return 1
   fi
 
@@ -128,7 +144,7 @@ sync_one() {
     echo "    旧: $old_commit"
     echo "    新: $new_commit"
     # 尝试拉旧 commit 做 diff（depth=1 拉不到历史时降级为只提示）
-    local diff_url="https://github.com/$UPSTREAM_OWNER/$repo/compare/$old_commit...$new_commit"
+    local diff_url="https://github.com/$owner/$repo/compare/$old_commit...$new_commit"
     echo "    diff: $diff_url"
   else
     echo "  ⚡ 首次同步（无 .upstream-commit 记录）"
@@ -141,8 +157,11 @@ sync_one() {
   fi
 
   # 用 rsync 同步：--delete 删除上游已删的文件，但保留 .upstream-commit
+  # （约定：不 vendor LICENSE；node_modules 防上游误提交）
   mkdir -p "$vendor_dir"
-  rsync -a --delete --exclude='.upstream-commit' "$src/" "$vendor_dir/"
+  rsync -a --delete \
+    --exclude='.upstream-commit' --exclude='LICENSE' --exclude='node_modules' \
+    "$src/" "$vendor_dir/"
   echo "$new_commit" > "$commit_file"
   echo "  ✅ 已更新到 $new_commit"
   UPDATED_SKILLS+=("$skill")

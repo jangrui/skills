@@ -1,7 +1,7 @@
 {
   "name": "diagram",
   "version": "0.1.0",
-  "description": "5 种图表技能合集：drawio / mermaid / excalidraw / tldraw / plantuml。把自然语言、源码或架构描述转成专业图表。",
+  "description": "6 种图表技能合集：drawio / mermaid / excalidraw / tldraw / plantuml / archify。把自然语言、源码或架构描述转成专业图表。",
   "author": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
@@ -18,7 +18,8 @@
     "mermaid",
     "excalidraw",
     "tldraw",
-    "plantuml"
+    "plantuml",
+    "archify"
   ],
   "category": "diagram",
   "skills": [
@@ -26,6 +27,7 @@
     "./mermaid",
     "./excalidraw",
     "./tldraw",
-    "./plantuml"
+    "./plantuml",
+    "./archify"
   ]
 }

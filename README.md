@@ -43,7 +43,7 @@
 /plugin install baoyu-core@jangrui       # AI 创作精选（需 Bun）
 
 # design
-/plugin install diagram-core@jangrui     # mermaid / drawio / plantuml
+/plugin install diagram-core@jangrui     # mermaid / drawio / plantuml / archify
 /plugin install taste-core@jangrui       # anti-slop 前端设计
 /plugin install ppt@jangrui              # 归藏网页 PPT
 /plugin install illustration@jangrui     # 插画 + 社交卡片
@@ -82,7 +82,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | documents | `anydoc` | `plugins/anydoc/` | 1/1 | firecrawl/anydoc |
 | writing | `writing-polish` | `plugins/writing/`（润色 5 个） | 5/5 | blader/humanizer, hardikpandya/stop-slop, petergyang/no-ai-slop, MrGeDiao/shuorenhua 等 |
 | writing | `baoyu-core` | `plugins/baoyu/` | 7/21 | JimLiu/baoyu-skills |
-| design | `diagram-core` | `plugins/diagram/` | 3/5 | Agents365-ai |
+| design | `diagram-core` | `plugins/diagram/` | 4/6 | Agents365-ai, tt-a1i/archify |
 | design | `taste-core` | `plugins/writing/taste/` | 4/13 | Leonxlnx/taste-skill |
 | design | `ppt` | `plugins/ppt/` | 1/1 | op7418/guizang-ppt-skill |
 | design | `illustration` | `plugins/illustration/` | 2/2 | helloianneo, op7418 |
@@ -113,8 +113,8 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 ```
 ├── .claude-plugin/marketplace.json    ← 唯一策展层（source "./" + skills 精选子集）
 ├── plugins/
-│   ├── diagram/                       ← 5 个 skill
-│   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/
+│   ├── diagram/                       ← 6 个 skill
+│   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/  archify/
 │   ├── writing/                       ← 5 润色 + 13 前端设计 + 37 wpsnote
 │   │   ├── humanizer/  humanizer-zh/  stop-slop/  no-ai-slop/  shuorenhua/
 │   │   ├── taste/                     ← 13 个前端设计 skill
@@ -255,6 +255,7 @@ lark-cli auth login --recommend
 所有 skill 的版权归各自上游作者，本仓库仅做索引、导航与必要的 vendor 聚合。感谢：
 
 - [Agents365-ai](https://github.com/Agents365-ai) — diagram skills
+- [tt-a1i/archify](https://github.com/tt-a1i/archify) — 交互式系统架构图
 - [blader/humanizer](https://github.com/blader/humanizer) — 英文去 AI 痕迹
 - [hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop) — 反 AI 腔写作
 - [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) — 移除 20+ AI slop 模式
