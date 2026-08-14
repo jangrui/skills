@@ -22,6 +22,7 @@ name: Sync skills
         type: choice
         options:
           - ''
+          - anthropic
           - anydoc
           - baoyu
           - dbx
@@ -50,6 +51,7 @@ jobs:
       - id: gen
         run: |
           ALL='[
+            {"plugin":"anthropic","add_path":"plugins/anthropic/","pr_hint":"plugins/anthropic/<skill>/"},
             {"plugin":"anydoc","add_path":"plugins/anydoc/","pr_hint":"plugins/anydoc/<skill>/"},
             {"plugin":"baoyu","add_path":"plugins/baoyu/","pr_hint":"plugins/baoyu/<skill>/"},
             {"plugin":"dbx","add_path":"plugins/dbx/","pr_hint":"plugins/dbx/<skill>/"},

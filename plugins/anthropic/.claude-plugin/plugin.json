@@ -1,0 +1,50 @@
+{
+  "name": "anthropic-skills",
+  "version": "0.1.0",
+  "description": "Anthropic 官方 Agent Skills 合集（17 个 skill）：docx/pdf/pptx/xlsx 文档处理、claude-api 参考、skill-creator、mcp-builder、frontend-design、canvas-design、algorithmic-art、theme-factory、webapp-testing、internal-comms 等。",
+  "author": {
+    "name": "Anthropic",
+    "url": "https://github.com/anthropics"
+  },
+  "homepage": "https://github.com/anthropics/skills",
+  "repository": "https://github.com/anthropics/skills",
+  "license": "Apache-2.0（13 个 skill）；docx/pdf/pptx/xlsx 为 Anthropic 专属条款，见各 skill 目录内 LICENSE.txt",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "plugin",
+    "ai-agent",
+    "skills",
+    "anthropic",
+    "docx",
+    "pdf",
+    "pptx",
+    "xlsx",
+    "claude-api",
+    "mcp",
+    "skill-creator",
+    "frontend-design",
+    "algorithmic-art",
+    "webapp-testing"
+  ],
+  "category": "anthropic",
+  "skills": [
+    "./algorithmic-art",
+    "./brand-guidelines",
+    "./canvas-design",
+    "./claude-api",
+    "./doc-coauthoring",
+    "./docx",
+    "./frontend-design",
+    "./internal-comms",
+    "./mcp-builder",
+    "./pdf",
+    "./pptx",
+    "./skill-creator",
+    "./slack-gif-creator",
+    "./theme-factory",
+    "./web-artifacts-builder",
+    "./webapp-testing",
+    "./xlsx"
+  ]
+}

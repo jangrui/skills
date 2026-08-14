@@ -3,8 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#claude-codemarketplace)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#codex-cli目录拷贝)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-213-informational)](#技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-17-informational)](#claude-codemarketplace)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-258-informational)](#技能目录)
+[![Plugins](https://img.shields.io/badge/Plugins-20-informational)](#claude-codemarketplace)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2006%3A00%20UTC-success)](#同步上游)
 
 面向 **Claude Code** 与 **Codex CLI** 的 AI 编程助手 skill 聚合仓库。
@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**17 个 marketplace 插件**，涵盖 **214 个 SKILL.md**，分布在 **12 个主题分类**。
+当前规模：**20 个 marketplace 插件**（含 `golang-core` 别名），涵盖 **258 个 SKILL.md**，分布在 **13 个主题分类**。
 
 ---
 
@@ -78,6 +78,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | 卡兹克工具箱 | `khazix-skills` | `plugins/khazix/` | 6 | KKKKhazix/khazix-skills |
 | 工程实践 | `mattpocock-skills` | `plugins/mattpocock/` | 22 | mattpocock/skills |
 | 文档转 Markdown | `anydoc` | `plugins/anydoc/` | 1 | firecrawl/anydoc |
+| Anthropic 官方 | —（不进 marketplace，仅目录拷贝） | `plugins/anthropic/` | 17 | anthropics/skills |
 
 Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 
@@ -91,6 +92,7 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 | `libtv` | `python3`（macOS 自带） | 设置环境变量 `LIBTV_ACCESS_KEY` |
 | `khazix-skills`（hv-analysis） | Python 3 + `weasyprint`、`markdown`（pip） | `pip install weasyprint markdown`；其余 5 个 skill 零依赖（storage-analyzer 纯标准库） |
 | `anydoc` | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
+| `anthropic`（目录拷贝） | Python 3 + 按需 pip 包 | 文档四件套（docx/pdf/pptx/xlsx）零额外依赖；slack-gif-creator 需 `pip install pillow imageio numpy`，webapp-testing 需 `pip install playwright && playwright install chromium`，mcp-builder 脚本需 `pip install anthropic mcp` |
 | 其余 | 无 | 拷贝即用 |
 
 ---
@@ -122,9 +124,14 @@ Grafana 拆成 7 个 plugin 允许按需安装，不必一次装全家桶。
 │   │   ├── leader/  neat-freak/  storage-analyzer/
 │   ├── mattpocock/                    ← 22 个 skill
 │   │   ├── engineering/  productivity/
-│   └── anydoc/                        ← 1 个 skill（文档转 Markdown）
-│       └── convert-documents-to-markdown/
-├── scripts/                           ← 15 个同步脚本
+│   ├── anydoc/                        ← 1 个 skill（文档转 Markdown）
+│   │   └── convert-documents-to-markdown/
+│   └── anthropic/                     ← Anthropic 官方 17 个 skill（扁平）
+│       ├── docx/  pdf/  pptx/  xlsx/  ← Office 文档处理
+│       ├── claude-api/  mcp-builder/  skill-creator/
+│       └── algorithmic-art/  canvas-design/  theme-factory/ 等
+├── scripts/                           ← 16 个同步脚本
+│   ├── sync-anthropic-skills.sh
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
 │   ├── sync-ppt-skills.sh
@@ -247,6 +254,7 @@ lark-cli auth login --recommend
 - [KKKKhazix/khazix-skills](https://github.com/KKKKhazix/khazix-skills) — 卡兹克 6 个技能：AI 资讯、横纵分析研究、公众号写作、agent 任务书、知识库收尾、存储分析
 - [mattpocock/skills](https://github.com/mattpocock/skills) — 工程实践技能
 - [firecrawl/anydoc](https://github.com/firecrawl/anydoc) — 文档转 Markdown 技能
+- [anthropics/skills](https://github.com/anthropics/skills) — Anthropic 官方 17 个技能：docx/pdf/pptx/xlsx 文档处理、claude-api 参考、skill-creator、mcp-builder 等（13 个 Apache-2.0；文档四件套为 Anthropic 专属条款，随 skill 保留 LICENSE.txt）
 - [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — 13 个 anti-slop 前端设计技能
 
 ---
