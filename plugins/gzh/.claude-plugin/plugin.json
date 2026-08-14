@@ -1,0 +1,26 @@
+{
+  "name": "gzh",
+  "version": "0.1.0",
+  "description": "微信公众号文章排版技能：Markdown 转可直接粘贴进公众号编辑器的 HTML，多主题组件库、自动章节编号、目录导航、代码块与图片排版，支持 docx/PDF/纯文本输入归一化与自定义主题生成。",
+  "author": {
+    "name": "jangrui",
+    "email": "admin@jangrui.com"
+  },
+  "license": "AGPL-3.0",
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "plugin",
+    "ai-agent",
+    "skills",
+    "wechat",
+    "gongzhonghao",
+    "wechat-official-account",
+    "typography",
+    "html"
+  ],
+  "category": "design",
+  "skills": [
+    "./gzh-design"
+  ]
+}

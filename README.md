@@ -46,6 +46,7 @@
 /plugin install diagram-core@jangrui     # mermaid / drawio / plantuml / archify
 /plugin install taste-core@jangrui       # anti-slop 前端设计
 /plugin install ppt@jangrui              # 归藏网页 PPT
+/plugin install gzh-design@jangrui       # 公众号文章排版（Markdown→HTML）
 /plugin install illustration@jangrui     # 插画 + 社交卡片
 /plugin install libtv@jangrui            # AI 生图/生视频（需 LIBTV_ACCESS_KEY）
 
@@ -85,6 +86,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | design | `diagram-core` | `plugins/diagram/` | 4/6 | Agents365-ai, tt-a1i/archify |
 | design | `taste-core` | `plugins/writing/taste/` | 4/13 | Leonxlnx/taste-skill |
 | design | `ppt` | `plugins/ppt/` | 1/1 | op7418/guizang-ppt-skill |
+| design | `gzh-design` | `plugins/gzh/` | 1/1 | isjiamu/gzh-design-skill |
 | design | `illustration` | `plugins/illustration/` | 2/2 | helloianneo, op7418 |
 | design | `libtv` | `plugins/libtv/` | 1/1 | libtv-labs/libtv-skills |
 | integration | `lark-core` | `plugins/lark/` | 8/27 | larksuite/cli |
@@ -120,6 +122,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │   │   ├── taste/                     ← 13 个前端设计 skill
 │   │   └── wpsnote/                   ← 37 个 skill
 │   ├── ppt/                           ← guizang-ppt
+│   ├── gzh/                           ← gzh-design 公众号文章排版
 │   ├── illustration/                  ← 插画 + 社交卡片
 │   ├── golang/                        ← 46 个 Go skill（扁平）
 │   ├── lark/                          ← 27 个飞书 skill（扁平）
@@ -141,11 +144,12 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │       ├── docx/  pdf/  pptx/  xlsx/  ← Office 文档处理
 │       ├── claude-api/  mcp-builder/  skill-creator/
 │       └── algorithmic-art/  canvas-design/  theme-factory/ 等
-├── scripts/                           ← 16 个同步脚本
+├── scripts/                           ← 17 个同步脚本
 │   ├── sync-anthropic-skills.sh
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
 │   ├── sync-ppt-skills.sh
+│   ├── sync-gzh-skills.sh
 │   ├── sync-illustration-skills.sh
 │   ├── sync-golang-skills.sh
 │   ├── sync-lark-skills.sh
@@ -260,6 +264,7 @@ lark-cli auth login --recommend
 - [hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop) — 反 AI 腔写作
 - [petergyang/no-ai-slop](https://github.com/petergyang/no-ai-slop) — 移除 20+ AI slop 模式
 - [op7418](https://github.com/op7418) — humanizer-zh / guizang-ppt / guizang-social-card
+- [isjiamu/gzh-design-skill](https://github.com/isjiamu/gzh-design-skill) — 微信公众号文章排版引擎（AGPL-3.0）
 - [samber/cc-skills-golang](https://github.com/samber/cc-skills-golang) — 46 个 Go 生产级技能
 - [larksuite/cli](https://github.com/larksuite/cli) — 飞书 27 个 skill
 - [grafana/skills](https://github.com/grafana/skills) — 49 个可观测性技能

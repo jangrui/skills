@@ -322,6 +322,32 @@
       ]
     },
     {
+      "name": "gzh-design",
+      "displayName": "公众号文章排版",
+      "description": "微信公众号文章排版引擎：把 Markdown（或 docx/PDF/纯文本自动归一化）转成可直接粘贴进公众号编辑器、样式不丢失的 HTML。9 套主题组件库 + 通用代码块/图片/标签组件，自动章节编号、目录导航、引言卡片、作者签名，支持一键自动排版与按参考图生成自定义主题。纯 Python 标准库脚本校验闭环。",
+      "source": "./",
+      "category": "design",
+      "author": {
+        "name": "isjiamu",
+        "url": "https://github.com/isjiamu"
+      },
+      "homepage": "https://github.com/isjiamu/gzh-design-skill",
+      "repository": "https://github.com/isjiamu/gzh-design-skill",
+      "license": "AGPL-3.0",
+      "keywords": [
+        "wechat",
+        "gongzhonghao",
+        "gzh",
+        "typography",
+        "html",
+        "markdown",
+        "official-account"
+      ],
+      "skills": [
+        "./plugins/gzh/gzh-design"
+      ]
+    },
+    {
       "name": "illustration",
       "displayName": "插画 + 社交卡片",
       "description": "文章配图与社交媒体卡片生成合集：小黑手绘插画（白底黑线描中文文章配图）+ 归藏风格社交卡片（小红书图文/公众号封面）。",
