@@ -4,6 +4,8 @@
 
 > Sources: humanizer, stop-slop, avoid-ai-writing, beautiful_prose.
 
+本表默认列代表项，不追求穷举同义变体。**这份清单是举例，不是边界。** 这里管的是修辞动作，不是字面：把一个命中的说法换一套词继续做同一件事——同样的 significance inflation、同样的 sycophantic opener、同样的空 hedging——仍然算命中。判断一个新说法要不要处理，看它在做什么动作，不看它在不在下面的列表里。反过来也成立：出现在列表里但在当前句子里承担实义的词，按误杀防护放行。
+
 ## Tier 1: Replace by default
 
 These words appear 5–20x more often in AI text than human text. Replace by default, but allow exceptions per misfire protection rules (see `severity.md`).
