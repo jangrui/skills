@@ -161,6 +161,7 @@ sync_one() {
   #   scripts/         上游的 CI/校验脚本（如 humanizer 的 validate-package.py）
   #   .github/         上游 CI
   #   AGENTS.md        上游 agent 指南
+  #   CLAUDE.md        上游 Claude 兼容文件（shuorenhua 是 -> AGENTS.md 软链，排除 AGENTS.md 后即悬空，须一并排除）
   #   README/LICENSE   文档与许可证
   mkdir -p "$vendor_dir"
   rsync -a --delete \
@@ -172,6 +173,7 @@ sync_one() {
     --exclude='agents' \
     --exclude='scripts' \
     --exclude='AGENTS.md' \
+    --exclude='CLAUDE.md' \
     --exclude='LICENSE' \
     --exclude='CHANGELOG.md' \
     --exclude='README.md' \
