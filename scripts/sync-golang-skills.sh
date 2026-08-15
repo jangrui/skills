@@ -23,7 +23,7 @@
 #   ./scripts/sync-golang-skills.sh --check          # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff skills/golang/<name>/
+#   git diff -- skills/golang/<name>/ .claude-plugin/marketplace.json
 #   git add skills/golang/
 #   git commit -m "chore(golang): sync <name> upstream <old>→<new>"
 # ============================================================================
@@ -71,6 +71,10 @@ done
 # CI 模式：记录变更到 $CI_CHANGES_FILE 供 workflow 读取
 CI_CHANGES_FILE="${CI_CHANGES_FILE:-}"
 UPDATED_SKILLS=()
+
+# 市场组版本只跟随已收录 skill 的实际内容变化；--check 保持只读。
+source "$REPO_ROOT/scripts/lib/marketplace-version.sh"
+marketplace_version_snapshot "$REPO_ROOT" "$PLUGIN_DIR" "$DRY_RUN"
 
 # ---------- 依赖检查 ----------
 for cmd in git rsync; do
@@ -225,10 +229,12 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff skills/golang/  人工 review 后 commit"
+  echo "下一步：git diff -- skills/golang/ .claude-plugin/marketplace.json  人工 review 后 commit"
 fi
 
 # CI 模式
+marketplace_version_apply "$DRY_RUN"
+
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then
   printf '%s\n' "${UPDATED_SKILLS[@]}" > "$CI_CHANGES_FILE"
   echo ""

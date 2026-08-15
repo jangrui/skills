@@ -5,8 +5,6 @@
 
 为 **Claude Code**、**Codex CLI**、**Codex 桌面版**和 **ZCode** 整理的可安装 AI Agent Skill 集合。按工作场景安装精选 skill，也可在 `skills/` 中查阅上游 skill。
 
-市场按场景提供精选 skill；`skills/` 同时保留未进入市场的上游 skill。
-
 本仓库不编写 skill 源码，只负责筛选和本地化保留。
 
 ## 快速开始
@@ -46,7 +44,7 @@
 
 | 场景组 | 内容 | 本地路径 | 上游 |
 |---|---|---|---|
-| `daily` 常用必备 | 去 AI 味润色与会话收尾 | `skills/humanizer/` 等、`skills/khazix/` | blader/humanizer 等 |
+| `daily` 常用必备 | 去 AI 味润色与会话收尾 | `skills/humanizer/`、`skills/khazix/` 等 | blader/humanizer 等 |
 | `coding` 代码 | Go 工程、工程实践与数据库 | `skills/golang/` `skills/mattpocock/` `skills/dbx/` | samber、mattpocock、t8y2 |
 | `design` 设计 | taste 前端设计 | `skills/taste/` | Leonxlnx/taste-skill |
 | `opc` | OPC 生图与平台调研 | `skills/opc/` | ReScienceLab/opc-skills |
@@ -56,10 +54,6 @@
 | `diagram` 图表与架构 | mermaid / drawio / plantuml / archify | `skills/drawio/` 等 | Agents365-ai、tt-a1i/archify |
 | `video` 视频制作 | 产品视频、LibLib 生图生视频与短剧 | `skills/shotcraft/` `skills/libtv/` `skills/shuohao/` | Vincentwei1021、libtv-labs、eternityspring |
 | `writing` 写作 | 宝玉 AI 创作、gzh 排版、插画与社交卡片 | `skills/baoyu/` `skills/gzh/` `skills/illustration/` | JimLiu/baoyu-skills、isjiamu、helloianneo/op7418 |
-
-市场只由 `.claude-plugin/marketplace.json` 策展：场景组使用 `source: "./"`、`strict: false` 和相对仓库根的 `./skills/...` 路径。Claude Code 原生读取条目；Codex 和 ZCode 的安装器据此合成各自的 manifest。
-
-未进入市场的 skill 仍保留在 `skills/` 下。
 
 ## 按需配置运行时依赖
 

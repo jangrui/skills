@@ -1,13 +1,13 @@
 name: Sync skills
 
 # 统一的 skill 同步 workflow（matrix 驱动，替代 12 个独立 workflow）
-# 每个矩阵项对应一个插件源：
-#   - plugin:    插件标识（baoyu / golang / lark …），用于分支名、label、脚本名
-#   - add_path:  git add 的路径（部分插件路径与名称不同，如 wpsnote → writing/wpsnote）
-#   - pr_hint:   PR 正文中给 review 者的路径提示
+# 每个矩阵项对应一个市场场景组：
+#   - marketplace_group: marketplace 条目名，用于版本、分支和并发锁
+#   - components:         同组的上游同步脚本；定时任务中串行执行
+#   - pr_hint:            PR 正文中给 review 者的路径提示
 #
-# 机制：跑 scripts/sync-<plugin>-skills.sh → 若有更新则自动开 PR → 自动审核 → 自动合并
-# 自动审核门禁（本 workflow）：diff 仅限 skills/、无 SKILL.md 被删、JSON 合法
+# 机制：跑 scripts/sync-<plugin>-skills.sh → 已收录内容变化时递增组版本 → 自动开 PR → 自动审核 → 自动合并
+# 自动审核门禁（本 workflow）：diff 仅限 skills/ 和 marketplace 版本、无 SKILL.md 被删、JSON 合法
 # AI 审核：由 CodeRabbit GitHub App 独立评审（非阻塞，仅建议）
 # 修 bug 只改这一个文件即可，不再维护 12 份副本
 "on":
@@ -16,7 +16,7 @@ name: Sync skills
   workflow_dispatch:
     inputs:
       plugin:
-        description: '只跑指定插件（留空跑全部）'
+        description: '运行指定同步源所属的市场组（留空跑全部）'
         required: false
         default: ''
         type: choice
@@ -29,6 +29,7 @@ name: Sync skills
           - diagram
           - golang
           - grafana
+          - gzh
           - illustration
           - khazix
           - lark
@@ -55,29 +56,20 @@ jobs:
       - id: gen
         run: |
           ALL='[
-            {"plugin":"anthropic","add_path":"skills/anthropic/","pr_hint":"skills/anthropic/<skill>/"},
-            {"plugin":"anydoc","add_path":"skills/anydoc/","pr_hint":"skills/anydoc/<skill>/"},
-            {"plugin":"baoyu","add_path":"skills/baoyu/","pr_hint":"skills/baoyu/<skill>/"},
-            {"plugin":"dbx","add_path":"skills/dbx/","pr_hint":"skills/dbx/<skill>/"},
-            {"plugin":"diagram","add_path":"skills/drawio/ skills/mermaid/ skills/excalidraw/ skills/tldraw/ skills/plantuml/ skills/archify/","pr_hint":"skills/<repo>/<skill>/（6 个绘图仓）"},
-            {"plugin":"golang","add_path":"skills/golang/","pr_hint":"skills/golang/<skill>/"},
-            {"plugin":"grafana","add_path":"skills/grafana/","pr_hint":"skills/grafana/<category>/<skill>/"},
-            {"plugin":"illustration","add_path":"skills/illustration/","pr_hint":"skills/illustration/"},
-            {"plugin":"khazix","add_path":"skills/khazix/","pr_hint":"skills/khazix/<skill>/"},
-            {"plugin":"lark","add_path":"skills/lark/","pr_hint":"skills/lark/<skill>/"},
-            {"plugin":"libtv","add_path":"skills/libtv/","pr_hint":"skills/libtv/<skill>/"},
-            {"plugin":"mattpocock","add_path":"skills/mattpocock/","pr_hint":"skills/mattpocock/<bucket>/<skill>/"},
-            {"plugin":"opc","add_path":"skills/opc/","pr_hint":"skills/opc/<skill>/"},
-            {"plugin":"ppt","add_path":"skills/ppt/","pr_hint":"skills/ppt/guizang-ppt/"},
-            {"plugin":"shuohao","add_path":"skills/shuohao/","pr_hint":"skills/shuohao/<skill>/"},
-            {"plugin":"shotcraft","add_path":"skills/shotcraft/","pr_hint":"skills/shotcraft/video-shotcraft/"},
-            {"plugin":"taste","add_path":"skills/taste/","pr_hint":"skills/taste/<skill>/"},
-            {"plugin":"wpsnote","add_path":"skills/wpsnote/","pr_hint":"skills/wpsnote/<skill>/"},
-            {"plugin":"writing","add_path":"skills/humanizer/ skills/humanizer-zh/ skills/stop-slop/ skills/no-ai-slop/ skills/shuorenhua/","pr_hint":"skills/<repo>/<skill>/（5 个润色仓）"}
+            {"marketplace_group":"jangrui-coding","components":["golang","mattpocock","dbx"],"pr_hint":"skills/golang/、skills/mattpocock/、skills/dbx/"},
+            {"marketplace_group":"jangrui-collab","components":["lark","wpsnote"],"pr_hint":"skills/lark/、skills/wpsnote/"},
+            {"marketplace_group":"jangrui-daily","components":["writing","khazix"],"pr_hint":"skills/<repo>/<skill>/（日常辅助）"},
+            {"marketplace_group":"jangrui-design","components":["taste"],"pr_hint":"skills/taste/<skill>/"},
+            {"marketplace_group":"jangrui-diagram","components":["diagram"],"pr_hint":"skills/<repo>/<skill>/（绘图仓）"},
+            {"marketplace_group":"jangrui-observability","components":["grafana"],"pr_hint":"skills/grafana/<category>/<skill>/"},
+            {"marketplace_group":"jangrui-office","components":["anthropic","anydoc","ppt"],"pr_hint":"skills/anthropic/、skills/anydoc/、skills/ppt/"},
+            {"marketplace_group":"jangrui-opc","components":["opc"],"pr_hint":"skills/opc/<skill>/"},
+            {"marketplace_group":"jangrui-video","components":["shotcraft","libtv","shuohao"],"pr_hint":"skills/shotcraft/、skills/libtv/、skills/shuohao/"},
+            {"marketplace_group":"jangrui-writing","components":["baoyu","gzh","illustration"],"pr_hint":"skills/baoyu/、skills/gzh/、skills/illustration/"}
           ]'
           SELECTED="${{ github.event.inputs.plugin }}"
           if [ -n "$SELECTED" ]; then
-            MATRIX=$(echo "$ALL" | jq -c --arg p "$SELECTED" 'map(select(.plugin == $p))')
+            MATRIX=$(echo "$ALL" | jq -c --arg p "$SELECTED" 'map(select(.components | index($p)))')
           else
             MATRIX=$(echo "$ALL" | jq -c '.')
           fi
@@ -94,7 +86,7 @@ jobs:
         include: ${{ fromJson(needs.matrix-config.outputs.matrix) }}
     runs-on: ubuntu-latest
     concurrency:
-      group: sync-${{ matrix.plugin }}-skills
+      group: sync-${{ matrix.marketplace_group }}-skills
       cancel-in-progress: false
     steps:
       - name: Checkout
@@ -105,26 +97,59 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Run sync script
-        id: sync
-        env:
-          CI_CHANGES_FILE: /tmp/updated-skills.txt
+      - name: Refresh main
         run: |
-          bash ./scripts/sync-${{ matrix.plugin }}-skills.sh
-          if [ -f "$CI_CHANGES_FILE" ]; then
+          git fetch origin main --depth=1
+          git checkout --detach origin/main
+
+      - name: Run group sync scripts
+        id: sync
+        run: |
+          set -euo pipefail
+          ALL_CHANGES_FILE=/tmp/updated-skills.txt
+          DEFERRED_GROUPS_FILE=/tmp/marketplace-version-groups.txt
+          : > "$ALL_CHANGES_FILE"
+          : > "$DEFERRED_GROUPS_FILE"
+          COMPONENTS='${{ toJson(matrix.components) }}'
+
+          while IFS= read -r PLUGIN; do
+            PLUGIN_CHANGES_FILE="/tmp/updated-${PLUGIN}-skills.txt"
+            : > "$PLUGIN_CHANGES_FILE"
+            CI_CHANGES_FILE="$PLUGIN_CHANGES_FILE" \
+              MARKETPLACE_VERSION_DEFER=1 \
+              MARKETPLACE_VERSION_GROUPS_FILE="$DEFERRED_GROUPS_FILE" \
+              bash "./scripts/sync-${PLUGIN}-skills.sh"
+            if [ -s "$PLUGIN_CHANGES_FILE" ]; then
+              sed "s#^#${PLUGIN}/#" "$PLUGIN_CHANGES_FILE" >> "$ALL_CHANGES_FILE"
+            fi
+          done < <(printf '%s' "$COMPONENTS" | jq -r '.[]')
+
+          if [ -s "$DEFERRED_GROUPS_FILE" ]; then
+            python3 ./scripts/bump-marketplace-versions.py bump-groups \
+              --marketplace ./.claude-plugin/marketplace.json \
+              --groups-file "$DEFERRED_GROUPS_FILE"
+          fi
+
+          if [ -s "$ALL_CHANGES_FILE" ]; then
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
             echo "updated<<EOF" >> "$GITHUB_OUTPUT"
-            cat "$CI_CHANGES_FILE" >> "$GITHUB_OUTPUT"
+            cat "$ALL_CHANGES_FILE" >> "$GITHUB_OUTPUT"
             echo "EOF" >> "$GITHUB_OUTPUT"
-            count=$(wc -l < "$CI_CHANGES_FILE" | tr -d ' ')
+            count=$(wc -l < "$ALL_CHANGES_FILE" | tr -d ' ')
             echo "count=$count" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Validate version automation
+        run: |
+          bash -n scripts/lib/marketplace-version.sh scripts/sync-*-skills.sh
+          python3 -m unittest -v tests/test_marketplace_versions.py
+          jq empty .claude-plugin/marketplace.json
+
       - name: Skip if no changes
         if: steps.sync.outputs.has_changes != 'true'
-        run: echo "✅ 所有 ${{ matrix.plugin }} skill 已是最新，无需 PR"
+        run: echo "✅ 所有 ${{ matrix.marketplace_group }} 组内 skill 已是最新，无需 PR"
 
       - name: Create branch & commit
         id: commit
@@ -132,23 +157,24 @@ jobs:
         env:
           COUNT: ${{ steps.sync.outputs.count }}
           UPDATED: ${{ steps.sync.outputs.updated }}
+          GROUP: ${{ matrix.marketplace_group }}
         run: |
-          BRANCH="chore/sync-${{ matrix.plugin }}"
+          BRANCH="chore/sync-${GROUP}"
           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
           git checkout -B "$BRANCH"
-          git add ${{ matrix.add_path }}
+          git add -- skills/ .claude-plugin/marketplace.json
           # 防御 sync 脚本误报：仅在确有可提交变化时才 commit/PR，避免空提交致 PR 失败
           if git diff --cached --quiet; then
             echo "pr_ready=false" >> "$GITHUB_OUTPUT"
-            echo "[SKIP] ${{ matrix.plugin }}: 脚本报告有更新但 git 无实际差异，跳过 PR"
+            echo "[SKIP] ${GROUP}: 脚本报告有更新但 git 无实际差异，跳过 PR"
             exit 0
           fi
           git commit -m "$(cat <<COMMIT_EOF
-          chore(${{ matrix.plugin }}): sync ${COUNT} upstream skill(s)
+          chore(${GROUP}): sync ${COUNT} upstream skill(s)
 
           Updated: $(echo "$UPDATED" | tr '\n' ' ')
 
-          Run ./scripts/sync-${{ matrix.plugin }}-skills.sh --check locally to reproduce.
+          Run the matching ./scripts/sync-*-skills.sh --check commands locally to reproduce.
           COMMIT_EOF
           )"
           git push origin "$BRANCH" --force
@@ -161,12 +187,12 @@ jobs:
           COUNT: ${{ steps.sync.outputs.count }}
           UPDATED: ${{ steps.sync.outputs.updated }}
           PR_HINT: ${{ matrix.pr_hint }}
-          PLUGIN: ${{ matrix.plugin }}
+          GROUP: ${{ matrix.marketplace_group }}
         run: |
           PR_BODY=$(cat <<BODY
           ## 上游同步
 
-          本次检测到 **${COUNT} 个** ${PLUGIN} skill 有上游更新，已自动 vendor 到 \`${{ matrix.add_path }}\`。
+          本次检测到 **${COUNT} 个** ${GROUP} 组内 skill 有上游更新，已自动 vendor 到 \`${PR_HINT}\`；若已收录内容发生变化，市场组版本会一并递增。
 
           ### 更新的 skill
           $(echo "$UPDATED" | sed 's/^/- /')
@@ -176,7 +202,7 @@ jobs:
           - ✅ 自包含性自检通过
 
           ### 自动审核 & 合并
-          - 门禁：diff 仅限 \`skills/\`、无 \`SKILL.md\` 删除、JSON 合法
+          - 门禁：diff 仅限 \`skills/\` 与该组的 \`marketplace.json\` 版本字段、无 \`SKILL.md\` 删除、JSON 合法
           - 通过即自动 squash 合并；不通过会评论原因并留人工
           - AI 评审（CodeRabbit）为非阻塞建议
 
@@ -185,7 +211,7 @@ jobs:
           BODY
           )
 
-          # 幂等：每插件固定分支，已有 open PR 则仅 force-push 更新内容（PR 自动跟随），跳过重复创建
+          # 幂等：每场景组固定分支，已有 open PR 则仅 force-push 更新内容（PR 自动跟随），跳过重复创建
           EXISTING=$(gh pr list --head "${BRANCH}" --base main --state open --json number --jq '.[0].number // empty')
           if [ -n "${EXISTING}" ]; then
             echo "已存在 open PR #${EXISTING}，已通过 force-push 更新内容，跳过重复创建"
@@ -193,36 +219,48 @@ jobs:
           fi
 
           gh pr create \
-            --title "chore(${PLUGIN}): sync ${COUNT} upstream skill(s) 🔄" \
+            --title "chore(${GROUP}): sync ${COUNT} upstream skill(s) 🔄" \
             --body "$PR_BODY" \
             --base main \
             --head "$BRANCH" \
             --label "dependencies"
 
       - name: Auto-review & merge
-        # 总是运行：既合并本次新建 PR，也清理本插件遗留 open sync PR（无 PR 则跳过）
+        # 总是运行：既合并本次新建 PR，也清理本场景组遗留 open sync PR（无 PR 则跳过）
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PLUGIN: ${{ matrix.plugin }}
+          GROUP: ${{ matrix.marketplace_group }}
         run: |
           set -euo pipefail
-          BRANCH="chore/sync-${PLUGIN}"
-          # 定位本插件的 open PR（固定分支，新建/复用两种情形统一处理）
+          BRANCH="chore/sync-${GROUP}"
+          # 定位本场景组的 open PR（固定分支，新建/复用两种情形统一处理）
           PR=$(gh pr list --head "${BRANCH}" --base main --state open --json number --jq '.[0].number // empty')
           if [ -z "${PR}" ]; then
             echo "未找到 ${BRANCH} 的 open PR，跳过自动合并"
             exit 0
           fi
-          echo "🎯 自动审核 PR #${PR} (${PLUGIN})"
+          echo "🎯 自动审核 PR #${PR} (${GROUP})"
 
-          # 拉取 main 做两点 diff（仅比树，浅克隆安全）
-          git fetch origin main --depth=1
-          CHANGED=$(git diff --name-only origin/main HEAD)
+          # 即使本轮没有新变更，也要审核并处理已有 PR：检出实际 PR 分支，
+          # 再用 merge-base 取得精确差异，避免误审当前 main。
+          # 校验器从当前 main 复制，不能执行待审 PR 自己改写后的脚本。
+          TRUSTED_VERSION_VALIDATOR=/tmp/bump-marketplace-versions.py
+          cp ./scripts/bump-marketplace-versions.py "$TRUSTED_VERSION_VALIDATOR"
+          MAIN_REFSPEC="+refs/heads/main:refs/remotes/origin/main"
+          BRANCH_REFSPEC="+refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}"
+          if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+            git fetch --unshallow --no-tags origin "$MAIN_REFSPEC" "$BRANCH_REFSPEC"
+          else
+            git fetch --no-tags origin "$MAIN_REFSPEC" "$BRANCH_REFSPEC"
+          fi
+          git checkout --detach "origin/${BRANCH}"
+          BASE=$(git merge-base origin/main HEAD)
+          CHANGED=$(git diff --name-only "$BASE" HEAD)
           echo "变更文件："; echo "${CHANGED}" | sed 's/^/  /'
 
-          # 门禁 1：diff 仅允许落在 skills/ 下，防止 sync 脚本误伤仓库基础设施
-          OUT_OF_SCOPE=$(echo "${CHANGED}" | grep -v '^skills/' || true)
+          # 门禁 1：只允许同步内容和唯一的市场版本文件。
+          OUT_OF_SCOPE=$(echo "${CHANGED}" | grep -v -E '^(skills/|\.claude-plugin/marketplace\.json$)' || true)
           if [ -n "${OUT_OF_SCOPE}" ]; then
             MSG=$(printf '⛔ **自动审核未通过**：检测到 `skills/` 之外的变更，已阻止自动合并，需人工介入：\n\n```\n%s\n```' "${OUT_OF_SCOPE}")
             gh pr comment "${PR}" --body "${MSG}"
@@ -230,7 +268,7 @@ jobs:
           fi
 
           # 门禁 2：不允许删除 SKILL.md（上游删除需人工确认，防止 skill 静默丢失）
-          DELETED_SKILL=$(git diff --name-only --diff-filter=D origin/main HEAD | grep 'SKILL.md$' || true)
+          DELETED_SKILL=$(git diff --name-only --diff-filter=D "$BASE" HEAD | grep 'SKILL.md$' || true)
           if [ -n "${DELETED_SKILL}" ]; then
             MSG=$(printf '⛔ **自动审核未通过**：检测到 SKILL.md 被删除，需人工确认：\n\n```\n%s\n```' "${DELETED_SKILL}")
             gh pr comment "${PR}" --body "${MSG}"
@@ -250,7 +288,16 @@ jobs:
             done <<< "${JSON_FILES}"
           fi
 
-          echo "✅ 三道门禁通过，准备 squash 合并"
+          # 门禁 4：市场清单只能递增本场景组的 version，不能借同步 PR 改策展内容。
+          if echo "${CHANGED}" | grep -qx '.claude-plugin/marketplace.json'; then
+            python3 "$TRUSTED_VERSION_VALIDATOR" validate-diff \
+              --marketplace ./.claude-plugin/marketplace.json \
+              --base "$BASE" \
+              --target HEAD \
+              --allowed-group "${GROUP}"
+          fi
+
+          echo "✅ 四道门禁通过，准备 squash 合并"
           if gh pr merge "${PR}" --squash --delete-branch; then
             echo "🎉 PR #${PR} 已自动合并到 main"
           else

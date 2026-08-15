@@ -9,6 +9,7 @@
     {
       "name": "jangrui-coding",
       "displayName": "jangrui-coding",
+      "version": "0.0.0",
       "description": "软件开发与工程实践：覆盖代码质量、并发与错误处理、测试、审查、诊断、命令行、配置和数据库探索。",
       "source": "./",
       "strict": false,
@@ -39,6 +40,7 @@
     {
       "name": "jangrui-collab",
       "displayName": "jangrui-collab",
+      "version": "0.0.0",
       "description": "协作平台集成：在已接入的平台中处理消息、文档、表格、日程、任务与内容流转；需相应 CLI 与授权。",
       "source": "./",
       "strict": false,
@@ -67,6 +69,7 @@
     {
       "name": "jangrui-daily",
       "displayName": "jangrui-daily",
+      "version": "0.0.0",
       "description": "日常工作辅助：改善中英文表达、整理项目知识并完成会话收尾。",
       "source": "./",
       "strict": false,
@@ -87,6 +90,7 @@
     {
       "name": "jangrui-design",
       "displayName": "jangrui-design",
+      "version": "0.0.0",
       "description": "产品界面与视觉设计：探索设计方向，创建或改进页面和交互。",
       "source": "./",
       "strict": false,
@@ -105,6 +109,7 @@
     {
       "name": "jangrui-diagram",
       "displayName": "jangrui-diagram",
+      "version": "0.0.0",
       "description": "图表与架构表达：制作流程图、架构图、UML 等结构化图表。",
       "source": "./",
       "strict": false,
@@ -123,6 +128,7 @@
     {
       "name": "jangrui-observability",
       "displayName": "jangrui-observability",
+      "version": "0.0.0",
       "description": "可观测性与运行分析：处理指标、日志、追踪、告警、仪表盘、数据采集和性能分析。",
       "source": "./",
       "strict": false,
@@ -147,6 +153,7 @@
     {
       "name": "jangrui-office",
       "displayName": "jangrui-office",
+      "version": "0.0.0",
       "description": "办公文档与演示材料处理：编辑、转换和生成文档、PDF、演示文稿及表格。",
       "source": "./",
       "strict": false,
@@ -167,6 +174,7 @@
     {
       "name": "jangrui-opc",
       "displayName": "jangrui-opc",
+      "version": "0.0.0",
       "description": "品牌与增长运营：支持视觉内容、社区与产品研究、搜索优化和域名筛选；部分能力需 API Key。",
       "source": "./",
       "strict": false,
@@ -190,6 +198,7 @@
     {
       "name": "jangrui-video",
       "displayName": "jangrui-video",
+      "version": "0.0.0",
       "description": "视频与短剧制作：生成和编辑图像/视频，完成产品视频与叙事内容的角色、大纲、美术、剧本和分镜开发。",
       "source": "./",
       "strict": false,
@@ -211,6 +220,7 @@
     {
       "name": "jangrui-writing",
       "displayName": "jangrui-writing",
+      "version": "0.0.0",
       "description": "内容创作与图文制作：支持写作、翻译、内容提取、排版与视觉素材制作。",
       "source": "./",
       "strict": false,
