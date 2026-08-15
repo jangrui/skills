@@ -448,6 +448,33 @@
       ]
     },
     {
+      "name": "video-shotcraft",
+      "displayName": "电影感产品视频制作",
+      "description": "video-shotcraft 电影感产品视频 Agent Skill：106 张镜头配方卡 + 已验收 Ink Press 宣传片模板（36.2s / 1080p / 10 镜头）+ Remotion 组件与音频资产 + 六阶段工作流（真实页面截图、2.5D 运镜、节奏卡点、声音设计、剪映工程导出）。需 Node 20+ 与 Remotion（npm），卡点分析可选 librosa。",
+      "source": "./",
+      "category": "design",
+      "author": {
+        "name": "Wei Yihao",
+        "url": "https://github.com/Vincentwei1021"
+      },
+      "homepage": "https://github.com/Vincentwei1021/video-shotcraft",
+      "repository": "https://github.com/Vincentwei1021/video-shotcraft",
+      "license": "Apache-2.0",
+      "keywords": [
+        "video",
+        "remotion",
+        "motion-design",
+        "product-video",
+        "promo",
+        "cinematic",
+        "beat-sync",
+        "sound-design"
+      ],
+      "skills": [
+        "./plugins/shotcraft/video-shotcraft"
+      ]
+    },
+    {
       "name": "lark-core",
       "displayName": "飞书精选",
       "description": "飞书 / Lark Agent Skills 精选（8 个）：认证基础、即时通讯、云文档、多维表格、电子表格、日历、任务、邮箱。需配合 npm 包 lark-cli 使用。上游全量 27 个见 plugins/lark/ 目录自取。",

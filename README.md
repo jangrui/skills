@@ -3,8 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#claude-codemarketplace)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#codex-cli目录拷贝)
-[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-258-informational)](#技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-17-informational)](#claude-codemarketplace)
+[![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-276-informational)](#技能目录)
+[![Plugins](https://img.shields.io/badge/Plugins-22-informational)](#claude-codemarketplace)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2006%3A00%20UTC-success)](#同步上游)
 
 面向 **Claude Code** 与 **Codex CLI** 的 AI 编程助手 skill 聚合仓库。
@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**21 个精选 marketplace 插件**（6 大分类，共 86 个 skill），vendor 全集 **275 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
+当前规模：**22 个精选 marketplace 插件**（6 大分类，共 87 个 skill），vendor 全集 **276 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
 
 ---
 
@@ -50,6 +50,7 @@
 /plugin install gzh-design@jangrui       # 公众号文章排版（Markdown→HTML）
 /plugin install illustration@jangrui     # 插画 + 社交卡片
 /plugin install libtv@jangrui            # AI 生图/生视频（需 LIBTV_ACCESS_KEY）
+/plugin install video-shotcraft@jangrui  # 电影感产品视频（Remotion，需 Node 20+）
 
 # integration
 /plugin install lark-core@jangrui        # 飞书精选（需 lark-cli）
@@ -92,6 +93,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | design | `illustration` | `plugins/illustration/` | 2/2 | helloianneo, op7418 |
 | design | `libtv` | `plugins/libtv/` | 1/1 | libtv-labs/libtv-skills |
 | design | `opc-design` | `plugins/opc/` | 3/10 | ReScienceLab/opc-skills |
+| design | `video-shotcraft` | `plugins/shotcraft/` | 1/1 | Vincentwei1021/video-shotcraft |
 | integration | `lark-core` | `plugins/lark/` | 8/27 | larksuite/cli |
 | integration | `wpsnote-core` | `plugins/writing/wpsnote/` | 6/37 | wpsnote/wpsnote-skills |
 | integration | `neat-freak` | `plugins/khazix/` | 1/6 | KKKKhazix/khazix-skills |
@@ -110,6 +112,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | `neat-freak` | 无 | 即装即用（khazix 全集中 hv-analysis 自取需 `pip install weasyprint markdown`） |
 | `anydoc` | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
 | `shuohao` | Node 20+（质量门/报告渲染脚本只用内置模块） | 免安装，脚本随 skill 自带 |
+| `video-shotcraft` | Node 20+ + Remotion（npm） | 模板工程内 `npm install` 即可渲染；页面截图需 `npm i puppeteer`，卡点分析可选 `pip install librosa`，剪映导出可选 `pip install pyJianYingDraft` |
 | `anthropic-docs` | 文档四件套零额外依赖 | 自取其余 skill 按需 pip（slack-gif-creator 需 `pip install pillow imageio numpy`，webapp-testing 需 `pip install playwright && playwright install chromium`，mcp-builder 脚本需 `pip install anthropic mcp`） |
 | 其余 | 无 | 拷贝即用 |
 
@@ -144,6 +147,8 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │   │   ├── nanobanana/  logo-creator/  banner-creator/  ← Gemini 生图设计
 │   │   ├── reddit/  twitter/  producthunt/  requesthunt/  ← 平台调研
 │   │   └── seo-geo/  domain-hunter/  archive/
+│   ├── shotcraft/                     ← 1 个电影感产品视频 skill（约 50MB，音频资产占大头）
+│   │   └── video-shotcraft/           ← 镜头配方卡 + Ink Press 模板 + Remotion 组件/SFX
 │   ├── khazix/                        ← 6 个卡兹克 skill（扁平）
 │   │   ├── aihot/  hv-analysis/  khazix-writer/
 │   │   ├── leader/  neat-freak/  storage-analyzer/
@@ -155,7 +160,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │       ├── docx/  pdf/  pptx/  xlsx/  ← Office 文档处理
 │       ├── claude-api/  mcp-builder/  skill-creator/
 │       └── algorithmic-art/  canvas-design/  theme-factory/ 等
-├── scripts/                           ← 19 个同步脚本
+├── scripts/                           ← 20 个同步脚本
 │   ├── sync-anthropic-skills.sh
 │   ├── sync-diagram-skills.sh
 │   ├── sync-writing-skills.sh
@@ -174,7 +179,8 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 │   ├── sync-taste-skills.sh
 │   ├── sync-anydoc-skills.sh
 │   ├── sync-opc-skills.sh
-│   └── sync-shuohao-skills.sh
+│   ├── sync-shuohao-skills.sh
+│   └── sync-shotcraft-skills.sh
 └── .github/workflows/                 ← 每日自动同步
 ```
 
@@ -291,6 +297,7 @@ lark-cli auth login --recommend
 - [firecrawl/anydoc](https://github.com/firecrawl/anydoc) — 文档转 Markdown 技能
 - [anthropics/skills](https://github.com/anthropics/skills) — Anthropic 官方 17 个技能：docx/pdf/pptx/xlsx 文档处理、claude-api 参考、skill-creator、mcp-builder 等（13 个 Apache-2.0；文档四件套为 Anthropic 专属条款，随 skill 保留 LICENSE.txt）
 - [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — 13 个 anti-slop 前端设计技能
+- [Vincentwei1021/video-shotcraft](https://github.com/Vincentwei1021/video-shotcraft) — 电影感产品视频制作技能：106 张镜头配方卡、Ink Press 宣传片模板、Remotion 组件与音频资产（Apache-2.0）
 
 ---
 

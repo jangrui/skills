@@ -30,10 +30,14 @@ name: Sync skills
           - golang
           - grafana
           - illustration
+          - khazix
           - lark
           - libtv
           - mattpocock
+          - opc
           - ppt
+          - shuohao
+          - shotcraft
           - taste
           - wpsnote
           - writing
@@ -63,7 +67,10 @@ jobs:
             {"plugin":"lark","add_path":"plugins/lark/","pr_hint":"plugins/lark/<skill>/"},
             {"plugin":"libtv","add_path":"plugins/libtv/","pr_hint":"plugins/libtv/<skill>/"},
             {"plugin":"mattpocock","add_path":"plugins/mattpocock/","pr_hint":"plugins/mattpocock/<bucket>/<skill>/"},
+            {"plugin":"opc","add_path":"plugins/opc/","pr_hint":"plugins/opc/<skill>/"},
             {"plugin":"ppt","add_path":"plugins/ppt/","pr_hint":"plugins/ppt/guizang-ppt/"},
+            {"plugin":"shuohao","add_path":"plugins/shuohao/","pr_hint":"plugins/shuohao/<skill>/"},
+            {"plugin":"shotcraft","add_path":"plugins/shotcraft/","pr_hint":"plugins/shotcraft/video-shotcraft/"},
             {"plugin":"taste","add_path":"plugins/writing/taste/","pr_hint":"plugins/writing/taste/<skill>/"},
             {"plugin":"wpsnote","add_path":"plugins/writing/wpsnote/","pr_hint":"plugins/writing/wpsnote/<skill>/"},
             {"plugin":"writing","add_path":"plugins/writing/","pr_hint":"plugins/writing/<skill>/"}
