@@ -4,7 +4,7 @@
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#claude-codemarketplace)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#codex-cli目录拷贝)
 [![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-276-informational)](#技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-21-informational)](#claude-codemarketplace)
+[![Plugins](https://img.shields.io/badge/Plugins-10-informational)](#claude-codemarketplace)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2006%3A00%20UTC-success)](#同步上游)
 
 面向 **Claude Code** 与 **Codex CLI** 的 AI 编程助手 skill 聚合仓库。
@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**21 个精选 marketplace 插件**（6 大分类，共 87 个 skill），vendor 全集 **276 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
+当前规模：**10 个使用场景组插件**（共 86 个精选 skill，每组跨 vendor 组合），vendor 全集 **276 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
 
 ---
 
@@ -25,37 +25,17 @@
 ```text
 /plugin marketplace add jangrui/skills
 
-# engineering
-/plugin install golang-core@jangrui      # Go 工程精选（11 个）
-/plugin install mattpocock-core@jangrui  # tdd / code-review / diagnosing-bugs / grilling / handoff
-/plugin install dbx@jangrui              # 数据库 CLI
-
-# observability
-/plugin install grafana-core@jangrui     # Dashboard / PromQL / 告警 / OTel / Alloy
-/plugin install grafana-lgtm@jangrui     # Loki / Tempo / Mimir / Prometheus / Pyroscope
-
-# documents
-/plugin install anthropic-docs@jangrui   # docx / pdf / pptx / xlsx
-/plugin install anydoc@jangrui           # 文档转 Markdown（需 Node 20+）
-
-# writing
-/plugin install writing-polish@jangrui   # 去 AI 味润色（中英 5 个）
-/plugin install baoyu-core@jangrui       # AI 创作精选（需 Bun）
-/plugin install shuohao@jangrui          # AI 短剧制作（小说→角色/大纲/美术/剧本/分镜，需 Node 20+）
-
-# design
-/plugin install diagram-core@jangrui     # mermaid / drawio / plantuml / archify
-/plugin install taste-core@jangrui       # anti-slop 前端设计
-/plugin install ppt@jangrui              # 归藏网页 PPT
-/plugin install gzh-design@jangrui       # 公众号文章排版（Markdown→HTML）
-/plugin install illustration@jangrui     # 插画 + 社交卡片
-/plugin install libtv@jangrui            # AI 生图/生视频（需 LIBTV_ACCESS_KEY）
-/plugin install video-shotcraft@jangrui  # 电影感产品视频（Remotion，需 Node 20+）
-
-# integration
-/plugin install lark-core@jangrui        # 飞书精选（需 lark-cli）
-/plugin install wpsnote-core@jangrui     # WPS 笔记精选（需 wpsnote-cli）
-/plugin install neat-freak@jangrui       # 会话收尾知识库同步
+# 每组一条命令装全组；daily 为 AGENTS 必备调用，其余按需
+/plugin install daily@jangrui         # 常用必备：去 AI 味润色 5 + AI 短剧 5 + 会话收尾（11 个）
+/plugin install coding@jangrui        # 代码：Go 工程 11 + 工程实践 4 + dbx（16 个）
+/plugin install design@jangrui        # 设计：taste 前端 4 + 公众号排版 + 插画卡片 2（7 个）
+/plugin install marketing@jangrui     # 营销：OPC 生图 3 + 平台调研 6（9 个，各自需 API key）
+/plugin install observability@jangrui # 运维可观测：Grafana 核心 5 + LGTM 栈 5（10 个）
+/plugin install office@jangrui        # 办公：文档四件套 + anydoc + 网页 PPT（6 个）
+/plugin install collab@jangrui        # 协作套件：飞书 8 + WPS 笔记 6（未来加腾讯文档、钉钉等）
+/plugin install diagram@jangrui       # 画图：mermaid / drawio / plantuml / archify（4 个）
+/plugin install video@jangrui         # 视频：电影感产品视频 + LibLib 生图生视频（2 个）
+/plugin install writing@jangrui       # 写作：宝玉 AI 创作（需 Bun）
 ```
 
 ### Codex CLI（目录拷贝）
@@ -73,46 +53,40 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 
 ## 技能目录
 
-所有 skill 按 vendor 目录组织；marketplace 条目是各全集的精选子集（`精选/全集`）。
+所有 skill 按 vendor 目录组织；marketplace 条目是按使用场景组合的 **8 个组插件**，组成员为各全集的精选子集。
 
-| 分类 | 插件 | 本地路径（全集） | 精选/全集 | 上游 |
+| 组插件 | 内容 | 本地路径（全集） | 精选/全集 | 上游 |
 |---|---|---|---|---|
-| engineering | `golang-core` | `plugins/golang/` | 11/46 | samber/cc-skills-golang |
-| engineering | `mattpocock-core` | `plugins/mattpocock/` | 5/26 | mattpocock/skills |
-| engineering | `dbx` | `plugins/dbx/` | 1/1 | t8y2/dbx |
-| observability | `grafana-core`、`grafana-lgtm` | `plugins/grafana/` | 10/49 | grafana/skills |
-| documents | `anthropic-docs` | `plugins/anthropic/` | 4/17 | anthropics/skills |
-| documents | `anydoc` | `plugins/anydoc/` | 1/1 | firecrawl/anydoc |
-| writing | `writing-polish` | `plugins/writing/`（润色 5 个） | 5/5 | blader/humanizer, hardikpandya/stop-slop, petergyang/no-ai-slop, MrGeDiao/shuorenhua 等 |
-| writing | `baoyu-core` | `plugins/baoyu/` | 7/21 | JimLiu/baoyu-skills |
-| writing | `shuohao` | `plugins/shuohao/` | 5/5 | eternityspring/shuohao-skills |
-| design | `diagram-core` | `plugins/diagram/` | 4/6 | Agents365-ai, tt-a1i/archify |
-| design | `taste-core` | `plugins/writing/taste/` | 4/13 | Leonxlnx/taste-skill |
-| design | `ppt` | `plugins/ppt/` | 1/1 | op7418/guizang-ppt-skill |
-| design | `gzh-design` | `plugins/gzh/` | 1/1 | isjiamu/gzh-design-skill |
-| design | `illustration` | `plugins/illustration/` | 2/2 | helloianneo, op7418 |
-| design | `libtv` | `plugins/libtv/` | 1/1 | libtv-labs/libtv-skills |
-| design | `video-shotcraft` | `plugins/shotcraft/` | 1/1 | Vincentwei1021/video-shotcraft |
-| integration | `lark-core` | `plugins/lark/` | 8/27 | larksuite/cli |
-| integration | `wpsnote-core` | `plugins/writing/wpsnote/` | 6/37 | wpsnote/wpsnote-skills |
-| integration | `neat-freak` | `plugins/khazix/` | 1/6 | KKKKhazix/khazix-skills |
-| integration | `opc` | `plugins/opc/` | 9/10 | ReScienceLab/opc-skills |
+| `daily` 常用必备 | 去 AI 味润色 5 + AI 短剧 5 + neat-freak | `plugins/writing/`（润色）`plugins/shuohao/` `plugins/khazix/` | 11 | blader/humanizer 等、eternityspring、KKKKhazix |
+| `coding` 代码 | Go 工程 11 + 工程实践 4 + dbx | `plugins/golang/` `plugins/mattpocock/` `plugins/dbx/` | 16/73 | samber、mattpocock、t8y2 |
+| `design` 设计 | taste 前端 4 + 公众号排版 + 插画卡片 2 | `plugins/writing/taste/` `plugins/gzh/` `plugins/illustration/` | 7/17 | Leonxlnx、isjiamu、helloianneo/op7418 |
+| `marketing` 营销增长 | OPC 生图 3（nanobanana/logo/banner）+ 调研 6（reddit/twitter/producthunt/requesthunt/seo-geo/domain-hunter） | `plugins/opc/` | 9/10 | ReScienceLab/opc-skills |
+| `observability` 运维可观测 | Grafana 核心 5 + LGTM 栈 5 | `plugins/grafana/` | 10/49 | grafana/skills |
+| `office` 日常办公 | 文档四件套 + anydoc + 网页 PPT | `plugins/anthropic/` `plugins/anydoc/` `plugins/ppt/` | 6/19 | anthropics、firecrawl、op7418 |
+| `collab` 协作套件 | 飞书 8 + WPS 笔记 6（未来加腾讯文档、钉钉等） | `plugins/lark/` `plugins/writing/wpsnote/` | 14/64 | larksuite、wpsnote |
+| `diagram` 画图绘图 | mermaid / drawio / plantuml / archify | `plugins/diagram/` | 4/6 | Agents365-ai, tt-a1i/archify |
+| `video` 做视频 | 电影感产品视频 + LibLib 生图生视频 | `plugins/shotcraft/` `plugins/libtv/` | 2/2 | Vincentwei1021、libtv-labs |
+| `writing` 写作 | 宝玉 AI 创作 | `plugins/baoyu/` | 7/21 | JimLiu/baoyu-skills |
+
+市场**仅由 `.claude-plugin/marketplace.json` 单文件策展**：8 个组条目、组内 skills 路径相对仓库根、`source: "./"`，无任何生成物。Claude Code 与 Codex 原生消费条目内联 skills；**ZCode 不读内联 skills**，装组条目得不到 skill——ZCode 端请走下方 Codex 式目录拷贝自取。
 
 不上市场的全集（如 grafana-k6 / grafana-cloud / 插件开发、anthropic 其余 13 个、wpsnote 其余 30 个等）仍完整保留在 `plugins/` 下，可按 Codex 目录拷贝方式自取。
 
 ### 运行时依赖
 
-| 插件 | 依赖 | 安装方式 |
+| 组件（组·skill） | 依赖 | 安装方式 |
 |---|---|---|
-| `lark-core` | `lark-cli`（npm） | `npx @larksuite/cli@latest install && lark-cli auth login --recommend` |
-| `baoyu-core` | Bun | `brew install oven-sh/bun/bun` |
-| `dbx` | `@dbx-app/cli`（npm） | `npm i -g @dbx-app/cli` |
-| `libtv` | `python3`（macOS 自带） | 设置环境变量 `LIBTV_ACCESS_KEY` |
-| `neat-freak` | 无 | 即装即用（khazix 全集中 hv-analysis 自取需 `pip install weasyprint markdown`） |
-| `anydoc` | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
-| `shuohao` | Node 20+（质量门/报告渲染脚本只用内置模块） | 免安装，脚本随 skill 自带 |
-| `video-shotcraft` | Node 20+ + Remotion（npm） | 模板工程内 `npm install` 即可渲染；页面截图需 `npm i puppeteer`，卡点分析可选 `pip install librosa`，剪映导出可选 `pip install pyJianYingDraft` |
-| `anthropic-docs` | 文档四件套零额外依赖 | 自取其余 skill 按需 pip（slack-gif-creator 需 `pip install pillow imageio numpy`，webapp-testing 需 `pip install playwright && playwright install chromium`，mcp-builder 脚本需 `pip install anthropic mcp`） |
+| marketing·OPC 9 件 | 各 skill 对应 API key（reddit 免 key） | 生图需 `GEMINI_API_KEY`（logo 另需 REMOVE_BG/RECRAFT），twitter/producthunt/seo-geo/requesthunt 见各 SKILL.md |
+| collab·飞书 8 件 | `lark-cli`（npm） | `npx @larksuite/cli@latest install && lark-cli auth login --recommend` |
+| collab·WPS 笔记 6 件 | `wpsnote-cli` | 按其官方说明安装 |
+| office·anydoc | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
+| office·文档四件套 | 零额外依赖 | 自取 anthropic 其余 skill 按需 pip（slack-gif-creator 需 `pip install pillow imageio numpy`，webapp-testing 需 `pip install playwright && playwright install chromium`，mcp-builder 脚本需 `pip install anthropic mcp`） |
+| writing·宝玉 | Bun | `brew install oven-sh/bun/bun` |
+| coding·dbx | `@dbx-app/cli`（npm） | `npm i -g @dbx-app/cli` |
+| video·libtv | `python3`（macOS 自带） | 设置环境变量 `LIBTV_ACCESS_KEY` |
+| video·shotcraft | Node 20+ + Remotion（npm） | 模板工程内 `npm install` 即可渲染；页面截图需 `npm i puppeteer`，卡点分析可选 `pip install librosa`，剪映导出可选 `pip install pyJianYingDraft` |
+| daily·短剧 5 件 | Node 20+（质量门/报告渲染脚本只用内置模块） | 免安装，脚本随 skill 自带 |
+| daily·neat-freak | 无 | 即装即用（khazix 全集中 hv-analysis 自取需 `pip install weasyprint markdown`） |
 | 其余 | 无 | 拷贝即用 |
 
 ---
@@ -120,7 +94,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 ## 目录结构
 
 ```
-├── .claude-plugin/marketplace.json    ← 唯一策展层（source "./" + skills 精选子集）
+├── .claude-plugin/marketplace.json    ← 唯一策展文件（8 个使用场景组条目 + skills 路径，source "./"，无生成物）
 ├── plugins/
 │   ├── diagram/                       ← 6 个 skill
 │   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/  archify/
