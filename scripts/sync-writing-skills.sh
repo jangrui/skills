@@ -23,9 +23,13 @@
 #   ./scripts/sync-writing-skills.sh --check      # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/writing/<name>/
-#   git add plugins/writing/
+#   git diff plugins/<name>/<name>/
+#   git add plugins/
 #   git commit -m "chore(writing): sync <name> upstream <old>→<new>"
+#
+# 目录约定（2026-08-15 起按源仓库归属，不再用主题聚合目录）：
+#   每个 skill 各自一个顶层仓目录 plugins/<repo>/<skill>/，如
+#   plugins/humanizer/humanizer、plugins/stop-slop/stop-slop
 # ============================================================================
 
 set -euo pipefail
@@ -33,14 +37,15 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/writing"
+# 每个源仓库一个顶层目录 plugins/<repo>/，skill 在其下：plugins/<repo>/<skill>/
+PLUGIN_BASE="$REPO_ROOT/plugins"
 
 # skill 元数据：key | 本地目录名 | 上游 owner | 上游 repo | 上游 skill 路径模式
 #   path_mode:
 #     root   = 上游根目录即 skill（如 humanizer、Humanizer-zh）
 #     subdir = 上游 skills/<name>/ 下（如 baoyu 那种，预留）
-# 注：humanizer (blader/humanizer) 虽本身是标准 plugin，但为与 humanizer-zh 共用
-#     writing 聚合项，按 B 方案 vendor 进来（只取 SKILL.md，排除上游 plugin 声明）
+# 注：humanizer (blader/humanizer) 上游本身是标准 plugin，
+#     只取 SKILL.md 精选（排除上游 plugin 声明）
 SKILL_NAMES=(humanizer humanizer-zh stop-slop shuorenhua no-ai-slop)
 meta_for() {
   case "$1" in
@@ -102,7 +107,7 @@ sync_one() {
   meta=$(meta_for "$skill") || { echo "❌ 未知 skill：$skill"; return 1; }
   local localdir owner repo path_mode
   IFS='|' read -r localdir owner repo path_mode <<< "$meta"
-  local vendor_dir="$PLUGIN_DIR/$localdir"
+  local vendor_dir="$PLUGIN_BASE/$localdir/$localdir"
   local commit_file="$vendor_dir/.upstream-commit"
 
   echo "▶ $skill  (upstream: $owner/$repo → local: $localdir, mode: $path_mode)"
@@ -231,7 +236,7 @@ check_self_contained() {
 
 # ---------- 主流程 ----------
 echo "=== writing-skills 同步工具 ==="
-echo "插件目录: $PLUGIN_DIR"
+echo "插件目录: $PLUGIN_BASE/<repo>/<skill>"
 echo "模式: $([ "$DRY_RUN" = "1" ] && echo 'dry-run (仅检查)' || echo '同步')"
 echo ""
 
@@ -253,7 +258,7 @@ fi
 
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/writing/  人工 review 后 commit"
+  echo "下一步：git diff plugins/  人工 review 后 commit"
 fi
 
 # CI 模式：把本次更新的 skill 列表写入文件

@@ -13,9 +13,13 @@
 #   ./scripts/sync-diagram-skills.sh --check     # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/diagram/<name>/
-#   git add plugins/diagram/
+#   git diff plugins/<name>/<name>/
+#   git add plugins/
 #   git commit -m "chore(diagram): sync <name> upstream <old>→<new>"
+#
+# 目录约定（2026-08-15 起按源仓库归属，不再用主题聚合目录）：
+#   每个 skill 各自一个顶层仓目录 plugins/<repo>/<skill>/，如
+#   plugins/drawio/drawio、plugins/archify/archify
 # ============================================================================
 
 set -euo pipefail
@@ -23,8 +27,8 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/diagram"
-SKILLS_DIR="$PLUGIN_DIR"          # skill 直接放在 plugin 根下，无中间 skills/ 层
+# 每个源仓库一个顶层目录 plugins/<repo>/，skill 在其下：plugins/<repo>/<skill>/
+PLUGIN_BASE="$REPO_ROOT/plugins"
 UPSTREAM_OWNER="Agents365-ai"     # 5 个图表 skill 的默认上游 org
 
 # skill 的三个名字（B 方案：本地目录名去掉 -skill 后缀）：
@@ -101,7 +105,7 @@ sync_one() {
   subdir=$(srcdir_for "$skill")
   local localdir
   localdir=$(local_name "$skill")
-  local vendor_dir="$SKILLS_DIR/$localdir"
+  local vendor_dir="$PLUGIN_BASE/$localdir/$localdir"
   local commit_file="$vendor_dir/.upstream-commit"
 
   echo "▶ $skill  (upstream: $owner/$repo → local: $localdir)"
@@ -216,7 +220,7 @@ except: pass
 
 # ---------- 主流程 ----------
 echo "=== diagram-skills 同步工具 ==="
-echo "插件目录: $PLUGIN_DIR"
+echo "插件目录: $PLUGIN_BASE/<repo>/<skill>"
 echo "模式: $([ "$DRY_RUN" = "1" ] && echo 'dry-run (仅检查)' || echo '同步')"
 echo ""
 
@@ -239,7 +243,7 @@ fi
 
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/diagram/  人工 review 后 commit"
+  echo "下一步：git diff plugins/  人工 review 后 commit"
 fi
 
 # CI 模式：把本次更新的 skill 列表写入文件，供 workflow 读取决定是否开 PR

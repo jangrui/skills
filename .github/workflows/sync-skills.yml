@@ -59,7 +59,7 @@ jobs:
             {"plugin":"anydoc","add_path":"plugins/anydoc/","pr_hint":"plugins/anydoc/<skill>/"},
             {"plugin":"baoyu","add_path":"plugins/baoyu/","pr_hint":"plugins/baoyu/<skill>/"},
             {"plugin":"dbx","add_path":"plugins/dbx/","pr_hint":"plugins/dbx/<skill>/"},
-            {"plugin":"diagram","add_path":"plugins/diagram/","pr_hint":"plugins/diagram/<skill>/"},
+            {"plugin":"diagram","add_path":"plugins/drawio/ plugins/mermaid/ plugins/excalidraw/ plugins/tldraw/ plugins/plantuml/ plugins/archify/","pr_hint":"plugins/<repo>/<skill>/（6 个绘图仓）"},
             {"plugin":"golang","add_path":"plugins/golang/","pr_hint":"plugins/golang/<skill>/"},
             {"plugin":"grafana","add_path":"plugins/grafana/","pr_hint":"plugins/grafana/<category>/<skill>/"},
             {"plugin":"illustration","add_path":"plugins/illustration/","pr_hint":"plugins/illustration/"},
@@ -71,9 +71,9 @@ jobs:
             {"plugin":"ppt","add_path":"plugins/ppt/","pr_hint":"plugins/ppt/guizang-ppt/"},
             {"plugin":"shuohao","add_path":"plugins/shuohao/","pr_hint":"plugins/shuohao/<skill>/"},
             {"plugin":"shotcraft","add_path":"plugins/shotcraft/","pr_hint":"plugins/shotcraft/video-shotcraft/"},
-            {"plugin":"taste","add_path":"plugins/writing/taste/","pr_hint":"plugins/writing/taste/<skill>/"},
-            {"plugin":"wpsnote","add_path":"plugins/writing/wpsnote/","pr_hint":"plugins/writing/wpsnote/<skill>/"},
-            {"plugin":"writing","add_path":"plugins/writing/","pr_hint":"plugins/writing/<skill>/"}
+            {"plugin":"taste","add_path":"plugins/taste/","pr_hint":"plugins/taste/<skill>/"},
+            {"plugin":"wpsnote","add_path":"plugins/wpsnote/","pr_hint":"plugins/wpsnote/<skill>/"},
+            {"plugin":"writing","add_path":"plugins/humanizer/ plugins/humanizer-zh/ plugins/stop-slop/ plugins/no-ai-slop/ plugins/shuorenhua/","pr_hint":"plugins/<repo>/<skill>/（5 个润色仓）"}
           ]'
           SELECTED="${{ github.event.inputs.plugin }}"
           if [ -n "$SELECTED" ]; then

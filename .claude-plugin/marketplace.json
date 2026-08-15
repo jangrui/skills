@@ -9,7 +9,7 @@
     {
       "name": "daily",
       "displayName": "常用必备",
-      "description": "AGENTS 中必备调用的常用 skill 合集（11 个）：写作去 AI 味 5 个（humanizer 英文 / humanizer-zh 中文 / stop-slop / no-ai-slop / shuorenhua）、烁皓 AI 短剧制作 5 个（novel-characters 角色设定集 / novel-outline 改编大纲 / novel-art 美术设定 / novel-script 剧本台词 / novel-storyboard 分镜，需 Node 20+）、neat-freak 会话收尾知识库同步。其余组按需调用。",
+      "description": "AGENTS 中必备调用的常用 skill 合集（6 个）：写作去 AI 味 5 个（humanizer 英文 / humanizer-zh 中文 / stop-slop / no-ai-slop / shuorenhua）、neat-freak 会话收尾知识库同步。其余组按需调用。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -20,26 +20,16 @@
         "daily",
         "humanizer",
         "anti-slop",
-        "shuohao",
-        "short-drama",
-        "novel",
-        "screenwriting",
-        "storyboard",
         "neat-freak",
         "session-summary",
         "knowledge-sync"
       ],
       "skills": [
-        "./plugins/writing/humanizer",
-        "./plugins/writing/humanizer-zh",
-        "./plugins/writing/stop-slop",
-        "./plugins/writing/no-ai-slop",
-        "./plugins/writing/shuorenhua",
-        "./plugins/shuohao/novel-characters",
-        "./plugins/shuohao/novel-outline",
-        "./plugins/shuohao/novel-art",
-        "./plugins/shuohao/novel-script",
-        "./plugins/shuohao/novel-storyboard",
+        "./plugins/humanizer/humanizer",
+        "./plugins/humanizer-zh/humanizer-zh",
+        "./plugins/stop-slop/stop-slop",
+        "./plugins/no-ai-slop/no-ai-slop",
+        "./plugins/shuorenhua/shuorenhua",
         "./plugins/khazix/neat-freak"
       ]
     },
@@ -94,7 +84,7 @@
     {
       "name": "design",
       "displayName": "视觉设计",
-      "description": "视觉设计合集（7 个）：taste anti-slop 前端设计 4 个（taste-skill 主入口、imagegen-frontend-web/mobile、redesign-skill）、gzh-design 公众号文章排版（Markdown→HTML）、插画 + 社交卡片 2 个（小黑手绘、归藏社交卡片）。",
+      "description": "视觉设计合集（4 个）：taste anti-slop 前端设计（taste-skill 主入口、imagegen-frontend-web/mobile 生图方向、redesign-skill 改版）。上游 13 个见 plugins/taste/ 目录自取。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -105,21 +95,13 @@
         "design",
         "frontend",
         "anti-slop",
-        "redesign",
-        "typography",
-        "wechat",
-        "gzh",
-        "illustration",
-        "social-card"
+        "redesign"
       ],
       "skills": [
-        "./plugins/writing/taste/taste-skill",
-        "./plugins/writing/taste/imagegen-frontend-web",
-        "./plugins/writing/taste/imagegen-frontend-mobile",
-        "./plugins/writing/taste/redesign-skill",
-        "./plugins/gzh/gzh-design",
-        "./plugins/illustration/ian-xiaohei-illustrations",
-        "./plugins/illustration/guizang-social-card"
+        "./plugins/taste/taste-skill",
+        "./plugins/taste/imagegen-frontend-web",
+        "./plugins/taste/imagegen-frontend-mobile",
+        "./plugins/taste/redesign-skill"
       ]
     },
     {
@@ -272,18 +254,18 @@
         "./plugins/lark/lark-calendar",
         "./plugins/lark/lark-task",
         "./plugins/lark/lark-mail",
-        "./plugins/writing/wpsnote/wps-note",
-        "./plugins/writing/wpsnote/content-digest",
-        "./plugins/writing/wpsnote/doc-importer",
-        "./plugins/writing/wpsnote/web-importer",
-        "./plugins/writing/wpsnote/wps-note-intelligent-search",
-        "./plugins/writing/wpsnote/wechat-publisher"
+        "./plugins/wpsnote/wps-note",
+        "./plugins/wpsnote/content-digest",
+        "./plugins/wpsnote/doc-importer",
+        "./plugins/wpsnote/web-importer",
+        "./plugins/wpsnote/wps-note-intelligent-search",
+        "./plugins/wpsnote/wechat-publisher"
       ]
     },
     {
       "name": "diagram",
       "displayName": "画图绘图",
-      "description": "图表生成合集（4 个）：mermaid、drawio、plantuml、archify，把自然语言、源码或架构描述转成专业图表（导出 PNG / SVG；archify 产出交互式系统架构图）。上游 6 个见 plugins/diagram/ 目录自取。",
+      "description": "图表生成合集（4 个）：mermaid、drawio、plantuml、archify，把自然语言、源码或架构描述转成专业图表（导出 PNG / SVG；archify 产出交互式系统架构图）。上游 6 个见 plugins/drawio/、plugins/mermaid/、plugins/plantuml/、plugins/archify/ 等目录自取。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -300,16 +282,16 @@
         "visualization"
       ],
       "skills": [
-        "./plugins/diagram/mermaid",
-        "./plugins/diagram/drawio",
-        "./plugins/diagram/plantuml",
-        "./plugins/diagram/archify"
+        "./plugins/mermaid/mermaid",
+        "./plugins/drawio/drawio",
+        "./plugins/plantuml/plantuml",
+        "./plugins/archify/archify"
       ]
     },
     {
       "name": "video",
       "displayName": "视频制作",
-      "description": "视频制作合集（2 个）：video-shotcraft 电影感产品视频（106 张镜头配方卡 + Remotion 组件与音频资产 + 六阶段工作流：页面截图、2.5D 运镜、节奏卡点、声音设计、剪映工程导出，需 Node 20+）、libtv AI 生图 / 生视频（Seedance、Kling、Wan 等模型，需 LIBTV_ACCESS_KEY）。",
+      "description": "视频制作合集（7 个）：video-shotcraft 电影感产品视频（106 张镜头配方卡 + Remotion 组件与音频资产 + 六阶段工作流：页面截图、2.5D 运镜、节奏卡点、声音设计、剪映工程导出，需 Node 20+）、libtv AI 生图 / 生视频（Seedance、Kling、Wan 等模型，需 LIBTV_ACCESS_KEY）、烁皓 AI 短剧制作 5 个（novel-characters 角色设定集 / novel-outline 改编大纲 / novel-art 美术设定 / novel-script 剧本台词 / novel-storyboard 分镜，从一本小说到直接喂生成管线的制作素材，需 Node 20+）。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -329,17 +311,26 @@
         "image-generation",
         "video-generation",
         "seedance",
-        "kling"
+        "kling",
+        "shuohao",
+        "short-drama",
+        "screenwriting",
+        "storyboard"
       ],
       "skills": [
         "./plugins/shotcraft/video-shotcraft",
-        "./plugins/libtv/libtv-skill"
+        "./plugins/libtv/libtv-skill",
+        "./plugins/shuohao/novel-characters",
+        "./plugins/shuohao/novel-outline",
+        "./plugins/shuohao/novel-art",
+        "./plugins/shuohao/novel-script",
+        "./plugins/shuohao/novel-storyboard"
       ]
     },
     {
       "name": "writing",
       "displayName": "写作创作",
-      "description": "写作与内容创作合集（7 个）：宝玉 AI 创作——生图、文章配图、封面图、信息图、翻译、URL→Markdown、YouTube 字幕。多数需 Bun。上游全量 21 个见 plugins/baoyu/ 目录自取。",
+      "description": "写作与内容创作合集（10 个）：宝玉 AI 创作 7 个——生图、文章配图、封面图、信息图、翻译、URL→Markdown、YouTube 字幕（多数需 Bun）、gzh-design 公众号文章排版（Markdown→公众号 HTML）、小黑手绘插画（文章配图）、归藏社交卡片（小红书图文/公众号封面）。上游全量见 plugins/baoyu/、plugins/gzh/、plugins/illustration/ 目录自取。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -355,7 +346,12 @@
         "infographic",
         "translate",
         "youtube",
-        "markdown"
+        "markdown",
+        "wechat",
+        "gzh",
+        "typography",
+        "social-card",
+        "xiaohongshu"
       ],
       "skills": [
         "./plugins/baoyu/baoyu-image-gen",
@@ -364,7 +360,10 @@
         "./plugins/baoyu/baoyu-infographic",
         "./plugins/baoyu/baoyu-translate",
         "./plugins/baoyu/baoyu-url-to-markdown",
-        "./plugins/baoyu/baoyu-youtube-transcript"
+        "./plugins/baoyu/baoyu-youtube-transcript",
+        "./plugins/gzh/gzh-design",
+        "./plugins/illustration/ian-xiaohei-illustrations",
+        "./plugins/illustration/guizang-social-card"
       ]
     }
   ]

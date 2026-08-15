@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# sync-wpsnote-skills.sh — 同步 wpsnote/wpsnote-skills 上游 skill 到 vendor 目录 plugins/writing/wpsnote/
+# sync-wpsnote-skills.sh — 同步 wpsnote/wpsnote-skills 上游 skill 到 vendor 目录 plugins/wpsnote/
 #
 # 上游特点（单仓库多 skill / 扁平）：
 #   - wpsnote/wpsnote-skills 的 skills/ 下有 36 个 skill 子目录（无统一前缀）
@@ -23,8 +23,8 @@
 #   ./scripts/sync-wpsnote-skills.sh --check              # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/writing/wpsnote/<name>/
-#   git add plugins/writing/wpsnote/
+#   git diff plugins/wpsnote/<name>/
+#   git add plugins/wpsnote/
 #   git commit -m "chore(wpsnote): sync <name> upstream <old>→<new>"
 # ============================================================================
 
@@ -33,7 +33,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/writing/wpsnote"
+PLUGIN_DIR="$REPO_ROOT/plugins/wpsnote"
 SKILLS_DIR="$PLUGIN_DIR"
 UPSTREAM_OWNER="wpsnote"
 UPSTREAM_REPO="wpsnote-skills"
@@ -263,7 +263,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/writing/wpsnote/  人工 review 后 commit"
+  echo "下一步：git diff plugins/wpsnote/  人工 review 后 commit"
 fi
 
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

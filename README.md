@@ -26,24 +26,24 @@
 /plugin marketplace add jangrui/skills
 
 # 每组一条命令装全组；daily 为 AGENTS 必备调用，其余按需
-/plugin install daily@jangrui         # 常用必备：去 AI 味润色 5 + AI 短剧 5 + 会话收尾（11 个）
+/plugin install daily@jangrui         # 常用必备：去 AI 味润色 5 + 会话收尾（6 个）
 /plugin install coding@jangrui        # 代码：Go 工程 11 + 工程实践 4 + dbx（16 个）
-/plugin install design@jangrui        # 设计：taste 前端 4 + 公众号排版 + 插画卡片 2（7 个）
+/plugin install design@jangrui        # 设计：taste anti-slop 前端设计（4 个）
 /plugin install marketing@jangrui     # 营销：OPC 生图 3 + 平台调研 6（9 个，各自需 API key）
 /plugin install observability@jangrui # 运维可观测：Grafana 核心 5 + LGTM 栈 5（10 个）
 /plugin install office@jangrui        # 办公：文档四件套 + anydoc + 网页 PPT（6 个）
 /plugin install collab@jangrui        # 协作套件：飞书 8 + WPS 笔记 6（未来加腾讯文档、钉钉等）
 /plugin install diagram@jangrui       # 画图：mermaid / drawio / plantuml / archify（4 个）
-/plugin install video@jangrui         # 视频：电影感产品视频 + LibLib 生图生视频（2 个）
-/plugin install writing@jangrui       # 写作：宝玉 AI 创作（需 Bun）
+/plugin install video@jangrui         # 视频：电影感产品视频 + LibLib 生图生视频 + AI 短剧 5（7 个）
+/plugin install writing@jangrui       # 写作：宝玉 AI 创作 7 + 公众号排版 + 插画 + 社交卡片（10 个）
 ```
 
 ### Codex CLI（目录拷贝）
 
 ```bash
 git clone --depth 1 https://github.com/jangrui/skills.git /tmp/jangrui-skills
-cp -r /tmp/jangrui-skills/plugins/diagram/drawio ~/.codex/skills/drawio
-cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
+cp -r /tmp/jangrui-skills/plugins/drawio/drawio ~/.codex/skills/drawio
+cp -r /tmp/jangrui-skills/plugins/humanizer/humanizer ~/.codex/skills/humanizer
 # 以此类推，每个 plugins/<plugin>/<skill>/ 目录即一个 skill
 ```
 
@@ -57,16 +57,16 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 
 | 组插件 | 内容 | 本地路径（全集） | 精选/全集 | 上游 |
 |---|---|---|---|---|
-| `daily` 常用必备 | 去 AI 味润色 5 + AI 短剧 5 + neat-freak | `plugins/writing/`（润色）`plugins/shuohao/` `plugins/khazix/` | 11 | blader/humanizer 等、eternityspring、KKKKhazix |
+| `daily` 常用必备 | 去 AI 味润色 5 + neat-freak | `plugins/humanizer/` 等 5 仓 `plugins/khazix/` | 6 | blader/humanizer 等 |
 | `coding` 代码 | Go 工程 11 + 工程实践 4 + dbx | `plugins/golang/` `plugins/mattpocock/` `plugins/dbx/` | 16/73 | samber、mattpocock、t8y2 |
-| `design` 设计 | taste 前端 4 + 公众号排版 + 插画卡片 2 | `plugins/writing/taste/` `plugins/gzh/` `plugins/illustration/` | 7/17 | Leonxlnx、isjiamu、helloianneo/op7418 |
+| `design` 设计 | taste 前端设计 4 | `plugins/taste/` | 4/13 | Leonxlnx/taste-skill |
 | `marketing` 营销增长 | OPC 生图 3（nanobanana/logo/banner）+ 调研 6（reddit/twitter/producthunt/requesthunt/seo-geo/domain-hunter） | `plugins/opc/` | 9/10 | ReScienceLab/opc-skills |
 | `observability` 运维可观测 | Grafana 核心 5 + LGTM 栈 5 | `plugins/grafana/` | 10/49 | grafana/skills |
 | `office` 日常办公 | 文档四件套 + anydoc + 网页 PPT | `plugins/anthropic/` `plugins/anydoc/` `plugins/ppt/` | 6/19 | anthropics、firecrawl、op7418 |
-| `collab` 协作套件 | 飞书 8 + WPS 笔记 6（未来加腾讯文档、钉钉等） | `plugins/lark/` `plugins/writing/wpsnote/` | 14/64 | larksuite、wpsnote |
-| `diagram` 画图绘图 | mermaid / drawio / plantuml / archify | `plugins/diagram/` | 4/6 | Agents365-ai, tt-a1i/archify |
-| `video` 做视频 | 电影感产品视频 + LibLib 生图生视频 | `plugins/shotcraft/` `plugins/libtv/` | 2/2 | Vincentwei1021、libtv-labs |
-| `writing` 写作 | 宝玉 AI 创作 | `plugins/baoyu/` | 7/21 | JimLiu/baoyu-skills |
+| `collab` 协作套件 | 飞书 8 + WPS 笔记 6（未来加腾讯文档、钉钉等） | `plugins/lark/` `plugins/wpsnote/` | 14/64 | larksuite、wpsnote |
+| `diagram` 画图绘图 | mermaid / drawio / plantuml / archify | `plugins/drawio/` 等 6 仓 | 4/6 | Agents365-ai、tt-a1i/archify |
+| `video` 做视频 | 电影感产品视频 + LibLib 生图生视频 + 烁皓短剧 5 | `plugins/shotcraft/` `plugins/libtv/` `plugins/shuohao/` | 7/7 | Vincentwei1021、libtv-labs、eternityspring |
+| `writing` 写作 | 宝玉 AI 创作 + gzh 排版 + 插画 + 社交卡片 | `plugins/baoyu/` `plugins/gzh/` `plugins/illustration/` | 10/24 | JimLiu/baoyu-skills、isjiamu、helloianneo/op7418 |
 
 市场**仅由 `.claude-plugin/marketplace.json` 单文件策展**：8 个组条目、组内 skills 路径相对仓库根、`source: "./"`，无任何生成物。Claude Code 与 Codex 原生消费条目内联 skills；**ZCode 不读内联 skills**，装组条目得不到 skill——ZCode 端请走下方 Codex 式目录拷贝自取。
 
@@ -85,7 +85,7 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | coding·dbx | `@dbx-app/cli`（npm） | `npm i -g @dbx-app/cli` |
 | video·libtv | `python3`（macOS 自带） | 设置环境变量 `LIBTV_ACCESS_KEY` |
 | video·shotcraft | Node 20+ + Remotion（npm） | 模板工程内 `npm install` 即可渲染；页面截图需 `npm i puppeteer`，卡点分析可选 `pip install librosa`，剪映导出可选 `pip install pyJianYingDraft` |
-| daily·短剧 5 件 | Node 20+（质量门/报告渲染脚本只用内置模块） | 免安装，脚本随 skill 自带 |
+| video·短剧 5 件 | Node 20+（质量门/报告渲染脚本只用内置模块） | 免安装，脚本随 skill 自带 |
 | daily·neat-freak | 无 | 即装即用（khazix 全集中 hv-analysis 自取需 `pip install weasyprint markdown`） |
 | 其余 | 无 | 拷贝即用 |
 
@@ -94,14 +94,21 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 ## 目录结构
 
 ```
-├── .claude-plugin/marketplace.json    ← 唯一策展文件（8 个使用场景组条目 + skills 路径，source "./"，无生成物）
-├── plugins/
-│   ├── diagram/                       ← 6 个 skill
-│   │   ├── drawio/  mermaid/  excalidraw/  tldraw/  plantuml/  archify/
-│   ├── writing/                       ← 5 润色 + 13 前端设计 + 37 wpsnote
-│   │   ├── humanizer/  humanizer-zh/  stop-slop/  no-ai-slop/  shuorenhua/
-│   │   ├── taste/                     ← 13 个前端设计 skill
-│   │   └── wpsnote/                   ← 37 个 skill
+├── .claude-plugin/marketplace.json    ← 唯一策展文件（10 个使用场景组条目 + skills 路径，source "./"，无生成物）
+├── plugins/                           ← 按源仓库归属，一仓一目录（不再建主题聚合目录）
+│   ├── drawio/                        ← Agents365-ai/drawio-skill
+│   ├── mermaid/                       ← Agents365-ai/mermaid-skill
+│   ├── excalidraw/                    ← Agents365-ai/excalidraw-skill（未精选）
+│   ├── tldraw/                        ← Agents365-ai/tldraw-skill（未精选）
+│   ├── plantuml/                      ← Agents365-ai/plantuml-skill
+│   ├── archify/                       ← tt-a1i/archify 交互式架构图
+│   ├── humanizer/                     ← blader/humanizer（去 AI 味，英）
+│   ├── humanizer-zh/                  ← op7418/Humanizer-zh（去 AI 味，中）
+│   ├── stop-slop/                     ← hardikpandya/stop-slop
+│   ├── no-ai-slop/                    ← petergyang/no-ai-slop
+│   ├── shuorenhua/                    ← MrGeDiao/shuorenhua
+│   ├── taste/                         ← Leonxlnx/taste-skill 13 个前端设计 skill
+│   ├── wpsnote/                       ← wpsnote/wpsnote-skills 37 个 skill
 │   ├── ppt/                           ← guizang-ppt
 │   ├── gzh/                           ← gzh-design 公众号文章排版
 │   ├── illustration/                  ← 插画 + 社交卡片
