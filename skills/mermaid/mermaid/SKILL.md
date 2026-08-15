@@ -1,7 +1,8 @@
 ---
 name: mermaid-skill
-description: Generate Mermaid diagrams (.mmd) and export to PNG/SVG/PDF using mmdc CLI or Kroki API. USE THIS SKILL when user mentions diagram, flowchart, sequence diagram, class diagram, ER diagram, state machine, architecture, visualize, git graph, 画图, 架构图, 流程图, 时序图. PROACTIVELY USE when explaining ANY system with 3+ components, API flows, authentication sequences, class hierarchies, database schemas, or state machines. Supports 12+ diagram types with fully automatic layout.
+description: Generate Mermaid diagrams (.mmd) and export to PNG/SVG/PDF using mmdc CLI or Kroki API. USE THIS SKILL when user mentions diagram, flowchart, sequence diagram, class diagram, ER diagram, state machine, architecture, visualize, git graph, 画图, 架构图, 流程图, 时序图. PROACTIVELY USE when explaining ANY system with 3+ components, API flows, authentication sequences, class hierarchies, database schemas, or state machines. Supports 17+ diagram types with fully automatic layout.
 homepage: https://github.com/Agents365-ai/creating-mermaid-diagrams
+version: 1.1.0
 metadata: {"openclaw":{"requires":{"bins":["curl"]},"emoji":"📊"}}
 ---
 
@@ -16,6 +17,7 @@ Generate `.mmd` text files and export to PNG/SVG/PDF using `mmdc` (local) or Kro
 **Use this skill for:** diagrams-as-code with automatic layout (flowchart, sequence, class, state, ER, gantt, mindmap, architecture) — text source that lives in git and embeds in Markdown.
 
 **Do NOT use it — route elsewhere — for:**
+
 - Pixel-precise placement, custom layout, branded icons, or heavy styling → **drawio**.
 - A hand-drawn / sketchy aesthetic → **excalidraw** or **tldraw**.
 - A freeform whiteboard or freehand strokes → **tldraw**.
@@ -24,14 +26,17 @@ Generate `.mmd` text files and export to PNG/SVG/PDF using `mmdc` (local) or Kro
 ## Prerequisites
 
 **Option A: Local (mmdc)** — also needs a headless Chrome (mmdc renders via Puppeteer)
+
 ```bash
 npm install -g @mermaid-js/mermaid-cli
 npx puppeteer browsers install chrome-headless-shell   # required — mmdc has no bundled browser
 mmdc --version
 ```
+
 > `mmdc --version` succeeds even with **no** Chrome installed, but every export then fails with `Could not find Chrome`. Install the browser above (or set `PUPPETEER_EXECUTABLE_PATH` to a system Chrome). If you can't, use Kroki (Option B) — it needs no browser.
 
 **Option B: Kroki API (no install)**
+
 ```bash
 curl --version  # Just need curl
 ```
@@ -63,6 +68,7 @@ curl -s -X POST -H "Content-Type: text/plain" --data-binary @diagram.mmd https:/
 ```
 
 Common validation errors:
+
 - Missing quotes around labels with special characters
 - Wrong arrow syntax (use `->>` for sequence, `-->` for flowchart)
 - Undeclared participants in sequence diagrams
@@ -74,7 +80,7 @@ Common validation errors:
 Validation (above) only proves the syntax is legal — it says nothing about whether the **rendered** diagram is readable. After exporting, use the agent's vision capability to read the PNG and catch what automatic layout can't prevent. Mermaid positions everything itself, so the failures here are about content and readability, **not** overlaps:
 
 | Check | What to look for | Fix |
-|---|---|---|
+| --- | --- | --- |
 | Label truncation | Node / edge text clipped or cut off | Shorten the label, or wrap it with `<br/>` |
 | Cramped, unreadable density | Too many nodes crammed together; tangled lines | Flip direction (`TD`↔`LR`), split into `subgraph`s, or reduce nodes |
 | Wrong orientation / aspect | Diagram far too wide or too tall to read | Change `flowchart TD`↔`LR` (or set `direction` in class/state) |
@@ -91,7 +97,7 @@ Validation (above) only proves the syntax is legal — it says nothing about whe
 After self-check, show the exported image and collect feedback. Apply the **minimal `.mmd` edit** for each request, then re-validate and re-export:
 
 | User request | Edit action |
-|---|---|
+| --- | --- |
 | Change a label | Edit the node / edge text in the `.mmd` |
 | Add / remove a node or edge | Add or delete the matching line |
 | Change a color | Add / adjust a `classDef` and `class <node> <className>` |
@@ -104,7 +110,7 @@ After self-check, show the exported image and collect feedback. Apply the **mini
 ## Diagram Types
 
 | Type | Keyword | Use for |
-|------|---------|---------|
+| ------ | --------- | --------- |
 | Flowchart | `flowchart TD/LR` | processes, pipelines, decisions |
 | Sequence | `sequenceDiagram` | API calls, message passing |
 | Class | `classDiagram` | OOP models, data structures |
@@ -117,6 +123,11 @@ After self-check, show the exported image and collect feedback. Apply the **mini
 | Architecture | `architecture-beta` | cloud / CI/CD service layouts |
 | Mind Map | `mindmap` | topic breakdowns |
 | User Journey | `journey` | user-experience flows |
+| Use Case | `usecase-beta` | actor–system interactions (UML) |
+| Cynefin | `cynefin-beta` | sense-making / complexity domains |
+| Event Modeling | `eventmodeling` | event-driven system timelines |
+| Tree View | `treeView-beta` | file / directory hierarchies |
+| Wardley Maps | `wardley-beta` | business strategy / value chains |
 
 ## Syntax Reference
 
@@ -124,6 +135,7 @@ After self-check, show the exported image and collect feedback. Apply the **mini
 **Sequence**: See [reference/SEQUENCE.md](reference/SEQUENCE.md)
 **Class & ER**: See [reference/CLASS-ER.md](reference/CLASS-ER.md)
 **Architecture**: See [reference/ARCHITECTURE.md](reference/ARCHITECTURE.md)
+**Use Case**: See [reference/USECASE.md](reference/USECASE.md)
 **Other types**: See [reference/OTHER-TYPES.md](reference/OTHER-TYPES.md)
 
 ## Examples
@@ -134,6 +146,7 @@ After self-check, show the exported image and collect feedback. Apply the **mini
 > Create a sequence diagram for JWT authentication
 
 **Generated `.mmd`:**
+
 ```mermaid
 sequenceDiagram
   participant C as Client
@@ -160,6 +173,7 @@ sequenceDiagram
 > Draw an e-commerce microservices architecture
 
 **Generated `.mmd`:**
+
 ```mermaid
 flowchart TD
   subgraph Clients
@@ -201,6 +215,7 @@ flowchart TD
 > Show order lifecycle states
 
 **Generated `.mmd`:**
+
 ```mermaid
 stateDiagram-v2
   [*] --> Pending : order created
@@ -222,6 +237,7 @@ stateDiagram-v2
 > Draw a simple service architecture for an API
 
 **Generated `.mmd`:**
+
 ```mermaid
 architecture-beta
   group api(cloud)[API]
@@ -274,11 +290,13 @@ curl -X POST -H "Content-Type: text/plain" --data-binary @diagram.mmd https://kr
 ```
 
 **Kroki advantages:**
+
 - No local installation required
 - Works on any system with `curl`
 - Supports 20+ diagram types (PlantUML, GraphViz, D2, etc.)
 
 **When to use Kroki:**
+
 - `mmdc` installation fails
 - Quick one-off diagrams
 - CI/CD pipelines without Node.js
@@ -286,7 +304,7 @@ curl -X POST -H "Content-Type: text/plain" --data-binary @diagram.mmd https://kr
 ## Common Mistakes
 
 | Mistake | Fix |
-|---------|-----|
+| --------- | ----- |
 | `mmdc` not found | `npm install -g @mermaid-js/mermaid-cli` |
 | `mmdc` error `Could not find Chrome` | Install the headless browser: `npx puppeteer browsers install chrome-headless-shell` (or use Kroki) |
 | Kroki PDF fails with HTTP 400 | Kroki does PNG/SVG only for Mermaid; use local `mmdc` for PDF |
