@@ -1,6 +1,6 @@
 {
   "name": "jangrui",
-  "description": "jangrui 精选 Agent Skills 市场：按使用场景分 10 个组插件（daily 常用必备 / coding 代码 / design 设计 / marketing 营销 / observability 运维可观测 / office 日常办公 / collab 协作套件 / diagram 画图 / video 视频 / writing 写作），每组跨上游 vendor 精选。全量合集不上市场，见仓库 plugins/ 目录自取。",
+  "description": "jangrui 精选 Agent Skills 市场：按使用场景分 10 组，跨上游 vendor 精选；全量见仓库 plugins/ 目录自取。",
   "owner": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
@@ -8,8 +8,8 @@
   "plugins": [
     {
       "name": "daily",
-      "displayName": "常用必备",
-      "description": "AGENTS 中必备调用的常用 skill 合集（6 个）：写作去 AI 味 5 个（humanizer 英文 / humanizer-zh 中文 / stop-slop / no-ai-slop / shuorenhua）、neat-freak 会话收尾知识库同步。其余组按需调用。",
+      "displayName": "Daily",
+      "description": "AGENTS 必备：写作去 AI 味 5 个（中英）+ neat-freak 会话收尾同步。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -35,8 +35,8 @@
     },
     {
       "name": "coding",
-      "displayName": "代码工程",
-      "description": "代码与 vibe coding 合集（16 个）：Go 工程 11 个（how-to 调度、错误处理、并发、context、测试、代码风格、cobra、viper、samber-lo、lint、项目布局）、Matt Pocock 工程实践 4 个（tdd / code-review / diagnosing-bugs / handoff）、dbx 数据库探索（70+ 数据库只读 SQL 与 schema context，需 @dbx-app/cli）。",
+      "displayName": "Coding",
+      "description": "Go 工程 11 + 工程实践 4 + dbx 数据库探索（需 @dbx-app/cli）。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -83,8 +83,8 @@
     },
     {
       "name": "design",
-      "displayName": "视觉设计",
-      "description": "视觉设计合集（4 个）：taste anti-slop 前端设计（taste-skill 主入口、imagegen-frontend-web/mobile 生图方向、redesign-skill 改版）。上游 13 个见 plugins/taste/ 目录自取。",
+      "displayName": "Design",
+      "description": "taste anti-slop 前端设计 4 个。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -106,8 +106,8 @@
     },
     {
       "name": "marketing",
-      "displayName": "营销增长",
-      "description": "solopreneur 营销与市场调研合集（9 个，ReScienceLab opc-skills）：设计 3 个——nanobanana（Gemini 3 Pro Image 生图/改图，2K/4K）、logo-creator（logo/图标/favicon，迭代改稿+去底+SVG 导出）、banner-creator（banner/封面图，迭代改稿+裁剪）；调研 6 个——reddit（公开 JSON API 免 key）、twitter（twitterapi.io）、producthunt（GraphQL API）、requesthunt（多平台用户需求挖掘，需装其 CLI）、seo-geo（SEO + AI 搜索引擎引用优化，DataForSEO）、domain-hunter（域名比价选购）。各自需对应 API key。上游全量 10 个见 plugins/opc/ 目录自取。",
+      "displayName": "Marketing",
+      "description": "OPC：Gemini 生图 3（nanobanana / logo / banner）+ 平台调研 6（reddit / twitter / seo-geo 等，各自需 API key）。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -146,8 +146,8 @@
     },
     {
       "name": "observability",
-      "displayName": "运维可观测",
-      "description": "运维 / SRE / 监控 / 可观测合集（10 个）：Grafana 核心 5 个（Dashboard 建模、PromQL、告警 IRM、OpenTelemetry 采集、Alloy）+ LGTM 开源栈 5 个（Loki 日志、Tempo 追踪、Mimir 长期指标、Prometheus、Pyroscope 持续 profiling）。上游全量见 plugins/grafana/ 目录自取。",
+      "displayName": "Observability",
+      "description": "Grafana 全家桶：Dashboard / PromQL / 告警 / OTel / Alloy + Loki / Tempo / Mimir / Prometheus / Pyroscope。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -189,8 +189,8 @@
     },
     {
       "name": "office",
-      "displayName": "日常办公",
-      "description": "日常办公文档合集（6 个）：Anthropic 官方文档四件套 docx / pdf / pptx / xlsx（创建、读取与编辑）、anydoc 文档转 Markdown（需 Node 20+）、归藏网页 PPT（横向翻页 HTML deck）。",
+      "displayName": "Office",
+      "description": "文档处理：docx / pdf / pptx / xlsx 四件套 + anydoc 转 Markdown + 归藏网页 PPT。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -222,8 +222,8 @@
     },
     {
       "name": "collab",
-      "displayName": "协作套件",
-      "description": "办公协作套件集成合集（14 个）：飞书 8 个（认证基础、即时通讯、云文档、多维表格、电子表格、日历、任务、邮箱，需 lark-cli）+ WPS 笔记 6 个（笔记读写、内容提炼、文档导入、网页导入、智能搜索、公众号发布，需 wpsnote-cli）。未来将加入腾讯文档、钉钉等协作套件。",
+      "displayName": "Collaboration",
+      "description": "协作套件：飞书 8（需 lark-cli）+ WPS 笔记 6（需 wpsnote-cli）；后续加腾讯文档、钉钉等。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -264,8 +264,8 @@
     },
     {
       "name": "diagram",
-      "displayName": "画图绘图",
-      "description": "图表生成合集（4 个）：mermaid、drawio、plantuml、archify，把自然语言、源码或架构描述转成专业图表（导出 PNG / SVG；archify 产出交互式系统架构图）。上游 6 个见 plugins/drawio/、plugins/mermaid/、plugins/plantuml/、plugins/archify/ 等目录自取。",
+      "displayName": "Diagramming",
+      "description": "mermaid / drawio / plantuml / archify，自然语言转专业图表。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -290,8 +290,8 @@
     },
     {
       "name": "video",
-      "displayName": "视频制作",
-      "description": "视频制作合集（7 个）：video-shotcraft 电影感产品视频（106 张镜头配方卡 + Remotion 组件与音频资产 + 六阶段工作流：页面截图、2.5D 运镜、节奏卡点、声音设计、剪映工程导出，需 Node 20+）、libtv AI 生图 / 生视频（Seedance、Kling、Wan 等模型，需 LIBTV_ACCESS_KEY）、烁皓 AI 短剧制作 5 个（novel-characters 角色设定集 / novel-outline 改编大纲 / novel-art 美术设定 / novel-script 剧本台词 / novel-storyboard 分镜，从一本小说到直接喂生成管线的制作素材，需 Node 20+）。",
+      "displayName": "Video",
+      "description": "电影感产品视频（shotcraft，需 Node 20+）+ AI 生图生视频（libtv）+ 短剧制作 5 件（shuohao）。",
       "source": "./",
       "author": {
         "name": "jangrui",
@@ -329,8 +329,8 @@
     },
     {
       "name": "writing",
-      "displayName": "写作创作",
-      "description": "写作与内容创作合集（10 个）：宝玉 AI 创作 7 个——生图、文章配图、封面图、信息图、翻译、URL→Markdown、YouTube 字幕（多数需 Bun）、gzh-design 公众号文章排版（Markdown→公众号 HTML）、小黑手绘插画（文章配图）、归藏社交卡片（小红书图文/公众号封面）。上游全量见 plugins/baoyu/、plugins/gzh/、plugins/illustration/ 目录自取。",
+      "displayName": "Writing",
+      "description": "内容创作：宝玉 AI 创作 7（多数需 Bun）+ 公众号排版 + 插画 + 社交卡片。",
       "source": "./",
       "author": {
         "name": "jangrui",

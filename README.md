@@ -68,7 +68,7 @@ cp -r /tmp/jangrui-skills/plugins/humanizer/humanizer ~/.codex/skills/humanizer
 | `video` 做视频 | 电影感产品视频 + LibLib 生图生视频 + 烁皓短剧 5 | `plugins/shotcraft/` `plugins/libtv/` `plugins/shuohao/` | 7/7 | Vincentwei1021、libtv-labs、eternityspring |
 | `writing` 写作 | 宝玉 AI 创作 + gzh 排版 + 插画 + 社交卡片 | `plugins/baoyu/` `plugins/gzh/` `plugins/illustration/` | 10/24 | JimLiu/baoyu-skills、isjiamu、helloianneo/op7418 |
 
-市场**仅由 `.claude-plugin/marketplace.json` 单文件策展**：8 个组条目、组内 skills 路径相对仓库根、`source: "./"`，无任何生成物。Claude Code 与 Codex 原生消费条目内联 skills；**ZCode 不读内联 skills**，装组条目得不到 skill——ZCode 端请走下方 Codex 式目录拷贝自取。
+市场**仅由 `.claude-plugin/marketplace.json` 单文件策展**：10 个组条目、组内 skills 路径相对仓库根、`source: "./"`，无任何生成物。Claude Code 与 Codex 原生消费条目内联 skills；ZCode 也能看到 skill——但 `source: "./"` 意味着插件根 = 整个仓库，ZCode 安装时会把整仓（约 130MB）复制进每组缓存，多组安装注意磁盘占用。
 
 不上市场的全集（如 grafana-k6 / grafana-cloud / 插件开发、anthropic 其余 13 个、wpsnote 其余 30 个等）仍完整保留在 `plugins/` 下，可按 Codex 目录拷贝方式自取。
 
