@@ -1,43 +1,15 @@
 {
   "name": "jangrui",
-  "description": "jangrui 精选 Agent Skills 市场：按使用场景分 10 组，跨上游 vendor 精选；全量见仓库 skills/ 目录自取。",
+  "description": "按工作场景组织、可按需安装的 Agent Skills 市场。",
   "owner": {
     "name": "jangrui",
     "email": "admin@jangrui.com"
   },
   "plugins": [
     {
-      "name": "daily",
-      "displayName": "Daily",
-      "description": "AGENTS 必备：写作去 AI 味 5 个（中英）+ neat-freak 会话收尾同步。",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "jangrui",
-        "url": "https://github.com/jangrui"
-      },
-      "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "daily",
-        "humanizer",
-        "anti-slop",
-        "neat-freak",
-        "session-summary",
-        "knowledge-sync"
-      ],
-      "skills": [
-        "./skills/humanizer/humanizer",
-        "./skills/humanizer-zh/humanizer-zh",
-        "./skills/stop-slop/stop-slop",
-        "./skills/no-ai-slop/no-ai-slop",
-        "./skills/shuorenhua/shuorenhua",
-        "./skills/khazix/neat-freak"
-      ]
-    },
-    {
       "name": "coding",
       "displayName": "Coding",
-      "description": "Go 工程 11 + 工程实践 4 + dbx 数据库探索（需 @dbx-app/cli）。",
+      "description": "软件开发与工程实践：覆盖代码质量、并发与错误处理、测试、审查、诊断、命令行、配置和数据库探索。",
       "source": "./",
       "strict": false,
       "author": {
@@ -45,25 +17,6 @@
         "url": "https://github.com/jangrui"
       },
       "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "coding",
-        "golang",
-        "go",
-        "error-handling",
-        "concurrency",
-        "testing",
-        "cobra",
-        "viper",
-        "samber-lo",
-        "lint",
-        "project-layout",
-        "tdd",
-        "code-review",
-        "debugging",
-        "database",
-        "sql",
-        "schema"
-      ],
       "skills": [
         "./skills/golang/golang-how-to",
         "./skills/golang/golang-error-handling",
@@ -84,152 +37,9 @@
       ]
     },
     {
-      "name": "design",
-      "displayName": "Design",
-      "description": "taste anti-slop 前端设计 4 个。",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "jangrui",
-        "url": "https://github.com/jangrui"
-      },
-      "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "design",
-        "frontend",
-        "anti-slop",
-        "redesign"
-      ],
-      "skills": [
-        "./skills/taste/taste-skill",
-        "./skills/taste/imagegen-frontend-web",
-        "./skills/taste/imagegen-frontend-mobile",
-        "./skills/taste/redesign-skill"
-      ]
-    },
-    {
-      "name": "marketing",
-      "displayName": "Marketing",
-      "description": "OPC：Gemini 生图 3（nanobanana / logo / banner）+ 平台调研 6（reddit / twitter / seo-geo 等，各自需 API key）。",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "jangrui",
-        "url": "https://github.com/jangrui"
-      },
-      "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "marketing",
-        "solopreneur",
-        "opc",
-        "nanobanana",
-        "gemini",
-        "image-generation",
-        "logo",
-        "banner",
-        "market-research",
-        "reddit",
-        "twitter",
-        "producthunt",
-        "requesthunt",
-        "seo",
-        "geo",
-        "domain"
-      ],
-      "skills": [
-        "./skills/opc/nanobanana",
-        "./skills/opc/logo-creator",
-        "./skills/opc/banner-creator",
-        "./skills/opc/reddit",
-        "./skills/opc/twitter",
-        "./skills/opc/producthunt",
-        "./skills/opc/requesthunt",
-        "./skills/opc/seo-geo",
-        "./skills/opc/domain-hunter"
-      ]
-    },
-    {
-      "name": "observability",
-      "displayName": "Observability",
-      "description": "Grafana 全家桶：Dashboard / PromQL / 告警 / OTel / Alloy + Loki / Tempo / Mimir / Prometheus / Pyroscope。",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "jangrui",
-        "url": "https://github.com/jangrui"
-      },
-      "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "observability",
-        "sre",
-        "monitoring",
-        "grafana",
-        "promql",
-        "dashboard",
-        "alerting",
-        "opentelemetry",
-        "alloy",
-        "loki",
-        "tempo",
-        "mimir",
-        "prometheus",
-        "pyroscope",
-        "lgtm",
-        "logging",
-        "tracing",
-        "profiling"
-      ],
-      "skills": [
-        "./skills/grafana/grafana-core/dashboarding",
-        "./skills/grafana/grafana-core/promql",
-        "./skills/grafana/grafana-core/alerting-irm",
-        "./skills/grafana/grafana-core/opentelemetry",
-        "./skills/grafana/grafana-core/alloy",
-        "./skills/grafana/grafana-lgtm/loki",
-        "./skills/grafana/grafana-lgtm/tempo",
-        "./skills/grafana/grafana-lgtm/mimir",
-        "./skills/grafana/grafana-lgtm/prometheus",
-        "./skills/grafana/grafana-lgtm/pyroscope"
-      ]
-    },
-    {
-      "name": "office",
-      "displayName": "Office",
-      "description": "文档处理：docx / pdf / pptx / xlsx 四件套 + anydoc 转 Markdown + 归藏网页 PPT。",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "jangrui",
-        "url": "https://github.com/jangrui"
-      },
-      "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "office",
-        "docx",
-        "pdf",
-        "pptx",
-        "xlsx",
-        "word",
-        "powerpoint",
-        "excel",
-        "markdown",
-        "document-conversion",
-        "presentation",
-        "web-deck"
-      ],
-      "skills": [
-        "./skills/anthropic/docx",
-        "./skills/anthropic/pdf",
-        "./skills/anthropic/pptx",
-        "./skills/anthropic/xlsx",
-        "./skills/anydoc/convert-documents-to-markdown",
-        "./skills/ppt/guizang-ppt"
-      ]
-    },
-    {
       "name": "collab",
       "displayName": "Collaboration",
-      "description": "协作套件：飞书 8（需 lark-cli）+ WPS 笔记 6（需 wpsnote-cli）；后续加腾讯文档、钉钉等。",
+      "description": "协作平台集成：在已接入的平台中处理消息、文档、表格、日程、任务与内容流转；需相应 CLI 与授权。",
       "source": "./",
       "strict": false,
       "author": {
@@ -237,21 +47,6 @@
         "url": "https://github.com/jangrui"
       },
       "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "collab",
-        "lark",
-        "feishu",
-        "飞书",
-        "wpsnote",
-        "笔记",
-        "tencent-doc",
-        "dingtalk",
-        "钉钉",
-        "collaboration",
-        "im",
-        "calendar",
-        "knowledge-base"
-      ],
       "skills": [
         "./skills/lark/lark-shared",
         "./skills/lark/lark-im",
@@ -270,9 +65,9 @@
       ]
     },
     {
-      "name": "diagram",
-      "displayName": "Diagramming",
-      "description": "mermaid / drawio / plantuml / archify，自然语言转专业图表。",
+      "name": "daily",
+      "displayName": "Daily",
+      "description": "日常工作辅助：改善中英文表达、整理项目知识并完成会话收尾。",
       "source": "./",
       "strict": false,
       "author": {
@@ -280,15 +75,44 @@
         "url": "https://github.com/jangrui"
       },
       "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "diagram",
-        "drawio",
-        "mermaid",
-        "plantuml",
-        "archify",
-        "uml",
-        "visualization"
-      ],
+      "skills": [
+        "./skills/humanizer/humanizer",
+        "./skills/humanizer-zh/humanizer-zh",
+        "./skills/stop-slop/stop-slop",
+        "./skills/no-ai-slop/no-ai-slop",
+        "./skills/shuorenhua/shuorenhua",
+        "./skills/khazix/neat-freak"
+      ]
+    },
+    {
+      "name": "design",
+      "displayName": "Design",
+      "description": "产品界面与视觉设计：探索设计方向，创建或改进页面和交互。",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "jangrui",
+        "url": "https://github.com/jangrui"
+      },
+      "homepage": "https://github.com/jangrui/skills",
+      "skills": [
+        "./skills/taste/taste-skill",
+        "./skills/taste/imagegen-frontend-web",
+        "./skills/taste/imagegen-frontend-mobile",
+        "./skills/taste/redesign-skill"
+      ]
+    },
+    {
+      "name": "diagram",
+      "displayName": "Diagramming",
+      "description": "图表与架构表达：制作流程图、架构图、UML 等结构化图表。",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "jangrui",
+        "url": "https://github.com/jangrui"
+      },
+      "homepage": "https://github.com/jangrui/skills",
       "skills": [
         "./skills/mermaid/mermaid",
         "./skills/drawio/drawio",
@@ -297,9 +121,9 @@
       ]
     },
     {
-      "name": "video",
-      "displayName": "Video",
-      "description": "电影感产品视频（shotcraft，需 Node 20+）+ AI 生图生视频（libtv）+ 短剧制作 5 件（shuohao）。",
+      "name": "observability",
+      "displayName": "Observability",
+      "description": "可观测性与运行分析：处理指标、日志、追踪、告警、仪表盘、数据采集和性能分析。",
       "source": "./",
       "strict": false,
       "author": {
@@ -307,25 +131,73 @@
         "url": "https://github.com/jangrui"
       },
       "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "video",
-        "remotion",
-        "motion-design",
-        "product-video",
-        "cinematic",
-        "beat-sync",
-        "sound-design",
-        "libtv",
-        "liblib",
-        "image-generation",
-        "video-generation",
-        "seedance",
-        "kling",
-        "shuohao",
-        "short-drama",
-        "screenwriting",
-        "storyboard"
-      ],
+      "skills": [
+        "./skills/grafana/grafana-core/dashboarding",
+        "./skills/grafana/grafana-core/promql",
+        "./skills/grafana/grafana-core/alerting-irm",
+        "./skills/grafana/grafana-core/opentelemetry",
+        "./skills/grafana/grafana-core/alloy",
+        "./skills/grafana/grafana-lgtm/loki",
+        "./skills/grafana/grafana-lgtm/tempo",
+        "./skills/grafana/grafana-lgtm/mimir",
+        "./skills/grafana/grafana-lgtm/prometheus",
+        "./skills/grafana/grafana-lgtm/pyroscope"
+      ]
+    },
+    {
+      "name": "office",
+      "displayName": "Office",
+      "description": "办公文档与演示材料处理：编辑、转换和生成文档、PDF、演示文稿及表格。",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "jangrui",
+        "url": "https://github.com/jangrui"
+      },
+      "homepage": "https://github.com/jangrui/skills",
+      "skills": [
+        "./skills/anthropic/docx",
+        "./skills/anthropic/pdf",
+        "./skills/anthropic/pptx",
+        "./skills/anthropic/xlsx",
+        "./skills/anydoc/convert-documents-to-markdown",
+        "./skills/ppt/guizang-ppt"
+      ]
+    },
+    {
+      "name": "opc",
+      "displayName": "OPC",
+      "description": "品牌与增长运营：支持视觉内容、社区与产品研究、搜索优化和域名筛选；部分能力需 API Key。",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "jangrui",
+        "url": "https://github.com/jangrui"
+      },
+      "homepage": "https://github.com/jangrui/skills",
+      "skills": [
+        "./skills/opc/nanobanana",
+        "./skills/opc/logo-creator",
+        "./skills/opc/banner-creator",
+        "./skills/opc/reddit",
+        "./skills/opc/twitter",
+        "./skills/opc/producthunt",
+        "./skills/opc/requesthunt",
+        "./skills/opc/seo-geo",
+        "./skills/opc/domain-hunter"
+      ]
+    },
+    {
+      "name": "video",
+      "displayName": "Video",
+      "description": "视频与短剧制作：生成和编辑图像/视频，完成产品视频与叙事内容的角色、大纲、美术、剧本和分镜开发。",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "jangrui",
+        "url": "https://github.com/jangrui"
+      },
+      "homepage": "https://github.com/jangrui/skills",
       "skills": [
         "./skills/shotcraft/video-shotcraft",
         "./skills/libtv/libtv-skill",
@@ -339,7 +211,7 @@
     {
       "name": "writing",
       "displayName": "Writing",
-      "description": "内容创作：宝玉 AI 创作 7（多数需 Bun）+ 公众号排版 + 插画 + 社交卡片。",
+      "description": "内容创作与图文制作：支持写作、翻译、内容提取、排版与视觉素材制作。",
       "source": "./",
       "strict": false,
       "author": {
@@ -347,22 +219,6 @@
         "url": "https://github.com/jangrui"
       },
       "homepage": "https://github.com/jangrui/skills",
-      "keywords": [
-        "writing",
-        "baoyu",
-        "宝玉",
-        "image-generation",
-        "illustration",
-        "infographic",
-        "translate",
-        "youtube",
-        "markdown",
-        "wechat",
-        "gzh",
-        "typography",
-        "social-card",
-        "xiaohongshu"
-      ],
       "skills": [
         "./skills/baoyu/baoyu-image-gen",
         "./skills/baoyu/baoyu-article-illustrator",
