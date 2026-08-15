@@ -1,20 +1,17 @@
 {
   "name": "anydoc",
   "version": "0.1.0",
-  "description": "Firecrawl anydoc 文档转换技能：把 Word / PowerPoint / Excel / OpenDocument / RTF / EPUB / CSV / PDF 转成 GitHub-Flavored Markdown。需 Node 20+，通过 npx @firecrawl/anydoc 免安装运行。",
+  "description": "Firecrawl anydoc 文档转换 Agent Skill：把 Word / PowerPoint / Excel / OpenDocument / RTF / EPUB / CSV / PDF 转成 GitHub-Flavored Markdown。需 Node 20+，通过 npx @firecrawl/anydoc 免安装运行。",
+  "skills": [
+    "./convert-documents-to-markdown"
+  ],
   "author": {
     "name": "firecrawl",
     "url": "https://github.com/firecrawl"
   },
-  "homepage": "https://github.com/firecrawl/anydoc",
-  "repository": "https://github.com/firecrawl/anydoc",
   "license": "MIT",
+  "homepage": "https://github.com/firecrawl/anydoc",
   "keywords": [
-    "claude-code",
-    "claude-code-plugin",
-    "plugin",
-    "ai-agent",
-    "skills",
     "anydoc",
     "firecrawl",
     "markdown",
@@ -22,13 +19,6 @@
     "pptx",
     "xlsx",
     "pdf",
-    "rtf",
-    "epub",
-    "odt",
     "document-conversion"
-  ],
-  "category": "productivity",
-  "skills": [
-    "./convert-documents-to-markdown"
   ]
 }

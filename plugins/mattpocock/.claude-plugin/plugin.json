@@ -1,54 +1,26 @@
 {
-  "name": "mattpocock-skills",
-  "version": "1.2.0",
-  "description": "Matt Pocock 的工程实践 Agent Skills 合集（26 个 skill）：engineering（TDD、code review、spec/ticket、wayfinder、domain-modeling 等 18 个）+ productivity（grilling、handoff、teach 等 8 个）。",
+  "name": "mattpocock-core",
+  "version": "0.1.0",
+  "description": "Matt Pocock 工程 Agent Skills 精选（5 个）：tdd、code-review、diagnosing-bugs、grilling、handoff。上游全量 26 个见 plugins/mattpocock/ 目录自取。",
+  "skills": [
+    "./engineering/tdd",
+    "./engineering/code-review",
+    "./engineering/diagnosing-bugs",
+    "./productivity/grilling",
+    "./productivity/handoff"
+  ],
   "author": {
     "name": "Matt Pocock",
     "url": "https://www.aihero.dev"
   },
-  "homepage": "https://github.com/mattpocock/skills",
-  "repository": "https://github.com/mattpocock/skills",
   "license": "MIT",
+  "homepage": "https://github.com/mattpocock/skills",
   "keywords": [
-    "claude-code",
-    "claude-code-plugin",
-    "plugin",
-    "ai-agent",
-    "skills",
-    "engineering",
     "tdd",
     "code-review",
+    "debugging",
     "grilling",
-    "domain-modeling",
-    "productivity"
-  ],
-  "category": "productivity",
-  "skills": [
-    "./engineering/ask-matt",
-    "./engineering/code-review",
-    "./engineering/codebase-design",
-    "./engineering/diagnosing-bugs",
-    "./engineering/domain-modeling",
-    "./engineering/grill-with-docs",
-    "./engineering/implement",
-    "./engineering/improve-codebase-architecture",
-    "./engineering/prototype",
-    "./engineering/research",
-    "./engineering/resolving-merge-conflicts",
-    "./engineering/setup-matt-pocock-skills",
-    "./engineering/tdd",
-    "./engineering/to-spec",
-    "./engineering/to-tickets",
-    "./engineering/triage",
-    "./engineering/wayfinder",
-    "./engineering/wizard",
-    "./productivity/grill-me",
-    "./productivity/grilling",
-    "./productivity/handoff",
-    "./productivity/teach",
-    "./productivity/to-questionnaire",
-    "./productivity/wait-what",
-    "./productivity/writing-for-agents",
-    "./productivity/writing-great-skills"
+    "handoff",
+    "engineering"
   ]
 }

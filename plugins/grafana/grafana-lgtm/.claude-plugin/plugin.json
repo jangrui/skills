@@ -1,0 +1,23 @@
+{
+  "name": "grafana-lgtm",
+  "version": "0.1.0",
+  "description": "LGTM 开源栈 Agent Skills（5 个）：Loki（日志）、Tempo（追踪）、Mimir（长期 Prometheus 指标）、Prometheus、Pyroscope（持续 profiling）。",
+  "skills": [
+    "./loki",
+    "./tempo",
+    "./mimir",
+    "./prometheus",
+    "./pyroscope"
+  ],
+  "keywords": [
+    "loki",
+    "tempo",
+    "mimir",
+    "prometheus",
+    "pyroscope",
+    "lgtm",
+    "logging",
+    "tracing",
+    "profiling"
+  ]
+}

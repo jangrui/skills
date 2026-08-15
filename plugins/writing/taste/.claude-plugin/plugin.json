@@ -1,0 +1,19 @@
+{
+  "name": "taste-core",
+  "version": "0.1.0",
+  "description": "Leonxlnx anti-slop 前端设计精选（4 个）：taste-skill 主入口、imagegen-frontend-web/mobile 生图方向、redesign-skill 改版。上游 13 个见 plugins/writing/taste/ 目录自取。",
+  "skills": [
+    "./taste-skill",
+    "./imagegen-frontend-web",
+    "./imagegen-frontend-mobile",
+    "./redesign-skill"
+  ],
+  "keywords": [
+    "taste",
+    "anti-slop",
+    "frontend",
+    "design",
+    "redesign",
+    "image-generation"
+  ]
+}

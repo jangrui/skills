@@ -1,20 +1,21 @@
 {
   "name": "shuohao",
   "version": "0.1.0",
-  "description": "烁皓 AI 短剧制作技能全集（5 个）：novel-characters（角色设定集）、novel-outline（短剧改编大纲）、novel-art（美术设定集）、novel-script（剧本）、novel-storyboard（分镜）。从一本小说到直接喂生成管线的制作素材，质量门全部脚本检查。需 Node 20+。",
+  "description": "烁皓 AI 短剧制作 Agent Skills（5 个）：novel-characters（角色设定集）、novel-outline（短剧改编大纲五件套）、novel-art（美术设定集）、novel-script（剧本 + 台词本对接 TTS）、novel-storyboard（分镜 + MiniMax H3 提示词）。从一本小说到直接喂生成管线的制作素材，质量门全部脚本检查。需 Node 20+。",
+  "skills": [
+    "./novel-characters",
+    "./novel-outline",
+    "./novel-art",
+    "./novel-script",
+    "./novel-storyboard"
+  ],
   "author": {
     "name": "eternityspring",
     "url": "https://github.com/eternityspring"
   },
-  "homepage": "https://github.com/eternityspring/shuohao-skills",
-  "repository": "https://github.com/eternityspring/shuohao-skills",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/eternityspring/shuohao-skills",
   "keywords": [
-    "claude-code",
-    "claude-code-plugin",
-    "plugin",
-    "ai-agent",
-    "skills",
     "shuohao",
     "short-drama",
     "novel-adaptation",
@@ -22,13 +23,5 @@
     "storyboard",
     "character-design",
     "ai-video"
-  ],
-  "category": "productivity",
-  "skills": [
-    "./novel-characters",
-    "./novel-outline",
-    "./novel-art",
-    "./novel-script",
-    "./novel-storyboard"
   ]
 }

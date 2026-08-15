@@ -1,26 +1,15 @@
 {
   "name": "ppt",
   "version": "0.1.0",
-  "description": "网页 PPT 生成技能：生成横向翻页单文件 HTML 网页 PPT，含 WebGL 背景、电子杂志风/瑞士国际主义风双模板系统。",
-  "author": {
-    "name": "jangrui",
-    "email": "admin@jangrui.com"
-  },
-  "license": "MIT",
+  "description": "网页 PPT 生成技能：生成横向翻页单文件 HTML 网页 PPT，含 WebGL 背景、电子杂志风/瑞士国际主义风双模板系统（22 种版式、截图美化、数据大字报等）。",
+  "skills": [
+    "./guizang-ppt"
+  ],
   "keywords": [
-    "claude-code",
-    "claude-code-plugin",
-    "plugin",
-    "ai-agent",
-    "skills",
     "presentation",
     "ppt",
     "guizang",
-    "swiss-style",
-    "web-deck"
-  ],
-  "category": "ppt",
-  "skills": [
-    "./guizang-ppt"
+    "web-deck",
+    "swiss-style"
   ]
 }

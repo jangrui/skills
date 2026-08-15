@@ -4,7 +4,7 @@
 [![Marketplace](https://img.shields.io/badge/Claude%20Code-Marketplace-blue)](#claude-codemarketplace)
 [![Codex CLI](https://img.shields.io/badge/Codex%20CLI-Compatible-green)](#codex-cli目录拷贝)
 [![Vendored Skills](https://img.shields.io/badge/Vendored%20Skills-276-informational)](#技能目录)
-[![Plugins](https://img.shields.io/badge/Plugins-22-informational)](#claude-codemarketplace)
+[![Plugins](https://img.shields.io/badge/Plugins-21-informational)](#claude-codemarketplace)
 [![Upstream Sync](https://img.shields.io/badge/Upstream%20Sync-Daily%2006%3A00%20UTC-success)](#同步上游)
 
 面向 **Claude Code** 与 **Codex CLI** 的 AI 编程助手 skill 聚合仓库。
@@ -14,7 +14,7 @@
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
 2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**22 个精选 marketplace 插件**（6 大分类，共 87 个 skill），vendor 全集 **276 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
+当前规模：**21 个精选 marketplace 插件**（6 大分类，共 87 个 skill），vendor 全集 **276 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
 
 ---
 
@@ -92,12 +92,11 @@ cp -r /tmp/jangrui-skills/plugins/writing/humanizer ~/.codex/skills/humanizer
 | design | `gzh-design` | `plugins/gzh/` | 1/1 | isjiamu/gzh-design-skill |
 | design | `illustration` | `plugins/illustration/` | 2/2 | helloianneo, op7418 |
 | design | `libtv` | `plugins/libtv/` | 1/1 | libtv-labs/libtv-skills |
-| design | `opc-design` | `plugins/opc/` | 3/10 | ReScienceLab/opc-skills |
 | design | `video-shotcraft` | `plugins/shotcraft/` | 1/1 | Vincentwei1021/video-shotcraft |
 | integration | `lark-core` | `plugins/lark/` | 8/27 | larksuite/cli |
 | integration | `wpsnote-core` | `plugins/writing/wpsnote/` | 6/37 | wpsnote/wpsnote-skills |
 | integration | `neat-freak` | `plugins/khazix/` | 1/6 | KKKKhazix/khazix-skills |
-| integration | `opc-research` | `plugins/opc/` | 6/10 | ReScienceLab/opc-skills |
+| integration | `opc` | `plugins/opc/` | 9/10 | ReScienceLab/opc-skills |
 
 不上市场的全集（如 grafana-k6 / grafana-cloud / 插件开发、anthropic 其余 13 个、wpsnote 其余 30 个等）仍完整保留在 `plugins/` 下，可按 Codex 目录拷贝方式自取。
 
