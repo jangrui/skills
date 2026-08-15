@@ -23,13 +23,13 @@
 #   ./scripts/sync-writing-skills.sh --check      # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/<name>/<name>/
-#   git add plugins/
+#   git diff skills/<name>/<name>/
+#   git add skills/
 #   git commit -m "chore(writing): sync <name> upstream <old>→<new>"
 #
 # 目录约定（2026-08-15 起按源仓库归属，不再用主题聚合目录）：
-#   每个 skill 各自一个顶层仓目录 plugins/<repo>/<skill>/，如
-#   plugins/humanizer/humanizer、plugins/stop-slop/stop-slop
+#   每个 skill 各自一个顶层仓目录 skills/<repo>/<skill>/，如
+#   skills/humanizer/humanizer、skills/stop-slop/stop-slop
 # ============================================================================
 
 set -euo pipefail
@@ -37,8 +37,8 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-# 每个源仓库一个顶层目录 plugins/<repo>/，skill 在其下：plugins/<repo>/<skill>/
-PLUGIN_BASE="$REPO_ROOT/plugins"
+# 每个源仓库一个顶层目录 skills/<repo>/，skill 在其下：skills/<repo>/<skill>/
+PLUGIN_BASE="$REPO_ROOT/skills"
 
 # skill 元数据：key | 本地目录名 | 上游 owner | 上游 repo | 上游 skill 路径模式
 #   path_mode:
@@ -258,7 +258,7 @@ fi
 
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/  人工 review 后 commit"
+  echo "下一步：git diff skills/  人工 review 后 commit"
 fi
 
 # CI 模式：把本次更新的 skill 列表写入文件

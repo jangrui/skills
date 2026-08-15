@@ -12,8 +12,8 @@
 #   ./scripts/sync-ppt-skills.sh --check          # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/ppt/guizang-ppt/
-#   git add plugins/ppt/
+#   git diff skills/ppt/guizang-ppt/
+#   git add skills/ppt/
 #   git commit -m "chore(ppt): sync guizang-ppt upstream <old>→<new>"
 # ============================================================================
 
@@ -22,7 +22,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/ppt"
+PLUGIN_DIR="$REPO_ROOT/skills/ppt"
 UPSTREAM_OWNER="op7418"
 UPSTREAM_REPO="guizang-ppt-skill"
 LOCAL_DIR="guizang-ppt"                # vendor 目录名
@@ -163,7 +163,7 @@ fi
 
 echo ""
 echo "=== 完成 ==="
-echo "下一步：git diff plugins/ppt/ 人工 review 后 commit"
+echo "下一步：git diff skills/ppt/ 人工 review 后 commit"
 
 # CI 模式
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

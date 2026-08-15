@@ -21,8 +21,8 @@
 #   ./scripts/sync-anydoc-skills.sh --check             # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/anydoc/<name>/
-#   git add plugins/anydoc/
+#   git diff skills/anydoc/<name>/
+#   git add skills/anydoc/
 #   git commit -m "chore(anydoc): sync <name> upstream <old>→<new>"
 # ============================================================================
 
@@ -31,7 +31,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/anydoc"
+PLUGIN_DIR="$REPO_ROOT/skills/anydoc"
 SKILLS_DIR="$PLUGIN_DIR"
 UPSTREAM_OWNER="firecrawl"
 UPSTREAM_REPO="anydoc"
@@ -200,7 +200,7 @@ else
         rsync -a "${RSYNC_EXCLUDES[@]}" "$UPSTREAM_TMP/$UPSTREAM_SKILLS_SUBDIR/$sub/" "$SKILLS_DIR/$sub/"
         echo "$UPSTREAM_COMMIT" > "$SKILLS_DIR/$sub/.upstream-commit"
         echo "  ✅ 已 vendor 新 skill: $sub"
-        echo "  ⚠️  请手动编辑 plugins/anydoc/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
+        echo "  ⚠️  请手动编辑 skills/anydoc/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
         UPDATED_SKILLS+=("$sub")
         local_added=1
       fi
@@ -212,7 +212,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/anydoc/  人工 review 后 commit"
+  echo "下一步：git diff skills/anydoc/  人工 review 后 commit"
 fi
 
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

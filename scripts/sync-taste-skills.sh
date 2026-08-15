@@ -13,7 +13,7 @@
 #
 # 机制：
 #   - git sparse-checkout 只拉上游 skills/ 子目录
-#   - 扁平结构：plugins/taste/<skill>/
+#   - 扁平结构：skills/taste/<skill>/
 #   - 每个 skill 目录单独保存 .upstream-commit
 #   - 同步后跑「自包含性自检」
 #
@@ -23,8 +23,8 @@
 #   ./scripts/sync-taste-skills.sh --check          # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/taste/
-#   git add plugins/taste/
+#   git diff skills/taste/
+#   git add skills/taste/
 #   git commit -m "chore(taste): sync upstream <old>→<new>"
 # ============================================================================
 
@@ -33,7 +33,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/taste"
+PLUGIN_DIR="$REPO_ROOT/skills/taste"
 UPSTREAM_OWNER="Leonxlnx"
 UPSTREAM_REPO="taste-skill"
 UPSTREAM_SUBDIR="skills"
@@ -250,7 +250,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/taste/  人工 review 后 commit"
+  echo "下一步：git diff skills/taste/  人工 review 后 commit"
 fi
 
 # CI 模式

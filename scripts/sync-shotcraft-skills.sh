@@ -19,8 +19,8 @@
 #   ./scripts/sync-shotcraft-skills.sh --check    # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/shotcraft/
-#   git add plugins/shotcraft/
+#   git diff skills/shotcraft/
+#   git add skills/shotcraft/
 #   git commit -m "chore(shotcraft): sync video-shotcraft upstream <old>→<new>"
 # ============================================================================
 
@@ -29,7 +29,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/shotcraft"
+PLUGIN_DIR="$REPO_ROOT/skills/shotcraft"
 UPSTREAM_OWNER="Vincentwei1021"
 UPSTREAM_REPO="video-shotcraft"
 LOCAL_DIR="video-shotcraft"           # vendor 目录名（= skill 名）
@@ -170,7 +170,7 @@ fi
 
 echo ""
 echo "=== 完成 ==="
-echo "下一步：git diff plugins/shotcraft/ 人工 review 后 commit"
+echo "下一步：git diff skills/shotcraft/ 人工 review 后 commit"
 
 # CI 模式
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

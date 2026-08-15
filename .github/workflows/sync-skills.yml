@@ -7,7 +7,7 @@ name: Sync skills
 #   - pr_hint:   PR 正文中给 review 者的路径提示
 #
 # 机制：跑 scripts/sync-<plugin>-skills.sh → 若有更新则自动开 PR → 自动审核 → 自动合并
-# 自动审核门禁（本 workflow）：diff 仅限 plugins/、无 SKILL.md 被删、JSON 合法
+# 自动审核门禁（本 workflow）：diff 仅限 skills/、无 SKILL.md 被删、JSON 合法
 # AI 审核：由 CodeRabbit GitHub App 独立评审（非阻塞，仅建议）
 # 修 bug 只改这一个文件即可，不再维护 12 份副本
 "on":
@@ -55,25 +55,25 @@ jobs:
       - id: gen
         run: |
           ALL='[
-            {"plugin":"anthropic","add_path":"plugins/anthropic/","pr_hint":"plugins/anthropic/<skill>/"},
-            {"plugin":"anydoc","add_path":"plugins/anydoc/","pr_hint":"plugins/anydoc/<skill>/"},
-            {"plugin":"baoyu","add_path":"plugins/baoyu/","pr_hint":"plugins/baoyu/<skill>/"},
-            {"plugin":"dbx","add_path":"plugins/dbx/","pr_hint":"plugins/dbx/<skill>/"},
-            {"plugin":"diagram","add_path":"plugins/drawio/ plugins/mermaid/ plugins/excalidraw/ plugins/tldraw/ plugins/plantuml/ plugins/archify/","pr_hint":"plugins/<repo>/<skill>/（6 个绘图仓）"},
-            {"plugin":"golang","add_path":"plugins/golang/","pr_hint":"plugins/golang/<skill>/"},
-            {"plugin":"grafana","add_path":"plugins/grafana/","pr_hint":"plugins/grafana/<category>/<skill>/"},
-            {"plugin":"illustration","add_path":"plugins/illustration/","pr_hint":"plugins/illustration/"},
-            {"plugin":"khazix","add_path":"plugins/khazix/","pr_hint":"plugins/khazix/<skill>/"},
-            {"plugin":"lark","add_path":"plugins/lark/","pr_hint":"plugins/lark/<skill>/"},
-            {"plugin":"libtv","add_path":"plugins/libtv/","pr_hint":"plugins/libtv/<skill>/"},
-            {"plugin":"mattpocock","add_path":"plugins/mattpocock/","pr_hint":"plugins/mattpocock/<bucket>/<skill>/"},
-            {"plugin":"opc","add_path":"plugins/opc/","pr_hint":"plugins/opc/<skill>/"},
-            {"plugin":"ppt","add_path":"plugins/ppt/","pr_hint":"plugins/ppt/guizang-ppt/"},
-            {"plugin":"shuohao","add_path":"plugins/shuohao/","pr_hint":"plugins/shuohao/<skill>/"},
-            {"plugin":"shotcraft","add_path":"plugins/shotcraft/","pr_hint":"plugins/shotcraft/video-shotcraft/"},
-            {"plugin":"taste","add_path":"plugins/taste/","pr_hint":"plugins/taste/<skill>/"},
-            {"plugin":"wpsnote","add_path":"plugins/wpsnote/","pr_hint":"plugins/wpsnote/<skill>/"},
-            {"plugin":"writing","add_path":"plugins/humanizer/ plugins/humanizer-zh/ plugins/stop-slop/ plugins/no-ai-slop/ plugins/shuorenhua/","pr_hint":"plugins/<repo>/<skill>/（5 个润色仓）"}
+            {"plugin":"anthropic","add_path":"skills/anthropic/","pr_hint":"skills/anthropic/<skill>/"},
+            {"plugin":"anydoc","add_path":"skills/anydoc/","pr_hint":"skills/anydoc/<skill>/"},
+            {"plugin":"baoyu","add_path":"skills/baoyu/","pr_hint":"skills/baoyu/<skill>/"},
+            {"plugin":"dbx","add_path":"skills/dbx/","pr_hint":"skills/dbx/<skill>/"},
+            {"plugin":"diagram","add_path":"skills/drawio/ skills/mermaid/ skills/excalidraw/ skills/tldraw/ skills/plantuml/ skills/archify/","pr_hint":"skills/<repo>/<skill>/（6 个绘图仓）"},
+            {"plugin":"golang","add_path":"skills/golang/","pr_hint":"skills/golang/<skill>/"},
+            {"plugin":"grafana","add_path":"skills/grafana/","pr_hint":"skills/grafana/<category>/<skill>/"},
+            {"plugin":"illustration","add_path":"skills/illustration/","pr_hint":"skills/illustration/"},
+            {"plugin":"khazix","add_path":"skills/khazix/","pr_hint":"skills/khazix/<skill>/"},
+            {"plugin":"lark","add_path":"skills/lark/","pr_hint":"skills/lark/<skill>/"},
+            {"plugin":"libtv","add_path":"skills/libtv/","pr_hint":"skills/libtv/<skill>/"},
+            {"plugin":"mattpocock","add_path":"skills/mattpocock/","pr_hint":"skills/mattpocock/<bucket>/<skill>/"},
+            {"plugin":"opc","add_path":"skills/opc/","pr_hint":"skills/opc/<skill>/"},
+            {"plugin":"ppt","add_path":"skills/ppt/","pr_hint":"skills/ppt/guizang-ppt/"},
+            {"plugin":"shuohao","add_path":"skills/shuohao/","pr_hint":"skills/shuohao/<skill>/"},
+            {"plugin":"shotcraft","add_path":"skills/shotcraft/","pr_hint":"skills/shotcraft/video-shotcraft/"},
+            {"plugin":"taste","add_path":"skills/taste/","pr_hint":"skills/taste/<skill>/"},
+            {"plugin":"wpsnote","add_path":"skills/wpsnote/","pr_hint":"skills/wpsnote/<skill>/"},
+            {"plugin":"writing","add_path":"skills/humanizer/ skills/humanizer-zh/ skills/stop-slop/ skills/no-ai-slop/ skills/shuorenhua/","pr_hint":"skills/<repo>/<skill>/（5 个润色仓）"}
           ]'
           SELECTED="${{ github.event.inputs.plugin }}"
           if [ -n "$SELECTED" ]; then
@@ -176,7 +176,7 @@ jobs:
           - ✅ 自包含性自检通过
 
           ### 自动审核 & 合并
-          - 门禁：diff 仅限 \`plugins/\`、无 \`SKILL.md\` 删除、JSON 合法
+          - 门禁：diff 仅限 \`skills/\`、无 \`SKILL.md\` 删除、JSON 合法
           - 通过即自动 squash 合并；不通过会评论原因并留人工
           - AI 评审（CodeRabbit）为非阻塞建议
 
@@ -221,10 +221,10 @@ jobs:
           CHANGED=$(git diff --name-only origin/main HEAD)
           echo "变更文件："; echo "${CHANGED}" | sed 's/^/  /'
 
-          # 门禁 1：diff 仅允许落在 plugins/ 下，防止 sync 脚本误伤仓库基础设施
-          OUT_OF_SCOPE=$(echo "${CHANGED}" | grep -v '^plugins/' || true)
+          # 门禁 1：diff 仅允许落在 skills/ 下，防止 sync 脚本误伤仓库基础设施
+          OUT_OF_SCOPE=$(echo "${CHANGED}" | grep -v '^skills/' || true)
           if [ -n "${OUT_OF_SCOPE}" ]; then
-            MSG=$(printf '⛔ **自动审核未通过**：检测到 `plugins/` 之外的变更，已阻止自动合并，需人工介入：\n\n```\n%s\n```' "${OUT_OF_SCOPE}")
+            MSG=$(printf '⛔ **自动审核未通过**：检测到 `skills/` 之外的变更，已阻止自动合并，需人工介入：\n\n```\n%s\n```' "${OUT_OF_SCOPE}")
             gh pr comment "${PR}" --body "${MSG}"
             exit 1
           fi

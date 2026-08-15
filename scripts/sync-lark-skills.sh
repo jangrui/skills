@@ -18,8 +18,8 @@
 #   ./scripts/sync-lark-skills.sh --check          # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/lark/<name>/
-#   git add plugins/lark/
+#   git diff skills/lark/<name>/
+#   git add skills/lark/
 #   git commit -m "chore(lark): sync <name> upstream <old>→<new>"
 # ============================================================================
 
@@ -28,7 +28,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/lark"
+PLUGIN_DIR="$REPO_ROOT/skills/lark"
 SKILLS_DIR="$PLUGIN_DIR"
 UPSTREAM_OWNER="larksuite"
 UPSTREAM_REPO="cli"
@@ -206,7 +206,7 @@ else
         rsync -a --delete --exclude='.upstream-commit' "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$sub/" "$SKILLS_DIR/$sub/"
         echo "$UPSTREAM_COMMIT" > "$SKILLS_DIR/$sub/.upstream-commit"
         echo "  ✅ 已 vendor 新 skill: $sub"
-        echo "  ⚠️  请手动编辑 plugins/lark/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
+        echo "  ⚠️  请手动编辑 skills/lark/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
         UPDATED_SKILLS+=("$sub")
         local_added=1
       fi
@@ -218,7 +218,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/lark/  人工 review 后 commit"
+  echo "下一步：git diff skills/lark/  人工 review 后 commit"
 fi
 
 # CI 模式

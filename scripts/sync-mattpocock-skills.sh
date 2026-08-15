@@ -14,7 +14,7 @@
 #
 # 机制：
 #   - git sparse-checkout 只拉上游 skills/ 子目录
-#   - 保留两层结构：plugins/mattpocock/{engineering,productivity}/<skill>/
+#   - 保留两层结构：skills/mattpocock/{engineering,productivity}/<skill>/
 #   - 每个 skill 目录单独保存 .upstream-commit
 #   - 同步后跑「自包含性自检」+ 与上游 plugin.json promoted 白名单对照
 #
@@ -25,8 +25,8 @@
 #   ./scripts/sync-mattpocock-skills.sh --check                  # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/mattpocock/
-#   git add plugins/mattpocock/
+#   git diff skills/mattpocock/
+#   git add skills/mattpocock/
 #   git commit -m "chore(mattpocock): sync upstream <old>→<new>"
 # ============================================================================
 
@@ -35,7 +35,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/mattpocock"
+PLUGIN_DIR="$REPO_ROOT/skills/mattpocock"
 UPSTREAM_OWNER="mattpocock"
 UPSTREAM_REPO="skills"
 UPSTREAM_SUBDIR="skills"
@@ -297,7 +297,7 @@ else
             "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$bucket/$sub/" "$PLUGIN_DIR/$bucket/$sub/"
           echo "$UPSTREAM_COMMIT" > "$PLUGIN_DIR/$bucket/$sub/.upstream-commit"
           echo "  ✅ 已 vendor 新 skill: $bucket/$sub"
-          echo "  ⚠️  请手动把 \"./$bucket/$sub\" 加入 plugins/mattpocock/.claude-plugin/plugin.json"
+          echo "  ⚠️  请手动把 \"./$bucket/$sub\" 加入 skills/mattpocock/.claude-plugin/plugin.json"
           echo "     以及根 .claude-plugin/marketplace.json 中 mattpocock-skills 的 skills 数组"
           UPDATED_SKILLS+=("$bucket/$sub")
           local_added=1
@@ -363,7 +363,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/mattpocock/  人工 review 后 commit"
+  echo "下一步：git diff skills/mattpocock/  人工 review 后 commit"
 fi
 
 # CI 模式

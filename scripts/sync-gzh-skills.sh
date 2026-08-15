@@ -15,8 +15,8 @@
 #   ./scripts/sync-gzh-skills.sh --check          # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/gzh/gzh-design/
-#   git add plugins/gzh/
+#   git diff skills/gzh/gzh-design/
+#   git add skills/gzh/
 #   git commit -m "chore(gzh): sync gzh-design upstream <old>→<new>"
 # ============================================================================
 
@@ -25,7 +25,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/gzh"
+PLUGIN_DIR="$REPO_ROOT/skills/gzh"
 UPSTREAM_OWNER="isjiamu"
 UPSTREAM_REPO="gzh-design-skill"
 LOCAL_DIR="gzh-design"                # vendor 目录名
@@ -191,7 +191,7 @@ fi
 
 echo ""
 echo "=== 完成 ==="
-echo "下一步：git diff plugins/gzh/ 人工 review 后 commit"
+echo "下一步：git diff skills/gzh/ 人工 review 后 commit"
 
 # CI 模式
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

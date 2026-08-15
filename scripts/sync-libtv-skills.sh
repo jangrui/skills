@@ -18,8 +18,8 @@
 #   ./scripts/sync-libtv-skills.sh --check      # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/libtv/
-#   git add plugins/libtv/
+#   git diff skills/libtv/
+#   git add skills/libtv/
 #   git commit -m "chore(libtv): sync upstream <old>→<new>"
 # ============================================================================
 
@@ -28,7 +28,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/libtv"
+PLUGIN_DIR="$REPO_ROOT/skills/libtv"
 SKILLS_DIR="$PLUGIN_DIR"
 UPSTREAM_OWNER="libtv-labs"
 UPSTREAM_REPO="libtv-skills"
@@ -218,7 +218,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/libtv/  人工 review 后 commit"
+  echo "下一步：git diff skills/libtv/  人工 review 后 commit"
 fi
 
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

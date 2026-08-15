@@ -1,4 +1,5 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "jangrui",
   "description": "jangrui 精选 Agent Skills 市场：按使用场景分 10 组，跨上游 vendor 精选；全量见仓库 skills/ 目录自取。",
   "owner": {

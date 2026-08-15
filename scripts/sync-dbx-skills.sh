@@ -18,8 +18,8 @@
 #   ./scripts/sync-dbx-skills.sh --check      # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/dbx/
-#   git add plugins/dbx/
+#   git diff skills/dbx/
+#   git add skills/dbx/
 #   git commit -m "chore(dbx): sync upstream <old>→<new>"
 # ============================================================================
 
@@ -28,7 +28,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/dbx"
+PLUGIN_DIR="$REPO_ROOT/skills/dbx"
 SKILLS_DIR="$PLUGIN_DIR"
 UPSTREAM_OWNER="t8y2"
 UPSTREAM_REPO="dbx"
@@ -205,7 +205,7 @@ else
           "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$sub/" "$SKILLS_DIR/$sub/"
         echo "$UPSTREAM_COMMIT" > "$SKILLS_DIR/$sub/.upstream-commit"
         echo "  ✅ 已 vendor 新 skill: $sub"
-        echo "  ⚠️  请手动编辑 plugins/dbx/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
+        echo "  ⚠️  请手动编辑 skills/dbx/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
         UPDATED_SKILLS+=("$sub")
         local_added=1
       fi
@@ -217,7 +217,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/dbx/  人工 review 后 commit"
+  echo "下一步：git diff skills/dbx/  人工 review 后 commit"
 fi
 
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

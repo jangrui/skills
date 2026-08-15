@@ -12,7 +12,7 @@
 #   ./scripts/sync-illustration-skills.sh --check                # dry-run
 #
 # 同步后请人工 review：
-#   git diff plugins/illustration/
+#   git diff skills/illustration/
 # ============================================================================
 
 set -euo pipefail
@@ -20,7 +20,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/illustration"
+PLUGIN_DIR="$REPO_ROOT/skills/illustration"
 
 SKILL_NAMES=(ian-xiaohei-illustrations guizang-social-card)
 
@@ -236,7 +236,7 @@ else
 fi
 
 echo "=== 完成 ==="
-[ "$DRY_RUN" != "1" ] && echo "下一步：git diff plugins/illustration/  人工 review 后 commit"
+[ "$DRY_RUN" != "1" ] && echo "下一步：git diff skills/illustration/  人工 review 后 commit"
 
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then
   printf '%s\n' "${UPDATED_SKILLS[@]}" > "$CI_CHANGES_FILE"

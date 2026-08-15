@@ -23,8 +23,8 @@
 #   ./scripts/sync-baoyu-skills.sh --check             # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/baoyu/<name>/
-#   git add plugins/baoyu/
+#   git diff skills/baoyu/<name>/
+#   git add skills/baoyu/
 #   git commit -m "chore(baoyu): sync <name> upstream <old>→<new>"
 # ============================================================================
 
@@ -33,7 +33,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/baoyu"
+PLUGIN_DIR="$REPO_ROOT/skills/baoyu"
 SKILLS_DIR="$PLUGIN_DIR"
 UPSTREAM_OWNER="JimLiu"
 UPSTREAM_REPO="baoyu-skills"
@@ -263,7 +263,7 @@ else
         echo "$UPSTREAM_COMMIT" > "$SKILLS_DIR/$sub/.upstream-commit"
         echo "  ✅ 已 vendor 新 skill: $sub"
         check_self_contained "$SKILLS_DIR/$sub" "$sub"
-        echo "  ⚠️  请手动编辑 plugins/baoyu/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
+        echo "  ⚠️  请手动编辑 skills/baoyu/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""
         UPDATED_SKILLS+=("$sub")
         local_added=1
       fi
@@ -275,7 +275,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/baoyu/  人工 review 后 commit"
+  echo "下一步：git diff skills/baoyu/  人工 review 后 commit"
 fi
 
 if [ -n "$CI_CHANGES_FILE" ] && [ "${#UPDATED_SKILLS[@]}" -gt 0 ]; then

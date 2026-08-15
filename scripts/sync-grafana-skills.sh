@@ -12,7 +12,7 @@
 #
 # 机制：
 #   - git sparse-checkout 只拉上游 skills/ 子目录（不要 .git/scripts/template/.github）
-#   - 保留两层结构：plugins/grafana/grafana-<category>/<skill>/
+#   - 保留两层结构：skills/grafana/grafana-<category>/<skill>/
 #   - 每个 skill 目录单独保存 .upstream-commit（同 lark 策略，便于单点回退）
 #   - 同步后自动跑「自包含性自检」，防止上游引入兄弟包依赖导致 vendor 断裂
 #
@@ -23,8 +23,8 @@
 #   ./scripts/sync-grafana-skills.sh --check                  # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
-#   git diff plugins/grafana/<category>/<skill>/
-#   git add plugins/grafana/
+#   git diff skills/grafana/<category>/<skill>/
+#   git add skills/grafana/
 #   git commit -m "chore(grafana): sync upstream <old>→<new>"
 # ============================================================================
 
@@ -33,7 +33,7 @@ set -euo pipefail
 # ---------- 配置 ----------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PLUGIN_DIR="$REPO_ROOT/plugins/grafana"
+PLUGIN_DIR="$REPO_ROOT/skills/grafana"
 UPSTREAM_OWNER="grafana"
 UPSTREAM_REPO="skills"
 UPSTREAM_SUBDIR="skills"
@@ -268,7 +268,7 @@ fi
 echo ""
 echo "=== 完成 ==="
 if [ "$DRY_RUN" != "1" ]; then
-  echo "下一步：git diff plugins/grafana/  人工 review 后 commit"
+  echo "下一步：git diff skills/grafana/  人工 review 后 commit"
 fi
 
 # CI 模式

@@ -12,9 +12,9 @@
 不创作 skill 源码，只做两件事：
 
 1. **聚合**：按主题整理优质 Agent Skills，提供上游链接与安装入口
-2. **Vendor**：把可自包含的 skill 本地化到 `plugins/`，只保留运行时必需内容，由 CI 每日跟进上游
+2. **Vendor**：把可自包含的 skill 本地化到 `skills/`，只保留运行时必需内容，由 CI 每日跟进上游
 
-当前规模：**10 个使用场景组插件**（共 86 个精选 skill，每组跨 vendor 组合），vendor 全集 **276 个 SKILL.md**。市场只放精选，全集见 `plugins/` 目录自取。
+当前规模：**10 个使用场景组插件**（共 86 个精选 skill，每组跨 vendor 组合），vendor 全集 **276 个 SKILL.md**。市场只放精选，全集见 `skills/` 目录自取。
 
 ---
 
@@ -42,9 +42,9 @@
 
 ```bash
 git clone --depth 1 https://github.com/jangrui/skills.git /tmp/jangrui-skills
-cp -r /tmp/jangrui-skills/plugins/drawio/drawio ~/.codex/skills/drawio
-cp -r /tmp/jangrui-skills/plugins/humanizer/humanizer ~/.codex/skills/humanizer
-# 以此类推，每个 plugins/<plugin>/<skill>/ 目录即一个 skill
+cp -r /tmp/jangrui-skills/skills/drawio/drawio ~/.codex/skills/drawio
+cp -r /tmp/jangrui-skills/skills/humanizer/humanizer ~/.codex/skills/humanizer
+# 以此类推，每个 skills/<plugin>/<skill>/ 目录即一个 skill
 ```
 
 重启或新开会话后，skill 会自动发现。
@@ -57,20 +57,20 @@ cp -r /tmp/jangrui-skills/plugins/humanizer/humanizer ~/.codex/skills/humanizer
 
 | 组插件 | 内容 | 本地路径（全集） | 精选/全集 | 上游 |
 |---|---|---|---|---|
-| `daily` 常用必备 | 去 AI 味润色 5 + neat-freak | `plugins/humanizer/` 等 5 仓 `plugins/khazix/` | 6 | blader/humanizer 等 |
-| `coding` 代码 | Go 工程 11 + 工程实践 4 + dbx | `plugins/golang/` `plugins/mattpocock/` `plugins/dbx/` | 16/73 | samber、mattpocock、t8y2 |
-| `design` 设计 | taste 前端设计 4 | `plugins/taste/` | 4/13 | Leonxlnx/taste-skill |
-| `marketing` 营销增长 | OPC 生图 3（nanobanana/logo/banner）+ 调研 6（reddit/twitter/producthunt/requesthunt/seo-geo/domain-hunter） | `plugins/opc/` | 9/10 | ReScienceLab/opc-skills |
-| `observability` 运维可观测 | Grafana 核心 5 + LGTM 栈 5 | `plugins/grafana/` | 10/49 | grafana/skills |
-| `office` 日常办公 | 文档四件套 + anydoc + 网页 PPT | `plugins/anthropic/` `plugins/anydoc/` `plugins/ppt/` | 6/19 | anthropics、firecrawl、op7418 |
-| `collab` 协作套件 | 飞书 8 + WPS 笔记 6（未来加腾讯文档、钉钉等） | `plugins/lark/` `plugins/wpsnote/` | 14/64 | larksuite、wpsnote |
-| `diagram` 画图绘图 | mermaid / drawio / plantuml / archify | `plugins/drawio/` 等 6 仓 | 4/6 | Agents365-ai、tt-a1i/archify |
-| `video` 做视频 | 电影感产品视频 + LibLib 生图生视频 + 烁皓短剧 5 | `plugins/shotcraft/` `plugins/libtv/` `plugins/shuohao/` | 7/7 | Vincentwei1021、libtv-labs、eternityspring |
-| `writing` 写作 | 宝玉 AI 创作 + gzh 排版 + 插画 + 社交卡片 | `plugins/baoyu/` `plugins/gzh/` `plugins/illustration/` | 10/24 | JimLiu/baoyu-skills、isjiamu、helloianneo/op7418 |
+| `daily` 常用必备 | 去 AI 味润色 5 + neat-freak | `skills/humanizer/` 等 5 仓 `skills/khazix/` | 6 | blader/humanizer 等 |
+| `coding` 代码 | Go 工程 11 + 工程实践 4 + dbx | `skills/golang/` `skills/mattpocock/` `skills/dbx/` | 16/73 | samber、mattpocock、t8y2 |
+| `design` 设计 | taste 前端设计 4 | `skills/taste/` | 4/13 | Leonxlnx/taste-skill |
+| `marketing` 营销增长 | OPC 生图 3（nanobanana/logo/banner）+ 调研 6（reddit/twitter/producthunt/requesthunt/seo-geo/domain-hunter） | `skills/opc/` | 9/10 | ReScienceLab/opc-skills |
+| `observability` 运维可观测 | Grafana 核心 5 + LGTM 栈 5 | `skills/grafana/` | 10/49 | grafana/skills |
+| `office` 日常办公 | 文档四件套 + anydoc + 网页 PPT | `skills/anthropic/` `skills/anydoc/` `skills/ppt/` | 6/19 | anthropics、firecrawl、op7418 |
+| `collab` 协作套件 | 飞书 8 + WPS 笔记 6（未来加腾讯文档、钉钉等） | `skills/lark/` `skills/wpsnote/` | 14/64 | larksuite、wpsnote |
+| `diagram` 画图绘图 | mermaid / drawio / plantuml / archify | `skills/drawio/` 等 6 仓 | 4/6 | Agents365-ai、tt-a1i/archify |
+| `video` 做视频 | 电影感产品视频 + LibLib 生图生视频 + 烁皓短剧 5 | `skills/shotcraft/` `skills/libtv/` `skills/shuohao/` | 7/7 | Vincentwei1021、libtv-labs、eternityspring |
+| `writing` 写作 | 宝玉 AI 创作 + gzh 排版 + 插画 + 社交卡片 | `skills/baoyu/` `skills/gzh/` `skills/illustration/` | 10/24 | JimLiu/baoyu-skills、isjiamu、helloianneo/op7418 |
 
 市场**仅由 `.claude-plugin/marketplace.json` 单文件策展**：10 个组条目、组内 skills 路径相对仓库根、`source: "./"`，无任何生成物。Claude Code 与 Codex 原生消费条目内联 skills；ZCode 也能看到 skill——但 `source: "./"` 意味着插件根 = 整个仓库，ZCode 安装时会把整仓（约 130MB）复制进每组缓存，多组安装注意磁盘占用。
 
-不上市场的全集（如 grafana-k6 / grafana-cloud / 插件开发、anthropic 其余 13 个、wpsnote 其余 30 个等）仍完整保留在 `plugins/` 下，可按 Codex 目录拷贝方式自取。
+不上市场的全集（如 grafana-k6 / grafana-cloud / 插件开发、anthropic 其余 13 个、wpsnote 其余 30 个等）仍完整保留在 `skills/` 下，可按 Codex 目录拷贝方式自取。
 
 ### 运行时依赖
 
@@ -95,7 +95,7 @@ cp -r /tmp/jangrui-skills/plugins/humanizer/humanizer ~/.codex/skills/humanizer
 
 ```
 ├── .claude-plugin/marketplace.json    ← 唯一策展文件（10 个使用场景组条目 + skills 路径，source "./"，无生成物）
-├── plugins/                           ← 按源仓库归属，一仓一目录（不再建主题聚合目录）
+├── skills/                           ← 按源仓库归属，一仓一目录（不再建主题聚合目录）
 │   ├── drawio/                        ← Agents365-ai/drawio-skill
 │   ├── mermaid/                       ← Agents365-ai/mermaid-skill
 │   ├── excalidraw/                    ← Agents365-ai/excalidraw-skill（未精选）
@@ -119,7 +119,7 @@ cp -r /tmp/jangrui-skills/plugins/humanizer/humanizer ~/.codex/skills/humanizer
 │   │   └── novel-characters/  novel-outline/  novel-art/  novel-script/  novel-storyboard/
 │   ├── grafana/                       ← 49 个 skill，7 个 category
 │   │   ├── grafana-core/  grafana-cloud/  grafana-lgtm/
-│   │   ├── grafana-plugins/  grafana-app-sdk/  grafana-k6/
+│   │   ├── grafana-skills/  grafana-app-sdk/  grafana-k6/
 │   │   └── grafana-datasources/
 │   ├── dbx/                           ← 1 个 skill
 │   ├── libtv/                         ← 1 个 skill（AI 生图/生视频）
@@ -183,7 +183,7 @@ cp -r /tmp/jangrui-skills/plugins/humanizer/humanizer ~/.codex/skills/humanizer
 ./scripts/sync-mattpocock-skills.sh engineering/tdd
 
 # review
-git diff plugins/
+git diff skills/
 ```
 
 CI（GitHub Actions）每天 06:00 UTC 自动检查上游更新并开 PR。合并前请人工 review。
@@ -219,7 +219,7 @@ CI（GitHub Actions）每天 06:00 UTC 自动检查上游更新并开 PR。合�
 
 ### Claude Code 和 Codex 都能用吗？
 
-能。Claude Code 走 marketplace；Codex 拷贝 `plugins/` 下目录即可。
+能。Claude Code 走 marketplace；Codex 拷贝 `skills/` 下目录即可。
 
 ### 更新会自动进来吗？
 
@@ -227,11 +227,11 @@ Vendor 项：CI 每天检查上游并开 PR，合并后本地 `/plugin update` �
 
 ### marketplace 为什么没有某个 skill / 全量合集？
 
-marketplace 是策展层，只放精选子集（条目 `skills` 数组即完整集合）。全集始终在 `plugins/` 下，两种自取方式：Codex 式目录拷贝，或 fork 后在 marketplace.json 里把路径加进对应条目。
+marketplace 是策展层，只放精选子集（条目 `skills` 数组即完整集合）。全集始终在 `skills/` 下，两种自取方式：Codex 式目录拷贝，或 fork 后在 marketplace.json 里把路径加进对应条目。
 
 ### 如何只装 Grafana 的一部分？
 
-市场提供 `grafana-core` 与 `grafana-lgtm` 两个精选；k6、Cloud、插件开发等从 `plugins/grafana/` 目录自取。
+市场提供 `grafana-core` 与 `grafana-lgtm` 两个精选；k6、Cloud、插件开发等从 `skills/grafana/` 目录自取。
 
 ### 安装 lark-core 后不能用？
 
