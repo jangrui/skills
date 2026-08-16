@@ -9,7 +9,7 @@
     {
       "name": "jangrui-coding",
       "displayName": "jangrui-coding",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "description": "软件开发与工程实践：覆盖代码质量、并发与错误处理、测试、审查、诊断、命令行、配置和数据库探索。",
       "source": "./",
       "strict": false,
