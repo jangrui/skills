@@ -81,7 +81,75 @@ eq(validateOutline(FIXTURE).length, 0, '自带样例通过 full 校验');
 eq(validateOutline(FIXTURE, 'skeleton').length, 0, '样例通过 skeleton 校验');
 eq(validateOutline(FIXTURE, 'beats').length, 0, '样例通过 beats 校验');
 ok(gateReport(FIXTURE).every((g) => g.ok), '样例全部质量门通过');
-eq(gateReport(FIXTURE).length, 13, '质量门共 13 项');
+eq(gateReport(FIXTURE).length, 14, '质量门共 14 项');
+
+/* ---------------- props 叙事道具 ---------------- */
+
+{
+  const clone = () => JSON.parse(JSON.stringify(FIXTURE));
+
+  // 自带样例带 props，两道相关的门都该过
+  ok(Array.isArray(FIXTURE.props) && FIXTURE.props.length > 0, '自带样例带上了叙事道具');
+  ok(gate(FIXTURE, 'prop-cap').ok, '样例的道具数在上限内');
+  ok(gate(FIXTURE, 'refs').ok, '样例的道具引用完整');
+  ok(gate(FIXTURE, 'refs').label.includes('道具'), '有 props 时 refs 门的措辞点出道具');
+
+  // --- 向后兼容：没有 props 字段的旧大纲必须照常通过，不是报错 ---
+  // 这条是这次改动最要紧的一条断言。存量 outline.json 一份都没有 props，
+  // 如果这两道门判失败，等于所有旧大纲一升级就全红。
+  const old = clone(); delete old.props;
+  for (const e of old.episodes) delete e.propIds;
+  eq(validateOutline(old).length, 0, '旧大纲没有 props 照常通过 validate');
+  ok(gate(old, 'prop-cap').ok, '旧大纲的道具上限门跳过而不是失败');
+  ok(gate(old, 'prop-cap').detail.includes('跳过'), '跳过要明说，不静默');
+  ok(gate(old, 'refs').ok, '旧大纲的引用门照常通过');
+  ok(!gate(old, 'refs').label.includes('道具'), '没有 props 时 refs 门的措辞不提道具');
+  eq(gateReport(old).length, 14, '旧大纲的门数一样是 14，跳过不等于少一道门');
+
+  // --- 击穿：propIds 指向不存在的道具 ---
+  const a = clone(); a.episodes[0].propIds = ['P09'];
+  ok(!gate(a, 'refs').ok, 'propIds 指向不存在的道具被拦下');
+  ok(gate(a, 'refs').detail.includes('P09'), '点名是哪个 id');
+
+  // --- 击穿：登记了但从没在任何一集出现 ---
+  const b = clone(); b.props.push({ id: 'P03', name: '油纸伞', function: '没人用它' });
+  ok(!gate(b, 'refs').ok, '零集使用的道具被拦下——跟失业角色同一个判据');
+  ok(gate(b, 'refs').detail.includes('P03'), '点名是哪件道具');
+
+  // --- 击穿：beatIds 指向不存在的爽点 ---
+  const c = clone(); c.props[0].beatIds = ['B99'];
+  ok(!gate(c, 'refs').ok, 'beatIds 指错被拦下——指错等于这件道具没有戏剧理由');
+
+  // --- 击穿：超过上限 ---
+  const d = clone();
+  for (let i = 3; i <= 10; i += 1) {
+    const id = `P${String(i).padStart(2, '0')}`;
+    d.props.push({ id, name: `道具${i}`, function: '凑数' });
+    d.episodes[0].propIds.push(id);
+  }
+  ok(!gate(d, 'prop-cap').ok, '道具超过 8 件被拦下');
+  ok(gate(d, 'prop-cap').detail.includes('10'), '报出实际件数');
+
+  // --- 击穿：结构层 ---
+  const e1 = clone(); delete e1.props[0].function;
+  ok(validateOutline(e1).some((x) => x.includes('function')), '缺 function 被拦——填不出来的不是道具是背景');
+  const e2 = clone(); e2.props[0].id = 'X01';
+  ok(validateOutline(e2).some((x) => x.includes('P01 这种格式')), '道具 id 格式被拦');
+  const e3 = clone(); e3.props[1].id = 'P01';
+  ok(validateOutline(e3).some((x) => x.includes('重复')), '道具 id 重复被拦');
+  const e4 = clone(); e4.props[0].beatIds = 'B01';
+  ok(validateOutline(e4).some((x) => x.includes('beatIds')), 'beatIds 不是数组被拦');
+
+  // --- 资产清单是算出来的，不是模型写的 ---
+  const assets = computeAssets(FIXTURE);
+  eq(assets.props.length, FIXTURE.props.length, '资产清单汇总了全部道具');
+  const p01 = assets.props.find((x) => x.id === 'P01');
+  const epsWithP01 = FIXTURE.episodes.filter((x) => (x.propIds ?? []).includes('P01')).map((x) => x.ep);
+  assert.deepEqual(p01.episodes, epsWithP01, '出现集是从 episodes[].propIds 反查出来的');
+  eq(p01.uses, epsWithP01.length, '次数跟出现集对得上');
+  eq(computeAssets(old).props.length, 0, '旧大纲的道具清单是空数组，不是 undefined');
+}
+
 eq(STAGES.join(','), 'skeleton,beats,full', '三档 stage');
 ok(ADAPT_MODES.includes('抽核'), '改编幅度枚举');
 
@@ -484,11 +552,23 @@ ok(/@media print\{[\s\S]*\.epswrap\.clip \.eps \.ep\{display:block!important/.te
   ok(!short.includes('class="epsmore"'), '3 集以内没有展开按钮');
 }
 
-// 每集调度矩阵：角色 + 场景同一张网格
+// 每集调度矩阵：角色 + 场景 + 道具同一张网格
 ok(html.includes('每集调度矩阵'), '有调度矩阵');
-eq((html.match(/class="mc[ "]/g) || []).length, (5 + 3) * 6, '矩阵格数 =（角色+场景）× 集数');
+eq((html.match(/class="mc[ "]/g) || []).length, (5 + 3 + 2) * 6, '矩阵格数 =（角色+场景+道具）× 集数');
 ok(html.includes('场　景'), '矩阵里有场景分带');
+ok(html.includes('道　具'), '矩阵里有道具分带');
+eq((html.match(/class="mc on pp"/g) || []).length, 7, '道具亮格数 = 各道具出现集之和');
 ok(html.includes('1 ⚠'), '一次性场景在合计列带警示');
+{
+  // 旧大纲（无 props）整段不出，不留一个空标题
+  const oldDoc = JSON.parse(JSON.stringify(FIXTURE));
+  delete oldDoc.props;
+  for (const e of oldDoc.episodes) delete e.propIds;
+  const oldHtml = renderHtml(oldDoc);
+  ok(!oldHtml.includes('道　具'), '旧大纲的矩阵不出道具分带');
+  ok(!oldHtml.includes('叙事道具</td>'), '旧大纲的资产量折算不出道具行');
+  eq((oldHtml.match(/class="mc[ "]/g) || []).length, (5 + 3) * 6, '旧大纲的矩阵格数不含道具');
+}
 
 // 场景概览卡
 eq((html.match(/class="scard"/g) || []).length, 3, '每个场景一张卡');
@@ -514,7 +594,7 @@ ok(html.includes('人群 ×1（第 2 集）'), '折算表带生成难点明细')
 }
 
 ok((html.match(/class="gate"/g) || []).length === 1, '质量门清单');
-eq((html.match(/<li class="ok">/g) || []).length, 13, '13 项质量门全 ✓');
+eq((html.match(/<li class="ok">/g) || []).length, 14, '14 项质量门全 ✓');
 ok(html.includes('全部通过'), '通过时有总结行');
 ok(html.includes('gatepill pass'), '页眉徽章是通过态');
 
@@ -563,6 +643,51 @@ ok(html.includes('@media print'), '可打印');
 ok(html.includes('prefers-reduced-motion'), '尊重减少动效');
 ok(html.includes('原文依据'), '改编说明的证据列渲染出来');
 ok(html.includes('雾一厚，连自己的手都看不清。'), '逐字证据进了报告');
+
+/* ---------------- render 英文界面 ---------------- */
+// 只翻译界面：数据（爽点类型、改编幅度、书名）和质量门 label 原样出
+
+ok(html.includes('<html lang="zh">'), '默认中文界面，lang="zh"');
+
+const enHtml = renderHtml(FIXTURE, 'en');
+ok(enHtml.includes('<html lang="en">'), '英文界面 lang="en"');
+ok(enHtml.includes('Export JSON'), 'EN 报告有 Export JSON 按钮');
+ok(enHtml.includes('Key decisions'), 'EN 报告有 Key decisions 区块');
+ok(enHtml.includes('Dispatch matrix'), 'EN 报告有 Dispatch matrix 区块');
+ok(enHtml.includes('Beat rhythm') && enHtml.includes('Scene overview'), 'EN 报告有 Beat rhythm 和 Scene overview');
+ok(enHtml.includes('Asset conversion') && enHtml.includes('Quality gates'), 'EN 报告有 Asset conversion 和 Quality gates');
+ok(!enHtml.includes('导出 JSON'), 'EN 报告不含中文导出按钮');
+ok(!enHtml.includes('关键决策'), 'EN 报告不含中文关键决策标题');
+ok(!enHtml.includes('每集调度矩阵') && !enHtml.includes('资产量折算'), 'EN 报告不含中文区块标题');
+ok(enHtml.includes('悬念钩'), 'EN 报告里爽点类型是数据，保持原样');
+ok(enHtml.includes('Leads 1–5'), 'EN 报告的质量门标签翻译且阈值原样保留');
+ok(!enHtml.includes('主角组 1–5 人'), 'EN 报告不再出现中文门标签');
+ok(enHtml.includes('Episode 1'), 'EN 分集卡标题');
+
+// outline.json 顶层 lang 字段生效，显式 --lang 优先
+{
+  const o = clone();
+  o.lang = 'en';
+  ok(renderHtml(o).includes('<html lang="en">'), 'outline.lang=en 时默认出英文界面');
+  ok(renderHtml(o, 'zh').includes('<html lang="zh">'), '显式 lang 参数优先于 outline.lang');
+}
+
+const enMd = renderMarkdown(FIXTURE, 'en');
+ok(enMd.startsWith('# 渡口 · Short-Drama Adaptation Outline'), 'EN MD 标题');
+ok(enMd.includes('1. Adaptation notes') && enMd.includes('5. Asset list'), 'EN MD 章节标题');
+// 质量门 label（含【钩子】字样）是数据不翻译，只查界面上的栏目标签
+ok(enMd.includes('**[Hook]**') && !enMd.includes('**【钩子】**'), 'EN MD 钩子栏用英文方括号');
+
+// 非法语言直接抛错，不静默回退
+{
+  let threw = '';
+  try {
+    renderHtml(FIXTURE, 'fr');
+  } catch (e) {
+    threw = e.message;
+  }
+  ok(threw.includes('zh / en'), '非法语言抛错——界面只内置 zh / en');
+}
 
 eq(DEFAULT_PER_VOLUME, 15, '默认每卷 15 章');
 

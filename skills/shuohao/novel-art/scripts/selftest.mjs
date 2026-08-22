@@ -76,7 +76,37 @@ eq(seeded.scenes.length, 3, 'seed 搬全部场景');
   ok(s03.seedNote?.includes('复用方案'), 'outline 的 reusePlan 变成 seedNote 提示做变体');
   ok(!seeded.scenes.find((s) => s.id === 'S01').seedNote, '没有复用方案的场景不带 seedNote');
 }
+{
+  // 道具：大纲从 1.1.0 起带 props，seed 要吃到
+  eq(seeded.props.length, OUTLINE.props.length, 'seed 搬全部道具');
+  const p01 = seeded.props.find((pr) => pr.id === 'P01');
+  const src = OUTLINE.props.find((pr) => pr.id === 'P01');
+  eq(p01.name, src.name, '道具名从大纲搬过来');
+  // 两边指的是同一件事：这件物件在戏里干什么，不是材质描述
+  eq(p01.summary, src.function, '大纲的 function 落成这里的 summary');
+  const epsWithP01 = OUTLINE.episodes.filter((e) => (e.propIds ?? []).includes('P01')).map((e) => e.ep);
+  eq(p01.usage.episodes.join(','), epsWithP01.join(','), 'seed 算出道具的出现集');
+  // beatIds 是 id，art 这边要的是爽点类型，seed 负责翻译
+  eq(p01.usage.beats.join(','), src.beatIds.map((id) => OUTLINE.beats.find((b) => b.id === id).type).join(','),
+    'beatIds 翻译成爽点类型');
+  // 设计字段留给模型
+  eq(p01.scale, '', '尺度留空——那是美术层的活');
+  eq(p01.states.length, 0, '状态变体留空');
+  eq(p01.image.prompt, '', '出图提示词留空');
+  eq(p01.carriedBy.length, 0, '跟谁走留空');
+}
+
+// 旧大纲没有 props 字段：返回空数组，模型照 prop-pass.md 从原文提取，跟以前一样
+{
+  const noProps = JSON.parse(JSON.stringify(OUTLINE));
+  delete noProps.props;
+  const r = seedFromOutline(noProps);
+  eq(r.props.length, 0, '旧大纲 seed 出空道具表，不是 undefined');
+  ok(Array.isArray(r.props), '空道具表仍然是数组，调用方不用判空');
+}
+
 ok(seedFromOutline({}).scenes.length === 0, '空大纲不炸');
+ok(seedFromOutline({}).props.length === 0, '空大纲的道具表也是空数组');
 
 /* ---------------- castNamesOf ---------------- */
 
@@ -414,4 +444,37 @@ eq(FIXTURE.props.length, 2, '样例带两件叙事道具');
   ok(html.includes('关联场景：<b>S01</b>'), 'HTML 道具卡带关联场景');
 }
 
+/* ---------------- render 英文界面（--lang en）---------------- */
+
+{
+  const en = renderHtml(FIXTURE, 'en');
+  ok(en.includes('lang="en"'), '英文报告 <html lang="en">');
+  ok(en.includes('Export JSON'), '英文报告有 Export JSON');
+  ok(en.includes('>Scene list<'), '英文报告有 Scene list');
+  ok(en.includes('>Quality gates<'), '英文报告有 Quality gates 区块');
+  ok(en.includes('Consistency anchors'), '英文报告有 Consistency anchors');
+  ok(!en.includes('导出 JSON'), '英文报告不含「导出 JSON」');
+  ok(!en.includes('场景清单'), '英文报告不含「场景清单」');
+  ok(!en.includes('质量门'), '英文报告不含「质量门」（门的中文 label 属于质量门层，不在界面表里）');
+  ok(html.includes('lang="zh"'), '默认报告仍是 <html lang="zh">');
+  ok(renderMarkdown(FIXTURE, 'en').includes('## Scene list'), 'MD 英文界面有 Scene list');
+}
+{
+  const d = clone();
+  d.lang = 'en';
+  ok(renderHtml(d).includes('lang="en"'), 'art.json 顶层 lang 字段生效');
+  ok(renderHtml(d, 'zh').includes('lang="zh"'), '--lang 优先于 lang 字段');
+}
+{
+  let threw = false;
+  try { renderHtml(FIXTURE, 'jp'); } catch { threw = true; }
+  ok(threw, '非内置语言直接抛错（目前内置 zh / en）');
+}
+
+// 质量门面板是报告的一部分：英文界面下门标签也要翻译（阈值由门自己算，原样保留）
+{
+  const gateEn = renderHtml(FIXTURE, 'en');
+  ok(gateEn.includes('Consistency anchors, 3–5'), 'EN 报告的质量门标签翻译且阈值原样保留');
+  ok(!gateEn.includes('一致性锚点 3–5 个'), 'EN 报告不再出现中文门标签');
+}
 console.log(`✓ ${passed} 项自测全部通过`);
