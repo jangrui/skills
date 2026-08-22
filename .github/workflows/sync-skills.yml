@@ -233,6 +233,9 @@ jobs:
           GROUP: ${{ matrix.marketplace_group }}
         run: |
           set -euo pipefail
+          # 中文等非 ASCII 文件名原样输出：默认 core.quotePath 会给文件名加
+          # 引号并转义（"skills/..."），导致门禁 1 误判为 skills/ 之外的变更
+          git config core.quotepath false
           BRANCH="chore/sync-${GROUP}"
           # 定位本场景组的 open PR（固定分支，新建/复用两种情形统一处理）
           PR=$(gh pr list --head "${BRANCH}" --base main --state open --json number --jq '.[0].number // empty')
@@ -267,10 +270,22 @@ jobs:
             exit 1
           fi
 
-          # 门禁 2：不允许删除 SKILL.md（上游删除需人工确认，防止 skill 静默丢失）
-          DELETED_SKILL=$(git diff --name-only --diff-filter=D "$BASE" HEAD | grep 'SKILL.md$' || true)
-          if [ -n "${DELETED_SKILL}" ]; then
-            MSG=$(printf '⛔ **自动审核未通过**：检测到 SKILL.md 被删除，需人工确认：\n\n```\n%s\n```' "${DELETED_SKILL}")
+          # 门禁 2：不允许删除 SKILL.md（上游删除需人工确认，防止 skill 静默丢失）。
+          # 两种重组情形放行：-M rename 检测把「换路径且内容相似」识别为 R 而非 D；
+          # 被删的是 symlink（mode 120000，如上游 skills/<name>/SKILL.md -> ../../SKILL.md）
+          # 则真文件已在新路径，不是 skill 丢失。普通文件被删且无相似新增才拦截。
+          REAL_DELETION=""
+          while IFS= read -r f; do
+            [ -n "${f}" ] || continue
+            MODE=$(git ls-tree "$BASE" -- "$f" | awk '{print $1}')
+            if [ "${MODE}" = "120000" ]; then
+              echo "  ↪ ${f} 为被移除的 symlink，视为路径重组，放行"
+              continue
+            fi
+            REAL_DELETION="${REAL_DELETION}${f}"$'\n'
+          done <<< "$(git diff --name-only --diff-filter=D -M "$BASE" HEAD | grep 'SKILL.md$' || true)"
+          if [ -n "${REAL_DELETION}" ]; then
+            MSG=$(printf '⛔ **自动审核未通过**：检测到 SKILL.md 被删除，需人工确认：\n\n```\n%s\n```' "${REAL_DELETION}")
             gh pr comment "${PR}" --body "${MSG}"
             exit 1
           fi
