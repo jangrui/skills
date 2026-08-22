@@ -298,15 +298,26 @@ jobs:
           fi
 
           echo "✅ 四道门禁通过，准备 squash 合并"
-          if gh pr merge "${PR}" --squash --delete-branch; then
-            echo "🎉 PR #${PR} 已自动合并到 main"
-          else
-            echo "⚠️ 直接合并失败，可能 main 启用了 required reviews 等分支保护"
-            # 降级：尝试 GitHub 原生 auto-merge（需 repo settings 开启该功能）
-            if gh pr merge "${PR}" --squash --auto --delete-branch 2>/dev/null; then
-              gh pr comment "${PR}" --body "ℹ️ 自动合并被分支保护阻挡，已开启 auto-merge，待条件满足后自动合并。"
-            else
-              gh pr comment "${PR}" --body "⚠️ 自动合并失败。请检查 main 分支保护（是否要求 required reviews）或 CodeRabbit 等 required check 未通过。"
-              exit 1
+          # matrix 各组并行运行：任一组先合并会使 main 前移，GitHub 以
+          # "Base branch was modified" 暂态拒绝其余组合并。重试并将最新 main
+          # 合入 PR 分支（触发 mergeability 重算）即可自愈；各组只改各自
+          # vendor 目录与 marketplace.json 中本组的 version 字段，不会冲突。
+          merge_ok=0
+          for attempt in 1 2 3 4 5; do
+            if gh pr merge "${PR}" --squash --delete-branch; then
+              merge_ok=1
+              break
             fi
+            echo "⚠️ 第 ${attempt}/5 次合并失败（常见于 main 暂时前移），拉平分支后重试"
+            gh pr update-branch "${PR}" 2>/dev/null || true
+            sleep $(( attempt * 20 ))
+          done
+          if [ "${merge_ok}" = "1" ]; then
+            echo "🎉 PR #${PR} 已自动合并到 main"
+          elif gh pr merge "${PR}" --squash --auto --delete-branch 2>/dev/null; then
+            # 降级：尝试 GitHub 原生 auto-merge（需 repo settings 开启该功能）
+            gh pr comment "${PR}" --body "ℹ️ 自动合并被分支保护阻挡，已开启 auto-merge，待条件满足后自动合并。"
+          else
+            gh pr comment "${PR}" --body "⚠️ 自动合并失败（已重试 5 次）。请检查 main 分支保护（是否要求 required reviews）或 CodeRabbit 等 required check 未通过。"
+            exit 1
           fi
