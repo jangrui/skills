@@ -40,7 +40,7 @@
     {
       "name": "jangrui-collab",
       "displayName": "jangrui-collab",
-      "version": "0.0.5",
+      "version": "0.0.6",
       "description": "协作平台集成：在已接入的平台中处理消息、文档、表格、日程、任务与内容流转；需相应 CLI 与授权。",
       "source": "./",
       "strict": false,
