@@ -109,7 +109,7 @@
     {
       "name": "jangrui-diagram",
       "displayName": "jangrui-diagram",
-      "version": "0.0.6",
+      "version": "0.0.7",
       "description": "图表与架构表达：制作流程图、架构图、UML 等结构化图表。",
       "source": "./",
       "strict": false,
