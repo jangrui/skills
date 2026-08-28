@@ -109,7 +109,7 @@
     {
       "name": "jangrui-diagram",
       "displayName": "jangrui-diagram",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "description": "图表与架构表达：制作流程图、架构图、UML 等结构化图表。",
       "source": "./",
       "strict": false,
@@ -153,7 +153,7 @@
     {
       "name": "jangrui-office",
       "displayName": "jangrui-office",
-      "version": "0.0.0",
+      "version": "0.0.1",
       "description": "办公文档与演示材料处理：编辑、转换和生成文档、PDF、演示文稿及表格。",
       "source": "./",
       "strict": false,
