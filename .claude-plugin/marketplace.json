@@ -69,7 +69,7 @@
     {
       "name": "jangrui-daily",
       "displayName": "jangrui-daily",
-      "version": "0.0.3",
+      "version": "0.0.4",
       "description": "日常工作辅助：改善中英文表达、整理项目知识并完成会话收尾。",
       "source": "./",
       "strict": false,
