@@ -198,7 +198,7 @@
     {
       "name": "jangrui-video",
       "displayName": "jangrui-video",
-      "version": "0.0.6",
+      "version": "0.0.7",
       "description": "视频与短剧制作：生成和编辑图像/视频，完成产品视频与叙事内容的角色、大纲、美术、剧本和分镜开发。",
       "source": "./",
       "strict": false,
