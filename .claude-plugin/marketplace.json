@@ -220,7 +220,7 @@
     {
       "name": "jangrui-writing",
       "displayName": "jangrui-writing",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "description": "内容创作与图文制作：支持写作、翻译、内容提取、排版与视觉素材制作。",
       "source": "./",
       "strict": false,
