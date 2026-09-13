@@ -71,7 +71,7 @@
     {
       "name": "jangrui-daily",
       "displayName": "jangrui-daily",
-      "version": "0.0.6",
+      "version": "0.0.7",
       "description": "日常工作辅助：改善中英文表达、整理项目知识并完成会话收尾。",
       "icon": "https://api.iconify.design/lucide/sparkles.svg?color=%238b5cf6",
       "source": "./",
