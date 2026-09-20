@@ -11,6 +11,9 @@
 #
 # 机制：
 #   - 浅克隆 + rsync 排除非运行时文件（README/LICENSE/.github/agents 等）
+#   - 同步后把 workbench/demosrc 相对软链物化为 demos/ 目录副本：ZCode 市场安装器
+#     会把缓存里的相对软链改写成安装期临时目录的绝对路径（用后即删 → 悬空），
+#     vendored 树不能携带跨目录软链
 #   - 用 .upstream-commit 记录当前 vendor 的上游 commit，秒判是否最新
 #   - 同步后自动跑「自包含性自检」，防止上游引入兄弟包依赖导致 vendor 断裂
 #
@@ -128,6 +131,23 @@ rsync -a \
   --exclude='LICENSE' \
   "$CLONE_DIR/" "$VENDOR_DIR/"
 echo "$NEW_COMMIT" > "$COMMIT_FILE"
+
+# 上游 workbench/demosrc 是相对软链 ../demos（git mode 120000）。ZCode 市场安装器
+# 会把缓存里的相对软链改写成安装期临时目录（zcode-marketplace-src-*）的绝对路径，
+# 临时目录用后即删 → 缓存内悬空 → 扫描技能目录报 ENOENT（2026-09-21 实例）。
+# 故同步后物化为真实目录副本；上游若改变软链形态则告警放行，交人工确认。
+DEMOSRC="$VENDOR_DIR/workbench/demosrc"
+if [ -L "$DEMOSRC" ]; then
+  DEMOSRC_TARGET=$(readlink "$DEMOSRC")
+  if [ "$DEMOSRC_TARGET" = "../demos" ] && [ -d "$VENDOR_DIR/demos" ]; then
+    rm "$DEMOSRC"
+    cp -Rp "$VENDOR_DIR/demos" "$DEMOSRC"
+    echo "🔗 workbench/demosrc 已物化为 demos/ 目录副本（规避 ZCode 缓存软链改写）"
+  else
+    echo "⚠️  workbench/demosrc 软链形态变化（target=${DEMOSRC_TARGET}），未物化，请人工确认"
+  fi
+fi
+
 echo "✅ $LOCAL_DIR 已更新到 $NEW_COMMIT"
 UPDATED_SKILLS+=("$LOCAL_DIR")
 
