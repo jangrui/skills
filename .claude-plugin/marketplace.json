@@ -41,7 +41,7 @@
     {
       "name": "jangrui-collab",
       "displayName": "jangrui-collab",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "description": "协作平台集成：在已接入的平台中处理消息、文档、表格、日程、任务与内容流转；需相应 CLI 与授权。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/collab.png",
       "source": "./",
@@ -229,7 +229,7 @@
     {
       "name": "jangrui-writing",
       "displayName": "jangrui-writing",
-      "version": "0.0.3",
+      "version": "0.0.4",
       "description": "内容创作与图文制作：支持写作、翻译、内容提取、排版与视觉素材制作。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/writing.png",
       "source": "./",
