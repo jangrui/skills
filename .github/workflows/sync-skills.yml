@@ -40,6 +40,7 @@ name: Sync skills
           - shuohao
           - shotcraft
           - taste
+          - wps
           - wpsnote
           - writing
 
@@ -57,7 +58,7 @@ jobs:
         run: |
           ALL='[
             {"marketplace_group":"jangrui-coding","components":["golang","mattpocock","dbx"],"pr_hint":"skills/golang/、skills/mattpocock/、skills/dbx/"},
-            {"marketplace_group":"jangrui-collab","components":["lark","wpsnote"],"pr_hint":"skills/lark/、skills/wpsnote/"},
+            {"marketplace_group":"jangrui-collab","components":["lark","wps","wpsnote"],"pr_hint":"skills/lark/、skills/wps/、skills/wpsnote/"},
             {"marketplace_group":"jangrui-daily","components":["writing","khazix"],"pr_hint":"skills/<repo>/<skill>/（日常辅助）"},
             {"marketplace_group":"jangrui-design","components":["taste"],"pr_hint":"skills/taste/<skill>/"},
             {"marketplace_group":"jangrui-diagram","components":["diagram"],"pr_hint":"skills/<repo>/<skill>/（绘图仓）"},
