@@ -94,7 +94,7 @@
     {
       "name": "jangrui-design",
       "displayName": "jangrui-design",
-      "version": "0.0.2",
+      "version": "0.0.3",
       "description": "产品界面与视觉设计：探索设计方向，创建或改进页面和交互。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/design.png",
       "source": "./",
@@ -114,7 +114,7 @@
     {
       "name": "jangrui-diagram",
       "displayName": "jangrui-diagram",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "description": "图表与架构表达：制作流程图、架构图、UML 等结构化图表。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/diagram.png",
       "source": "./",
