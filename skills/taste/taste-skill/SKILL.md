@@ -1,6 +1,16 @@
 ---
 name: design-taste-frontend
-description: tasteskill v2, the anti-slop frontend skill. Art direction for websites, distilled from a study of 247 curated gallery sites (One Page Love, Awwwards Sites of the Day). Deals researched directions (idea, composition, type, palette, photographs, section blueprints) from a library, enforces a strict no-slop house style with a real-browser inspector, and runs a look-and-fix loop on screenshots. Use this whenever you build, design, redesign, restyle, polish or review a landing page, marketing site, portfolio, product page, one-pager, hero or any public-facing web page, in any stack (HTML/CSS, React, Next.js, Vue, Svelte, Astro, Tailwind) — also when the user says a page looks generic, templated, "AI-made", sloppy, or asks to make it look designed, premium, award-level or less like every other site. Also for app screens: dashboards, admin and analytics views, settings, inboxes and other screens people work in, with their own run and rules.
+description: >-
+  tasteskill v2, the anti-slop frontend skill. Art direction for websites, distilled from a study of
+  247 curated gallery sites (One Page Love, Awwwards Sites of the Day). Deals researched directions
+  (idea, composition, type, palette, photographs, section blueprints) from a library, enforces a strict
+  no-slop house style with a real-browser inspector, and runs a look-and-fix loop on screenshots. Use
+  this whenever you build, design, redesign, restyle, polish or review a landing page, marketing site,
+  portfolio, product page, one-pager, hero or any public-facing web page, in any stack (HTML/CSS, React,
+  Next.js, Vue, Svelte, Astro, Tailwind) — also when the user says a page looks generic, templated,
+  "AI-made", sloppy, or asks to make it look designed, premium, award-level or less like every other
+  site. Also for app screens: dashboards, admin and analytics views, settings, inboxes and other screens
+  people work in, with their own run and rules.
 ---
 
 # tasteskill v2
@@ -457,9 +467,28 @@ onto the roles, and take only composition from the draw. The house rules still a
 itself requires a banned device (its logo sits in a gradient, its accent is violet), keep the brand
 asset, say so in the report, and pass `--allow <rule>` to the inspector for that rule only.
 
-**Redesign or review of an existing page.** Run `lint.mjs` and `inspect.mjs` on it first and report
-what they find, then critique the screenshots with `references/critique.md`. For a redesign, draw a
-direction and proceed from step 2, keeping the page's real content and working behaviour.
+**Redesign, restyle or review of an existing page or app screen.**
+
+1. **Record the before.** Run the project as it is and inspect it into its own folder
+   (`inspect.mjs <url> --out .taste-skill/before`, with `--app` for an app screen) and lint its
+   source. Read the code: the framework, the styling method (Tailwind v3 or v4, CSS modules,
+   styled-components, plain CSS), the components, and what must survive: routes, forms, data,
+   behaviour, the brand's own assets.
+2. **A review stops here.** Critique the before screenshots with `references/critique.md`, list the
+   findings with the inspector's measurements, and name the three changes that would move the page
+   most.
+3. **Keep the stack, the content and what works.** No framework or styling-library migration; check the
+   dependency file before adding anything. A restyle keeps the layout and takes type, colour and
+   components from a dealt direction (`--keep` whatever the brand fixes); a redesign deals a full
+   direction and rebuilds the sections from its blueprints inside the existing components. Either way
+   proceed from step 2 of the run with the page's real content.
+4. **Order of work, biggest effect for least risk:** type (faces and scale), colour (one ground, one
+   ink, one accent), the frame (margins, section rhythm, a title on the first screen and a heading on
+   every section), states (hover, focus, loading, empty, error), then the stock components (icon
+   cards, pill badges, gradient blobs, card grids) replaced by the dealt blueprints.
+5. **Prove it.** Inspect again into `.taste-skill/after`, compare before and after at every width,
+   click through every link, form and menu that worked before, and report the before and after
+   measurements side by side.
 
 **A component or a single section, not a page.** Skip the draw unless there is no direction to follow.
 Match the surrounding design, apply the house rules and the laws, and still inspect the result.
