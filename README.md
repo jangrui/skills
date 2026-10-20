@@ -50,7 +50,7 @@
 | `opc` | OPC 生图与平台调研 | `skills/opc/` | ReScienceLab/opc-skills |
 | `observability` 运维可观测 | Grafana Core 与 LGTM | `skills/grafana/` | grafana/skills |
 | `office` 日常办公 | 文档处理、anydoc 与网页 PPT | `skills/anthropic/` `skills/anydoc/` `skills/ppt/` | anthropics、firecrawl、op7418 |
-| `collab` 协作套件 | 飞书、金山文档与 WPS 笔记 | `skills/lark/` `skills/wps/` `skills/wpsnote/` | larksuite、WPS 官方 Skillhub、wpsnote |
+| `collab` 协作套件 | 飞书、金山文档、WPS 笔记与腾讯会议 | `skills/lark/` `skills/wps/` `skills/wpsnote/` `skills/tencent-adm/` | larksuite、WPS 官方 Skillhub、wpsnote、腾讯会议（skillhub.cn） |
 | `diagram` 图表与架构 | mermaid / drawio / plantuml / archify | `skills/drawio/` 等 | Agents365-ai、tt-a1i/archify |
 | `video` 视频制作 | 产品视频、LibLib 生图生视频与短剧 | `skills/shotcraft/` `skills/libtv/` `skills/shuohao/` | Vincentwei1021、libtv-labs、eternityspring |
 | `writing` 写作 | 宝玉 AI 创作、gzh 排版、插画与社交卡片 | `skills/baoyu/` `skills/gzh/` `skills/illustration/` | JimLiu/baoyu-skills、isjiamu、helloianneo/op7418 |
@@ -65,6 +65,7 @@
 | collab·飞书 | `lark-cli` | `npx @larksuite/cli@latest install` 或 `brew install jangrui/tap/lark-cli`；首次使用执行 `lark-cli config init --new`，再 `lark-cli auth login --recommend` |
 | collab·金山文档 | `kdocs-cli`（仅 WPS 个人账号） | 在 `skills/wps/kdocs/` 下运行 `bash scripts/setup.sh`（官方 CDN 预编译二进制），再执行 `kdocs-cli auth login` 完成授权 |
 | collab·WPS 笔记 | `wpsnote-cli` | 按其官方说明安装 |
+| collab·腾讯会议 | python3 与 `TENCENT_MEETING_TOKEN` | 从 https://meeting.tencent.com/ai-skill 获取 Token 并 `export TENCENT_MEETING_TOKEN=...`；skill 自带纯标准库 MCP 桥接脚本，按其 `SKILL.md` 经官方 MCP 端点调用 |
 | office·anydoc | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
 | office·文档处理 | Node.js、Python 3、LibreOffice 等（因 skill 而异） | 按各 `SKILL.md` 安装所需工具 |
 | writing·宝玉 | Bun | `brew install oven-sh/bun/bun` |
@@ -108,6 +109,7 @@
 - [eternityspring/shuohao-skills](https://github.com/eternityspring/shuohao-skills) — AI 短剧制作：角色设定集、改编大纲、美术设定、剧本、分镜（Apache-2.0）
 - [wpsnote/wpsnote-skills](https://github.com/wpsnote/wpsnote-skills) — WPS 笔记技能
 - [WPS 官方 Skillhub](https://www.kdocs.cn/latest) — 金山文档云文档操作技能（kdocs）
+- [腾讯会议 MCP Skill（skillhub.cn @tencent-adm）](https://api.skillhub.cn/api/v1/download?slug=@tencent-adm/tencent-meeting-mcp) — 腾讯会议管理与纪要查询技能
 - [t8y2/dbx](https://github.com/t8y2/dbx) — 数据库 CLI 技能
 - [libtv-labs/libtv-skills](https://github.com/libtv-labs/libtv-skills) — LibLib.tv 生图/生视频技能
 - [KKKKhazix/khazix-skills](https://github.com/KKKKhazix/khazix-skills) — AI 资讯、横纵分析研究、公众号写作、任务书、知识库收尾与存储分析
