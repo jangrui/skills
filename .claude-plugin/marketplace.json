@@ -95,7 +95,7 @@
     {
       "name": "jangrui-design",
       "displayName": "jangrui-design",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "description": "产品界面与视觉设计：探索设计方向，创建或改进页面和交互。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/design.png",
       "source": "./",
