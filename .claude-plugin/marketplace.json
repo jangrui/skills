@@ -161,7 +161,7 @@
     {
       "name": "jangrui-office",
       "displayName": "jangrui-office",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "description": "办公文档与演示材料处理：编辑、转换和生成文档、PDF、演示文稿及表格。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/office.png",
       "source": "./",
