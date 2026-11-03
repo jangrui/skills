@@ -28,6 +28,7 @@ name: Sync skills
           - dbx
           - diagram
           - golang
+          - gongwen-gbt9704-skill
           - grafana
           - gzh
           - illustration
@@ -64,7 +65,7 @@ jobs:
             {"marketplace_group":"jangrui-design","components":["taste"],"pr_hint":"skills/taste/<skill>/"},
             {"marketplace_group":"jangrui-diagram","components":["diagram"],"pr_hint":"skills/<repo>/<skill>/（绘图仓）"},
             {"marketplace_group":"jangrui-observability","components":["grafana"],"pr_hint":"skills/grafana/<category>/<skill>/"},
-            {"marketplace_group":"jangrui-office","components":["anthropic","anydoc","ppt"],"pr_hint":"skills/anthropic/、skills/anydoc/、skills/ppt/"},
+            {"marketplace_group":"jangrui-office","components":["anthropic","anydoc","ppt","gongwen-gbt9704-skill"],"pr_hint":"skills/anthropic/、skills/anydoc/、skills/ppt/、skills/gongwen-gbt9704-skill/"},
             {"marketplace_group":"jangrui-opc","components":["opc"],"pr_hint":"skills/opc/<skill>/"},
             {"marketplace_group":"jangrui-video","components":["shotcraft","libtv","shuohao"],"pr_hint":"skills/shotcraft/、skills/libtv/、skills/shuohao/"},
             {"marketplace_group":"jangrui-writing","components":["baoyu","gzh","illustration"],"pr_hint":"skills/baoyu/、skills/gzh/、skills/illustration/"}

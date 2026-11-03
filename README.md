@@ -49,7 +49,7 @@
 | `design` 设计 | taste 前端设计 | `skills/taste/` | Leonxlnx/taste-skill |
 | `opc` | OPC 生图与平台调研 | `skills/opc/` | ReScienceLab/opc-skills |
 | `observability` 运维可观测 | Grafana Core 与 LGTM | `skills/grafana/` | grafana/skills |
-| `office` 日常办公 | 文档处理、anydoc 与网页 PPT | `skills/anthropic/` `skills/anydoc/` `skills/ppt/` | anthropics、firecrawl、op7418 |
+| `office` 日常办公 | 文档处理、anydoc、网页 PPT 与公文排版 | `skills/anthropic/` `skills/anydoc/` `skills/ppt/` `skills/gongwen-gbt9704-skill/` | anthropics、firecrawl、op7418、mizzlelover |
 | `collab` 协作套件 | 飞书、金山文档、WPS 笔记与腾讯会议 | `skills/lark/` `skills/wps/` `skills/wpsnote/` `skills/tencent-adm/` | larksuite、WPS 官方 Skillhub、wpsnote、腾讯会议（skillhub.cn） |
 | `diagram` 图表与架构 | mermaid / drawio / plantuml / archify | `skills/drawio/` 等 | Agents365-ai、tt-a1i/archify |
 | `video` 视频制作 | 产品视频、LibLib 生图生视频与短剧 | `skills/shotcraft/` `skills/libtv/` `skills/shuohao/` | Vincentwei1021、libtv-labs、eternityspring |
@@ -67,6 +67,7 @@
 | collab·WPS 笔记 | `wpsnote-cli` | 按其官方说明安装 |
 | collab·腾讯会议 | python3 与 `TENCENT_MEETING_TOKEN` | 从 https://meeting.tencent.com/ai-skill 获取 Token 并 `export TENCENT_MEETING_TOKEN=...`；skill 自带纯标准库 MCP 桥接脚本，按其 `SKILL.md` 经官方 MCP 端点调用 |
 | office·anydoc | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
+| office·公文排版 | Node 20+、`zip`/`unzip`；字体检查需 `fc-list`，PDF 验证可选 LibreOffice | 免安装，脚本随 skill 自带，只用 node 内置模块 |
 | office·文档处理 | Node.js、Python 3、LibreOffice 等（因 skill 而异） | 按各 `SKILL.md` 安装所需工具 |
 | writing·宝玉 | Bun | `brew install oven-sh/bun/bun` |
 | coding·dbx | DBX Desktop、至少一个已配置连接、`@dbx-app/cli` | 用 `brew install --cask dbx` 安装桌面端，再 `brew install dbx-cli` 或 `npm i -g @dbx-app/cli`；用 `dbx doctor` 检查环境 |
@@ -115,6 +116,7 @@
 - [KKKKhazix/khazix-skills](https://github.com/KKKKhazix/khazix-skills) — AI 资讯、横纵分析研究、公众号写作、任务书、知识库收尾与存储分析
 - [mattpocock/skills](https://github.com/mattpocock/skills) — 工程实践技能
 - [firecrawl/anydoc](https://github.com/firecrawl/anydoc) — 文档转 Markdown 技能
+- [mizzlelover/gongwen-gbt9704-skill](https://github.com/mizzlelover/gongwen-gbt9704-skill) — 按 GB/T 9704-2012 生成公文 DOCX：版心、字体、标题层级、文号、页码、附件与版记（MIT）
 - [anthropics/skills](https://github.com/anthropics/skills) — Anthropic 官方 skill：docx/pdf/pptx/xlsx 文档处理、claude-api 参考、skill-creator、mcp-builder 等（部分采用 Apache-2.0；文档处理 skill 为 Anthropic 专属条款，随 skill 保留 LICENSE.txt）
 - [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — anti-slop 前端设计技能
 - [Vincentwei1021/video-shotcraft](https://github.com/Vincentwei1021/video-shotcraft) — 电影感产品视频制作：镜头配方卡、Ink Press 宣传片模板、Remotion 组件与音频资产（Apache-2.0）

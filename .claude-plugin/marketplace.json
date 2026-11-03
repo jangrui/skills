@@ -177,7 +177,8 @@
         "./skills/anthropic/pptx",
         "./skills/anthropic/xlsx",
         "./skills/anydoc/convert-documents-to-markdown",
-        "./skills/ppt/guizang-ppt"
+        "./skills/ppt/guizang-ppt",
+        "./skills/gongwen-gbt9704-skill/gongwen"
       ]
     },
     {
