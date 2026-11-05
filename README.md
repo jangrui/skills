@@ -13,7 +13,7 @@
 
 ```text
 /plugin marketplace add jangrui/skills
-/plugin install daily@jangrui  # 推荐：日常写作润色与会话收尾
+/plugin install jangrui-daily@jangrui  # 推荐：日常写作润色与会话收尾
 ```
 
 ### Codex 桌面版与 ZCode
@@ -26,16 +26,16 @@
 
 ```text
 # 每组一条命令装全组；组内容与依赖见下方目录表
-/plugin install coding@jangrui        # 代码
-/plugin install collab@jangrui        # 协作
-/plugin install daily@jangrui         # 常用必备
-/plugin install design@jangrui        # 设计
-/plugin install diagram@jangrui       # 画图
-/plugin install opc@jangrui           # OPC
-/plugin install observability@jangrui # 可观测性
-/plugin install office@jangrui        # 办公
-/plugin install video@jangrui         # 视频
-/plugin install writing@jangrui       # 写作
+/plugin install jangrui-coding@jangrui        # 代码
+/plugin install jangrui-collab@jangrui        # 协作
+/plugin install jangrui-daily@jangrui         # 常用必备
+/plugin install jangrui-design@jangrui        # 设计
+/plugin install jangrui-diagram@jangrui       # 画图
+/plugin install jangrui-opc@jangrui           # OPC
+/plugin install jangrui-observability@jangrui # 可观测性
+/plugin install jangrui-office@jangrui        # 办公
+/plugin install jangrui-video@jangrui         # 视频
+/plugin install jangrui-writing@jangrui       # 写作
 ```
 
 ## 技能目录
