@@ -23,18 +23,15 @@
   - [导出参会成员统计](#export_participants--导出参会成员统计)
   - [获取异步任务结果](#get_job_result--获取异步任务结果)
 - [录制与转写](#录制与转写)
-  - [查询录制列表](#get_records_list--查询录制列表)
   - [搜索录制文件](#search_records--搜索录制文件)
-  - [获取录制下载地址](#get_record_addresses--获取录制下载地址)
-  - [查询转写详情](#get_transcripts_details--查询转写详情)
-  - [查询转写段落](#get_transcripts_paragraphs--查询转写段落)
-  - [搜索转写内容](#search_transcripts--搜索转写内容)
-  - [获取智能纪要](#get_smart_minutes--获取智能纪要)
+  - [读录制内容（聚合）](#record_content--读录制内容聚合)
+  - [查录制访问信息（聚合）](#record_access--查录制访问信息聚合)
+  - [修改录制分享/授权成员（聚合写）](#record_share_set--修改录制分享授权成员聚合写)
+  - [修改录制智能化开关](#record_settings_set--修改录制智能化开关)
   - [搜索元宝纪要](#search_minutes--搜索元宝纪要)
   - [查询元宝纪要详情](#get_minutes--查询元宝纪要详情)
 - [录制权限申请](#录制权限申请)
-  - [申请录制权限-预览](#apply_record_permission_prepare--申请录制权限-预览)
-  - [申请录制权限-提交](#apply_record_permission_commit--申请录制权限-提交)
+  - [申请录制权限（聚合）](#record_permission_apply--申请录制权限聚合)
 - [通讯录](#通讯录)
     - [搜索企业通讯录](#contact_search--搜索企业通讯录)
     - [按手机号批量查找用户](#contact_lookup_by_phone--按手机号批量查找用户)
@@ -293,6 +290,8 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### `get_user_ended_meetings` — 查询已结束会议
 
+> **默认时间范围**：未传 `start_time`/`end_time` 时，默认按当前时间向前推 30 天查询；若用户诉求覆盖更久之前的会议，需显式传入 `start_time`。
+
 #### 调用示例
 
 ```bash
@@ -313,6 +312,8 @@ python3 scripts/tencent_meeting.py tools/call '{
 ### `search_meetings` — 搜索会议列表
 
 > `q_fields` 取值：`subject`（主题，分词匹配）/ `creator`（创建人昵称，模糊匹配）/ `note`（备注，模糊匹配）/ `all`（所有字段）。`page_size` 上限 30。
+>
+> **默认时间范围**：未传 `from`/`to` 时，默认按当前时间向前推 30 天搜索；若用户诉求覆盖更久之前的会议，需显式传入 `from`。
 
 #### 调用示例
 
@@ -416,50 +417,15 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ## 录制与转写
 
-### `get_records_list` — 查询录制列表
-
-> **三种查询模式互斥**：`start_time + end_time`（时间跨度 ≤ 31 天，可翻页）/ `meeting_id`（无需时间）/ `meeting_code`（无需时间）。同一次调用只使用其中一种。
-
-#### 调用示例
-
-```bash
-# 按时间范围查询 + 分页接续（跨度 ≤ 31 天）
-python3 scripts/tencent_meeting.py tools/call '{
-  "name": "get_records_list",
-  "arguments": {
-    "start_time": "2026-03-25T00:00:00+08:00",
-    "end_time": "2026-03-25T23:59:59+08:00",
-    "page_size": 10,
-    "page_token": "上一次响应中的next_page_token"
-  }
-}'
-
-# 按会议 ID 查询（无需传时间）
-python3 scripts/tencent_meeting.py tools/call '{
-  "name": "get_records_list",
-  "arguments": {
-    "meeting_id": "xxx"
-  }
-}'
-
-# 按会议号查询（无需传时间）
-python3 scripts/tencent_meeting.py tools/call '{
-  "name": "get_records_list",
-  "arguments": {
-    "meeting_code": "904854736"
-  }
-}'
-```
-
----
-
 ### `search_records` — 搜索录制文件
 
 > `q_fields` 取值分为两类，**snippet 返回行为不同**：
 > - **返回 snippet**：`transcript_content`（转写原文）/ `smart_minutes`（智能纪要）/ `timeline`（时间轴），均为分词匹配
 > - **不返回 snippet**：`subject`（主题，分词匹配）/ `creator`（创建人昵称，模糊匹配）/ `all`（所有字段，按各字段自身方式匹配）
 >
-> `page_size` 上限 30。可用 `meeting_id` / `meeting_code` 精准定位；`file_type` 可选 `video` 等。
+> `page_size` 上限 30。可用 `meeting_id` / `meeting_code` 精准定位；`file_type` 可选 `video` 等。按时间查询范围不超过 31 天，起始不早于 1 年前。
+>
+> **默认时间范围**：未传 `from`/`to` 时，默认按当前时间向前推 30 天检索；若用户诉求覆盖更久之前的录制，需显式传入 `from`。
 
 #### 调用示例
 
@@ -498,41 +464,379 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ---
 
-### `get_record_addresses` — 获取录制下载地址
+### `record_content` — 读录制内容（聚合）
 
-参数以 MCP schema 为准（`tools/list`）。
+> **聚合入口**，通过 `action` 五选一分派到不同底层能力。100% 兼容对应旧工具的入参形态。
+
+#### `action` 枚举与场景
+
+| `action` | 承接旧工具 | 说明 | 必填定位参数 |
+|---|---|---|---|
+| `minutes` | `get_smart_minutes`（deprecated） | 获取智能纪要（录制纪要） | `record_file_id` 或 `share_url` |
+| `todos` | 内部旧工具 | 获取智能待办 | `record_file_id` |
+| `transcript`（不传 `text`） | `get_transcripts_details`（deprecated） | 查询转写详情文本 | `record_file_id` 或 `share_url`；可选配合 `pid`（起始段落号字符串型，未传默认 `"0"`，仅本场景生效）+ `limit`（数字型，仅本场景生效） |
+| `transcript`（传 `text`） | `search_transcripts`（deprecated） | 按关键词搜索转写内容（中文关键词需 urlencode） | `record_file_id` + `text` |
+| `paragraphs` | `get_transcripts_paragraphs`（deprecated） | 获取转写段落 ID 列表（后续用 `action=transcript` 取具体段落文本） | `record_file_id` |
+| `timeline` | 内部旧工具 | 获取智能时间轴 | `record_file_id` |
+
+#### 可选参数
+
+- `lang`：`action=minutes` 时可选，枚举 `default`（原文，默认）/ `zh`（简体中文）/ `en`（英文）/ `ja`（日语）
+- `pwd`：录制文件访问密码（仅当录制设置了密码时需要）
+- `page_size` / `page_token`：分页参数
+- `pid` / `limit`：**仅 `action=transcript` 详情场景（不传 `text`）生效**；其他 action 下传入将被忽略。`pid` 未传时默认按首段 `"0"` 起
+
+#### 调用示例
+
+```bash
+# 1) 获取智能纪要（record_file_id）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_content",
+  "arguments": {
+    "action": "minutes",
+    "record_file_id": "xxx"
+  }
+}'
+
+# 2) 获取智能纪要（通过录制分享链接）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_content",
+  "arguments": {
+    "action": "minutes",
+    "share_url": "https://meeting.tencent.com/xxx"
+  }
+}'
+
+# 3) 智能待办
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_content",
+  "arguments": {
+    "action": "todos",
+    "record_file_id": "xxx"
+  }
+}'
+
+# 4) 转写详情（不传 text）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_content",
+  "arguments": {
+    "action": "transcript",
+    "record_file_id": "xxx",
+    "pid": "0",
+    "limit": 20
+  }
+}'
+
+# 5) 转写关键词搜索（传 text）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_content",
+  "arguments": {
+    "action": "transcript",
+    "record_file_id": "xxx",
+    "text": "%E5%BB%B6%E6%9C%9F"
+  }
+}'
+
+# 6) 转写段落 ID 列表
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_content",
+  "arguments": {
+    "action": "paragraphs",
+    "record_file_id": "xxx"
+  }
+}'
+
+# 7) 智能时间轴
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_content",
+  "arguments": {
+    "action": "timeline",
+    "record_file_id": "xxx"
+  }
+}'
+```
+
+#### 注意事项
+
+- `action` 为必填，非法值或缺失时工具会返回明确报错（含合法枚举清单）
+- 录制状态为「录制中」/「转码中」时不可查看内容；应告知用户等待「转码完成」
+- 权限不足时进入场景9（`record_permission_apply`）流程
 
 ---
 
-### `get_transcripts_details` — 查询转写详情
+### `record_access` — 查录制访问信息（聚合）
 
-参数以 MCP schema 为准（`tools/list`）；`pid` 为字符串型起始段落号（首页传 `"0"`），`limit` 为数字型。
+> **聚合入口**，通过 `action` 四选一查询录制访问相关信息。
+
+#### `action` 枚举与场景
+
+| `action` | 承接旧工具 | 说明 | 必填定位参数 |
+|---|---|---|---|
+| `address` | `get_record_addresses`（deprecated） | 获取录制播放地址 | `meeting_record_id` |
+| `sharing` | 内部旧工具 | 查询当前分享配置 | `meeting_record_id` |
+| `members` | 内部旧工具 | 查询已授权成员列表 | `meeting_record_id` |
+| `settings` | 内部旧工具 | 查询智能化开关配置（字幕/AI 开关等） | `record_file_id` |
+
+#### 调用示例
+
+```bash
+# 1) 获取录制播放地址
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_access",
+  "arguments": {
+    "action": "address",
+    "meeting_record_id": "xxx"
+  }
+}'
+
+# 2) 查看分享配置
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_access",
+  "arguments": {
+    "action": "sharing",
+    "meeting_record_id": "xxx"
+  }
+}'
+
+# 3) 查看授权成员列表
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_access",
+  "arguments": {
+    "action": "members",
+    "meeting_record_id": "xxx"
+  }
+}'
+
+# 4) 查看智能化开关配置
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_access",
+  "arguments": {
+    "action": "settings",
+    "record_file_id": "xxx"
+  }
+}'
+```
+
+#### 注意事项
+
+- `action=address/sharing/members` 用 `meeting_record_id` 定位
+- `action=settings` 用 `record_file_id` 定位（**注意与前三者的定位参数不同**）
+- 权限不足时进入场景9（`record_permission_apply`）流程
 
 ---
 
-### `get_transcripts_paragraphs` — 查询转写段落
+### `record_share_set` — 修改录制分享/授权成员（聚合写）
 
-参数以 MCP schema 为准（`tools/list`）。
+> **写操作**，一次调用可同时完成"改分享配置 + 增授权成员 + 删授权成员"三类子操作的组合（子字段任选），返回结构为 `results` 聚合对象。
+> **调用前必须**：通过 `record_access action=sharing` + `action=members` 展示当前状态，完整展示变更前后对比，获得用户明确同意后再执行。
+
+#### 参数结构
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `meeting_record_id` | string | 是 | 定位录制 |
+| `sharing_config` | object | 否 | 分享配置变更对象，字段均为可选，仅传入的字段会被下发修改；可用字段：`switch_state`（bool：分享总开关，`false` 关闭分享；**与 `permission_point_id` 互斥**）、`permission_point_id`（int：分享模式 1~6，详见下表）、`pwd`（string：访问密码，4~10 位字母或数字；所选分享模式要求密码时必填）、`expired_time_type`（int：链接有效期类型 `0`-永久 / `1`-7天 / `2`-15天 / `3`-30天 / `4`-自定义）、`expired_time`（string：ISO 8601 时间，如 `2026-12-31T23:59:59+08:00`；仅 `expired_time_type=4` 时生效）、`download_enable`（bool：是否允许观看者下载；**企业锁定下载时后端会忽略本项**，变更后应以 `record_access action=sharing` 响应为准）、`view_minutes_enable`（bool：是否允许观看者查看转写与纪要）、`rooms_enable`（bool：是否允许 Rooms 会议室设备查看本录制） |
+| `add_members` | array | 否 | 需新增授权的成员列表（**对象数组**，单次最多 200 个），每个元素形如 `{"open_id": "xxx", "permission": 0}`；`permission` 可选：**0-可查看（默认）/ 1-可管理**；空数组视为不新增 |
+| `remove_members` | array | 否 | 需移除授权的成员列表（**open_id 字符串数组**，单次最多 200 个），形如 `["open_id_aaa", "open_id_bbb"]`；空数组视为不移除 |
+
+`sharing_config` / `add_members` / `remove_members` **三个子字段可任选组合**，至少传一个才有实际写入效果。
+
+#### 分享模式枚举（`permission_point_id`）
+
+| ID | 含义 | 是否需要 `pwd` |
+|---|------|-----|
+| 1 | 所有人可查看 | — |
+| 2 | 所有人需输入密码查看 | ✅ |
+| 3 | 所有人需申请权限查看 | — |
+| 4 | 同企业可查看 | — |
+| 5 | 同企业需输入密码查看 | ✅ |
+| 6 | 同企业需申请权限查看 | — |
+
+> 使用 `record_access action=sharing` 查询时，响应中的 `current.permission_point_id` 已被转换为人类可读文案。
+
+#### 互斥约束
+
+- **`switch_state=false` 禁止与 `permission_point_id` 同传**：关闭分享总开关和切换分享模式二选一；工具层会显式拦截并报错。
+- 选择 `permission_point_id=2` 或 `permission_point_id=5` 时**必须**同时提供 `pwd`，否则后端会拒绝。
+
+#### 调用示例
+
+```bash
+# 修改分享模式 + 新增授权成员 + 移除授权成员（三类子操作组合）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_share_set",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "sharing_config": {
+      "permission_point_id": 4
+    },
+    "add_members": [
+      {"open_id": "open_id_aaa", "permission": 0},
+      {"open_id": "open_id_ccc", "permission": 1}
+    ],
+    "remove_members": [
+      "open_id_bbb"
+    ]
+  }
+}'
+
+# 只设置分享模式为"所有人需输入密码查看"并给出密码
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_share_set",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "sharing_config": {
+      "permission_point_id": 2,
+      "pwd": "ab1234"
+    }
+  }
+}'
+
+# 关闭分享总开关
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_share_set",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "sharing_config": {
+      "switch_state": false
+    }
+  }
+}'
+
+# 自定义链接到期时间（ISO 8601）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_share_set",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "sharing_config": {
+      "expired_time_type": 4,
+      "expired_time": "2026-12-31T23:59:59+08:00"
+    }
+  }
+}'
+
+# 开启观看者查看纪要与转写、禁止下载（企业锁定下载时 `download_enable` 被后端忽略）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_share_set",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "sharing_config": {
+      "view_minutes_enable": true,
+      "download_enable": false,
+      "rooms_enable": true
+    }
+  }
+}'
+
+# 只新增授权成员（permission 省略时默认 0=可查看）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_share_set",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "add_members": [
+      {"open_id": "open_id_aaa"},
+      {"open_id": "open_id_ccc", "permission": 1}
+    ]
+  }
+}'
+
+# 只移除授权成员（remove_members 为 open_id 字符串数组，不是对象数组）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_share_set",
+  "arguments": {
+    "meeting_record_id": "xxx",
+    "remove_members": ["open_id_bbb", "open_id_ddd"]
+  }
+}'
+```
+
+#### 返回字段说明
+
+| 字段 | 说明 |
+|---|---|
+| `results.modify_config` | 分享配置修改的子操作结果（当入参含 `sharing_config` 时返回） |
+| `results.add_members` | 新增授权的子操作结果（当入参含 `add_members` 时返回） |
+| `results.remove_members` | 移除授权的子操作结果（当入参含 `remove_members` 时返回） |
+
+> 模型应**逐项检查**每个子操作的成功 / 失败状态并汇报给用户，不能只看整体请求成功。
+
+#### 注意事项
+
+- **强制二次确认**：所有子操作变更前必须获得用户明确同意
+- 授权成员的 `open_id` 来源：`add_members`（新增）场景可按通用规则通过 `contact_*` 将姓名/手机号/邮箱解析为 open_id（见 `SKILL.md` 场景10，要求同轮次立即消费）；`remove_members`（移除）场景推荐先调 `record_access action=members` 展示当前授权列表供用户选择，避免误删
+- 移除授权成员是不可逆操作，必须在变更摘要中显式列出
 
 ---
 
-### `search_transcripts` — 搜索转写内容
+### `record_settings_set` — 修改录制智能化开关
 
-参数以 MCP schema 为准（`tools/list`）。
+> **写操作**，用于修改录制的智能化开关（字幕开关 / AI 开关）。
+> **调用前必须**：通过 `record_access action=settings` 展示当前开关状态，向用户说明"关闭 AI/字幕开关会影响后续录制的智能化产物（纪要 / 转写 / 时间轴等）"，获得明确同意后再执行。
+
+#### 参数说明
+
+| 参数 | 类型 | 必填 | 说明 |
+|---|---|---|---|
+| `record_file_id` | string | 是 | 定位录制文件 |
+| `subtitle_switch` | int | 否 | 逐字稿开关：**`1`=关闭 / `2`=开启**（枚举，仅允许 1 或 2），未传视为不修改 |
+| `enable_ai_switch` | int | 否 | 智能录制（AI）开关：**`1`=关闭 / `2`=开启**（枚举，仅允许 1 或 2），未传视为不修改 |
+
+`subtitle_switch` / `enable_ai_switch` **至少传一个**才有实际写入效果；**严禁传 `true`/`false`**，类型校验会直接拒绝。
+
+**联动规则**（下游强制纠正）：
+- 开启智能录制（`enable_ai_switch=2`）会**自动开启**逐字稿（`subtitle_switch=2`）
+- 关闭逐字稿（`subtitle_switch=1`）会**自动关闭**智能录制（`enable_ai_switch=1`）
+- 以响应中的 `subtitle_switch` / `enable_ai_switch` 作为最终生效值告知用户
+
+#### 调用示例
+
+```bash
+# 同时关闭逐字稿与 AI 开关（1=关闭）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_settings_set",
+  "arguments": {
+    "record_file_id": "xxx",
+    "subtitle_switch": 1,
+    "enable_ai_switch": 1
+  }
+}'
+
+# 只开启逐字稿（2=开启）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_settings_set",
+  "arguments": {
+    "record_file_id": "xxx",
+    "subtitle_switch": 2
+  }
+}'
+
+# 开启 AI 智能录制（会联动把逐字稿也打开）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_settings_set",
+  "arguments": {
+    "record_file_id": "xxx",
+    "enable_ai_switch": 2
+  }
+}'
+```
+
+#### 注意事项
+
+- **强制二次确认**：关闭 AI / 逐字稿开关会影响后续录制的智能化产物，必须向用户强调
+- **严禁传布尔值**：`subtitle_switch` / `enable_ai_switch` 均为 int 枚举（1/2），传 `true`/`false` 会被工具层直接拒绝
+- **以响应为准**：由于存在联动规则，变更后应以响应中的 `subtitle_switch` / `enable_ai_switch` 作为实际生效值反馈用户；也可再次调用 `record_access action=settings` 确认结果
 
 ---
-
-### `get_smart_minutes` — 获取智能纪要
-
-参数以 MCP schema 为准（`tools/list`）；可选 `lang`（默认 `default` 原文，可传 `en` 等指定翻译语言）与 `pwd`（录制文件访问密码，仅当录制设置了密码时需要）。
 
 ### `search_minutes` — 搜索元宝纪要
 
 > **纪要搜索路由策略**：用户说「搜索纪要」「找纪要」时，需先判断录制权限再决定路由：
 > - **有录制权限**：优先调用 `search_records`（`q_fields=smart_minutes`）搜录制纪要，无结果再降级调用 `search_minutes` 搜元宝纪要
 > - **无录制权限**：直接调用 `search_minutes` 搜元宝纪要
-> - **细节/原话类问题**（如「谁说要延期」）：直接走录制逐字稿 `search_records`（`q_fields=transcript_content`）或 `search_transcripts`
+> - **细节/原话类问题**（如「谁说要延期」）：直接走录制逐字稿 `search_records`（`q_fields=transcript_content`）或 `record_content`（`action=transcript` 并传 `text`）
 > - **无录制权限 + 需要逐字稿**：引导用户申请录制权限（场景9）
+>
+> **默认时间范围**：未传 `from`/`to` 时，默认按当前时间向前推 365 天检索；若用户诉求覆盖更久之前的会议，需显式传入 `from`。
 >
 > 详细路由规则见 SKILL.md 场景7A「纪要搜索路由策略」。
 
@@ -624,7 +928,7 @@ python3 scripts/tencent_meeting.py tools/call '{
 #### 调用示例
 
 ```bash
-# 按会议号查询稳态纪要
+# 按会议号查询全局总结
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_minutes",
   "arguments": {
@@ -635,7 +939,7 @@ python3 scripts/tencent_meeting.py tools/call '{
   }
 }'
 
-# 按会议ID查询稳态纪要
+# 按会议ID查询全局总结
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_minutes",
   "arguments": {
@@ -658,8 +962,8 @@ python3 scripts/tencent_meeting.py tools/call '{
   }
 }'
 
-# 获取滚动（瞬态）纪要（必须传 minute_id + short_summary=true）
-# ⚠️ 滚动纪要必须自动全量拉取：循环调用直到 has_more=false
+# 获取实时总结（必须传 minute_id + short_summary=true）
+# ⚠️ 实时总结必须自动全量拉取：循环调用直到 has_more=false
 # 首次调用（不传 page_token）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_minutes",
@@ -681,7 +985,7 @@ python3 scripts/tencent_meeting.py tools/call '{
 # }
 # 若 has_more=true，继续用 next_page_token 拉取下一页：
 
-# 获取滚动纪要 - 续页拉取（循环直到 has_more=false）
+# 获取实时总结 - 续页拉取（循环直到 has_more=false）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_minutes",
   "arguments": {
@@ -693,7 +997,7 @@ python3 scripts/tencent_meeting.py tools/call '{
 }'
 # 将所有分页的 items 聚合后一次性返回给用户
 
-# 稳态纪要翻页查询（page_size 默认10，最大30）
+# 全局总结翻页查询（page_size 默认10，最大30）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "get_minutes",
   "arguments": {
@@ -711,15 +1015,46 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ## 录制权限申请
 
-> 录制权限申请采用 **两步流程**：先调用 `apply_record_permission_prepare` 获取预览信息向用户展示并确认，
-> 用户明确同意后再调用 `apply_record_permission_commit` 正式提交。**严禁跳过预览阶段直接提交申请。**
-> 触发场景：用户访问录制相关内容（下载地址/转写/智能纪要）出现无权限错误，或用户主动请求申请录制权限。
+> 录制权限申请采用 **两步流程**，统一入口 `record_permission_apply`：先调用 `action=prepare` 获取预览信息向用户展示并确认，
+> 用户明确同意后再调用 `action=commit` 正式提交。**严禁跳过预览阶段直接提交申请。**
+> 触发场景：用户访问录制相关内容（`record_content` / `record_access`）出现无权限错误，或用户主动请求申请录制权限。
 
-### `apply_record_permission_prepare` — 申请录制权限-预览
+### `record_permission_apply` — 申请录制权限（聚合）
 
-参数以 MCP schema 为准（`tools/list`）；推荐同时携带 `meeting_id`（若已知），便于服务端校验。
+> **聚合入口**，通过 `action` 二选一分派。两个 action 入参完全一致，均为 `meeting_record_id`（必填）+ `meeting_id`（可选，若已知建议传入便于服务端校验）。
 
-#### 返回字段说明
+#### `action` 枚举
+
+| `action` | 承接旧工具 | 说明 |
+|---|---|---|
+| `prepare` | `apply_record_permission_prepare`（deprecated） | 获取申请预览信息，不实际下发申请 |
+| `commit` | `apply_record_permission_commit`（deprecated） | 正式提交申请（**前置条件**：已调用 `action=prepare` 并获得用户明确同意） |
+
+#### 调用示例
+
+```bash
+# 1) 预览阶段
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_permission_apply",
+  "arguments": {
+    "action": "prepare",
+    "meeting_record_id": "xxx",
+    "meeting_id": "yyy"
+  }
+}'
+
+# 2) 提交阶段（用户确认后）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "record_permission_apply",
+  "arguments": {
+    "action": "commit",
+    "meeting_record_id": "xxx",
+    "meeting_id": "yyy"
+  }
+}'
+```
+
+#### `action=prepare` 返回字段说明
 
 | 字段 | 说明 |
 |------|------|
@@ -731,17 +1066,9 @@ python3 scripts/tencent_meeting.py tools/call '{
 | `preview.applicant` | 申请人名称 |
 | `expires_in` | 预览有效期（秒），接近过期时建议重新调用 |
 
-> **调用后必须**：向用户完整展示预览信息（标题/录制所有者/申请人/申请说明），等待用户明确同意后再调用 commit 工具。
+> **调用后必须**：向用户完整展示预览信息（标题/录制所有者/申请人/申请说明），等待用户明确同意后再调用 `action=commit`。
 
----
-
-### `apply_record_permission_commit` — 申请录制权限-提交
-
-> **前置条件**：已调用 prepare 工具向用户展示预览信息，并获得用户明确同意。
-
-参数与 `apply_record_permission_prepare` 保持一致（若 prepare 传了 `meeting_id`，commit 也应传）。
-
-#### 返回字段说明
+#### `action=commit` 返回字段说明
 
 | 字段 | 说明 |
 |------|------|
@@ -751,13 +1078,25 @@ python3 scripts/tencent_meeting.py tools/call '{
 | `approval_url` | 审批链接（**必须展示给用户**，便于跟进审批进度） |
 | `share_text` | 申请说明描述 |
 
+#### 注意事项
+
+- `meeting_record_id` **严禁伪造**，来源优先级：会议查询响应中的 `records[].meeting_record_id` > `search_records` 返回结果
+- 用户明确拒绝或未确认时，**严禁**调用 `action=commit`；告知用户"已取消录制权限申请"
+- 提交申请前必须二次确认（见 SKILL.md 场景9）
+
 ## 通讯录
 
-> **调用场景白名单（强约束）**：通讯录工具（`contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email`）**仅可用于以下两类场景**，用于将姓名/手机号/邮箱**正向解析**为 `open_id`：
-> 1. **会议邀请**：将姓名/手机号/邮箱解析为 `open_id`，用于 `schedule_meeting` / `update_meeting` / `meeting_invitees_add` / `meeting_invitees_replace` 的受邀人入参
-> 2. **呼叫成员入会**：将姓名/手机号/邮箱解析为 `open_id`，用于 `meeting_control_call` 的 `users` 入参
+> **调用用途（黑名单）**：通讯录工具（`contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email`）仅用于把姓名/手机号/邮箱**正向解析**为 `open_id` 供同轮次下游 MCP 工具消费（典型消费方：`schedule_meeting` / `update_meeting` / `meeting_invitees_add` / `meeting_invitees_remove` / `meeting_invitees_replace` / `meeting_control_call` / `record_share_set.add_members` 等，非穷尽）。解析出的 `open_id` 必须在同一轮内立即喂给下游工具，否则视为违规。
 >
-> **严禁在其他场景下调用通讯录工具**，包括但不限于：仅为查看某人部门/职位/联系方式、好奇某人信息、为通用人员搜索目的、为踢人提供 open_id（应改用 `get_meeting_participants`，详见 `SKILL.md` 场景12）、**将 `open_id` 反查为姓名**（通讯录工具仅支持姓名/手机号/邮箱 → `open_id` 的正向查询，**不支持** `open_id` 反查；姓名回填应使用 `get_meeting_invitees` / `get_meeting_participants` 响应中自带的 `user_name`）。**不得将通讯录作为通用人员信息查询接口使用**。
+> **严禁用途（非穷尽）**：
+>
+> | 禁止用途 | 典型用户话术 | 正确处理 |
+> |---|---|---|
+> | 通用查人 | "张三是谁 / 哪个部门 / 什么职位 / 联系方式" | 直接告知"查询通讯录人员信息不在本服务范围内" |
+> | `open_id` 反查姓名 | （内部伪需求）"把这个 open_id 翻译成姓名" | 该工具**不支持** `open_id` 反查；姓名回填用 `get_meeting_invitees` / `get_meeting_participants` 响应中自带的 `user_name` |
+> | 本轮不调用任何下游 MCP 工具 | — | 视为通用查人，统一拒绝 |
+>
+> **不得将通讯录工具作为通用人员信息查询接口使用**。
 >
 > **隐私要点**：手机号、邮箱属于强敏感字段，调用前禁止在对话/日志中复述明文；返回的成员姓名向用户展示时优先使用昵称，必要时按 `privacy_policy.md` 脱敏。
 
@@ -979,9 +1318,9 @@ python3 scripts/tencent_meeting.py tools/call '{
   "arguments": {
     "category": "unexpected_result",
     "intent": "获取某场会议的智能纪要",
-    "actions_tried": "调用 get_smart_minutes(record_file_id=xxx)",
+    "actions_tried": "调用 record_content(action=minutes, record_file_id=xxx)",
     "result": "返回空内容，但用户确认会议已生成纪要",
-    "tool_name": "get_smart_minutes"
+    "tool_name": "record_content"
   }
 }'
 
@@ -990,7 +1329,7 @@ python3 scripts/tencent_meeting.py tools/call '{
   "name": "submit_feedback",
   "arguments": {
     "category": "suggestion",
-    "intent": "希望 get_records_list 支持按会议主题模糊搜索"
+    "intent": "希望 search_records 支持按会议主题模糊搜索"
   }
 }'
 ```
