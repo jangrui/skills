@@ -1,6 +1,6 @@
 ---
 name: tencent-meeting-mcp
-description: "腾讯会议：会议管理与音视频协作助手。预约/创建/修改/取消会议、查询会议详情与会议号转换、查看参会成员/受邀人/等候室成员、管理会中等候室成员、查询用户会议列表（即将开始/进行中/已结束）、搜索会议列表、导出参会成员统计与获取异步任务结果、查询录制列表与播放地址、搜索录制文件、获取转写全文/段落/搜索、获取AI智能纪要（支持多语言翻译）、搜索与查询元宝纪要（支持关键词/时间过滤、获取概览/要点/待办/滚动总结）、录制权限申请（预览+提交两步流程）、企业通讯录搜索/按手机号或邮箱批量查询用户（获取open_id）、向会议添加/移除/替换受邀人（创建或修改会议时可一并指定）、会中批量呼叫成员入会、会中踢出成员（支持普通成员/SIP/PSTN，可选是否允许重新加入）、时间转换与版本检查、Agent意见箱反馈上报。当用户需要预约或管理腾讯会议、查看参会人员、查询会议录制或转写内容、获取智能纪要、通过姓名/手机号/邮箱定位企业成员、管理会议受邀人、会中呼叫或踢人时使用；当用户访问录制相关内容（播放地址/转写/智能纪要）出现无权限错误时，自动发起录制权限申请流程；当用户仅提供姓名/手机号/邮箱、且已明确要邀请或呼叫该成员入会时，才先调用contact_*工具获取open_id后再执行邀请/呼叫；用户只是想查询某人是谁/部门/职位等纯人员查询场景，禁止调用contact_*工具；当Agent遇到以下任何情况时必须立即触发submit_feedback：工具缺失（功能不存在）、工具报错（返回错误码）、能力不足（参数/功能限制）、结果不符预期（数据异常）、改进建议（功能优化）；如果用户提供的是9位会议号而非meeting_id，优先使用get_meeting_by_code转换后再操作。不要在以下场景触发：日程管理（非腾讯会议日程）、即时通讯/聊天、腾讯文档操作、企业微信审批流程、电话/PSTN拨号、视频剪辑或视频编辑、其他视频会议平台（Zoom/Teams/飞书/钉钉）。"
+description: "腾讯会议：会议管理与音视频协作助手。预约/创建/修改/取消会议、查询会议详情与会议号转换、查看参会成员/受邀人/等候室成员、管理会中等候室成员、查询用户会议列表（即将开始/进行中/已结束）、搜索会议列表、导出参会成员统计与获取异步任务结果、查询录制列表与播放地址、搜索录制文件、获取转写全文/段落/搜索、获取AI智能纪要（支持多语言翻译）、搜索与查询元宝纪要（支持关键词/时间过滤、获取概览/要点/待办/实时总结）、录制权限申请（预览+提交两步流程）、企业通讯录搜索/按手机号或邮箱批量查询用户（获取open_id）、向会议添加/移除/替换受邀人（创建或修改会议时可一并指定）、会中批量呼叫成员入会、会中踢出成员（支持普通成员/SIP/PSTN，可选是否允许重新加入）、时间转换与版本检查、Agent意见箱反馈上报。当用户需要预约或管理腾讯会议、查看参会人员、查询会议录制或转写内容、获取智能纪要、通过姓名/手机号/邮箱定位企业成员、管理会议受邀人、会中呼叫或踢人时使用；当用户访问录制相关内容（播放地址/转写/智能纪要）出现无权限错误时，自动发起录制权限申请流程；当用户仅提供姓名/手机号/邮箱、且本轮会立即调用其他 MCP 工具消费该 open_id（如邀请入会、呼叫入会、录制授权成员管理等）时，才调用 contact_* 工具解析 open_id；用户只是想查询某人是谁/部门/职位等纯人员查询场景，禁止调用 contact_* 工具；当Agent遇到以下任何情况时必须立即触发submit_feedback：工具缺失（功能不存在）、工具报错（返回错误码）、能力不足（参数/功能限制）、结果不符预期（数据异常）、改进建议（功能优化）；如果用户提供的是9位会议号而非meeting_id，优先使用get_meeting_by_code转换后再操作。不要在以下场景触发：日程管理（非腾讯会议日程）、即时通讯/聊天、腾讯文档操作、企业微信审批流程、电话/PSTN拨号、视频剪辑或视频编辑、其他视频会议平台（Zoom/Teams/飞书/钉钉）。"
 homepage: https://meeting.tencent.com/
 metadata:
   {
@@ -53,16 +53,17 @@ metadata:
 ### 敏感操作
 
 - 修改或取消会议前，**必须向用户展示会议信息并确认**后再执行
-- 录制权限申请提交前（`apply_record_permission_commit`），**必须先调用 `apply_record_permission_prepare` 获取预览信息并向用户完整展示**（会议主题、录制所有者、申请人、申请类型等），获得用户明确同意后再调用 commit 工具；详见场景9
+- 录制权限申请提交前（`record_permission_apply` `action=commit`），**必须先调用 `record_permission_apply` `action=prepare` 获取预览信息并向用户完整展示**（会议主题、录制所有者、申请人、申请类型等），获得用户明确同意后再执行 commit；详见场景9
+- 录制分享/授权成员变更（`record_share_set`）与录制智能化开关修改（`record_settings_set`）前，**必须向用户完整展示待变更内容并获得明确同意**后再执行；详见场景7B
 - 提交反馈（`submit_feedback`）前，**必须按场景8的二次确认流程获得用户明文同意**后再调用；反馈内容**严禁包含未脱敏的隐私信息**，详见 `references/privacy_policy.md`
 - 受邀人变更（`meeting_invitees_remove` / `meeting_invitees_replace`）前，**必须先调用 `get_meeting_invitees` 展示当前受邀人列表**，明确告知用户将被移除/替换的成员，获得明确同意后再执行；`replace` 传空数组会清空所有受邀人，**必须二次强调**；详见场景11
 - 会中踢人（`meeting_control_kick`）前，**必须向用户完整展示被踢成员名单与 `allow_rejoin` 值**（true=允许重新加入 / false=禁止重新加入），获得明确同意后再执行；详见场景12
 - 会中呼叫（`meeting_control_call`）涉及对成员发起电话/客户端呼叫，**必须向用户展示被呼叫成员名单并确认**后再执行；详见场景12
 - 调用这些通讯录工具前，**必须先完成意图判定**： `contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email` 这些通讯录工具前，必须先在内部完成意图判定并满足以下全部条件，否则一律禁止调用：
-  1. 本轮请求**显式包含**邀请入会 / 添加受邀人 / 呼叫入会动作；
-  2. 解析出的 open_id 将**在同一轮内立即**喂给 schedule_meeting / update_meeting / meeting_invitees_* / meeting_control_call等工具。
+  1. 本轮请求**显式包含**某项将消费 open_id 的下游 MCP 工具调用（典型如邀请入会、呼叫入会、录制授权成员管理等，非穷尽）；
+  2. 解析出的 open_id 将**在同一轮内立即**喂给某条下游 MCP 工具的入参（典型消费方：schedule_meeting / update_meeting / meeting_invitees_* / meeting_control_call / record_share_set.add_members 等，非穷尽）。
   只要用户说的是"查找 / 搜索 / 查一下 / 看看 / 是谁 / 哪个部门 / 联系方式"等
-  **纯查询表述且不伴随上述动作**，立即停止，使用固定拒绝话术（见场景10反例），
+  **纯查询表述且不伴随任何下游 MCP 工具调用**，立即停止，使用固定拒绝话术（见场景10反例），
   **严禁调用任何 contact_* 工具**。
 - 通讯录工具入参中的手机号、邮箱属于强敏感信息，**禁止在对话或日志中复述明文**；返回的成员姓名向用户展示时优先使用昵称，必要时按 `references/privacy_policy.md` 脱敏
 - 无法查询到会议时，先确认会议号正确性或是否为本人创建
@@ -96,9 +97,9 @@ metadata:
 ## 通用规则
 
 1. **Meeting Code 转换**：用户提供的会议号需通过 `get_meeting_by_code` 转换为 meeting_id 后才能调用其他工具
-2. **用户标识前置（仅限邀请/呼叫场景）**：**当且仅当**用户已表达明确的「会议邀请 / 添加受邀人 / 会中呼叫入会」意图、却只提供了姓名/手机号/邮箱（未提供 open_id）时，才调用 `contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email` 解析出 open_id，并**立即**用于 `schedule_meeting` / `update_meeting` / `meeting_invitees_*` / `meeting_control_call`。
-   ⛔ 前置判定：若本轮无"邀请/添加受邀人/呼叫入会"动作，直接禁止调用 contact_*，
-   - ⛔ **纯人员查询不适用本规则**：用户只是想"搜一下/查一下某人是谁、看其部门/职位/联系方式"而无任何后续会议动作时，**禁止调用任何 `contact_*` 工具**，应直接告知"查询通讯录人员信息不在本服务范围内"。
+2. **用户标识前置（仅限需要消费 open_id 的下游动作）**：**当且仅当**用户已表达明确的某项需要 open_id 入参的下游 MCP 工具调用意图（典型如会议邀请 / 添加受邀人 / 会中呼叫入会 / 录制授权成员管理等，非穷尽）、却只提供了姓名/手机号/邮箱（未提供 open_id）时，才调用 `contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email` 解析出 open_id，并**立即**用于对应下游 MCP 工具（典型消费方：`schedule_meeting` / `update_meeting` / `meeting_invitees_*` / `meeting_control_call` / `record_share_set.add_members` 等）。
+   ⛔ 前置判定：若本轮无任何将消费 open_id 的下游 MCP 工具调用，直接禁止调用 contact_*，
+   - ⛔ **纯人员查询不适用本规则**：用户只是想"搜一下/查一下某人是谁、看其部门/职位/联系方式"而无任何后续 MCP 工具调用时，**禁止调用任何 `contact_*` 工具**，应直接告知"查询通讯录人员信息不在本服务范围内"。
    - ⛔ **踢人不适用本规则**：踢人所需的 `open_id` / `ms_open_id` 一律取自 `get_meeting_participants`，**严禁**用 `contact_*` 反查（详见场景12）。
 3. **年份默认值**：未指定年份时使用当前年份，禁止使用过去年份
 4. **参数格式错误**：提示用户修改，**禁止主动修改用户输入的参数值**
@@ -228,6 +229,8 @@ metadata:
 - `get_user_meetings` 仅包含未开始/进行中的会议，`get_user_ended_meetings` 仅包含已结束会议
 - `search_meetings` 支持按关键词(q)、搜索字段(q_fields)、会议号、日期窗口等过滤，数据按分页返回
 - `search_meetings` 的 `from`/`to` 参数使用 ISO 8601 格式（如 `2026-03-20T00:00:00+08:00`），按用户输入原值透传
+- `search_meetings` 未传 `from`/`to` 时默认按当前时间向前推 30 天搜索；若用户诉求覆盖更久之前的会议，需显式传入 `from`
+- `get_user_ended_meetings` 未传 `start_time`/`end_time` 时默认按当前时间向前推 30 天查询；若用户诉求覆盖更久之前的会议，需显式传入 `start_time`
 
 **输出规范**
 按时间排列展示会议列表（包含录制信息等），标注状态（未开始/进行中/已结束）
@@ -237,54 +240,80 @@ metadata:
 ### 场景7：查询录制与转写
 
 **触发条件**
-用户要求查看录制、转写内容、搜索关键词、获取智能纪要（录制纪要）
+用户要求查看录制、转写内容、搜索关键词、获取智能纪要（录制纪要）、查询录制访问信息（下载地址/分享配置/授权成员/智能化开关）
 
 > ⚠️ **纪要类型判定前置**：用户说"查纪要/会议总结/会议纪要/会议要点"时，**必须先阅读下方「元宝纪要与录制纪要的边界规则」判断走哪条链路**，不得仅凭命令名字面匹配。若确定走元宝纪要链路，请转至场景7A处理。
 
+**工具总览（三段式）**
+
+本场景围绕录制查询共 **3 个入口工具**，按"定位 → 读内容 → 查访问信息"三段式组织：
+
+| 阶段 | 工具 | 作用 |
+|---|---|---|
+| ① 定位录制 | `search_records` | 按关键词 / 会议 / 时间窗口 / 文件类型定位录制文件，也用于按 `q_fields=smart_minutes` / `transcript_content` 搜纪要或逐字稿命中 |
+| ② 读录制内容 | `record_content` | 通过 `action` 五选一读取录制内容：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（转写详情或转写关键词搜索）/ `paragraphs`（转写段落 ID）/ `timeline`（智能时间轴） |
+| ③ 查录制访问信息 | `record_access` | 通过 `action` 四选一查录制访问相关信息：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员列表）/ `settings`（智能化开关配置） |
+
 **处理流程**
-1. 根据用户意图选择获取录制信息的途径：
-    - **查指定会议的录制（含权限状态）**：使用会议查询工具，响应中每个会议携带 `records` 数组（含 `meeting_record_id` / `state` / `permission_status` 等）。按以下方式定位具体会议：
-        - 按会议主题或主持人搜索 → `search_meetings`
-        - 有会议号 → `get_meeting_by_code`（按会议号精确查）
-        - 有 meeting_id → `get_meeting`（按会议ID精确查）
-        - 按时间查近期会议 → `get_user_meetings`（未开始/进行中）或 `get_user_ended_meetings`（已结束）
-    - **指定关键词查录制**：用户给出主题、创建者、内容等关键词想搜索匹配的录制 → `search_records`
-    - **未指定某场会议、想找自己的录制**：优先用 `get_records_list`（按时间范围或默认查，仅返回用户有权限的录制文件）
-2. 根据需求选择后续操作：
-   - 获取播放录制 → `get_record_addresses`
-   - 转写全文 → `get_transcripts_paragraphs` 获取段落 ID → `get_transcripts_details` 获取文本
-   - 搜索关键词 → `search_transcripts`
-   - 智能纪要（录制纪要） → `get_smart_minutes`
+
+1. **定位录制**（拿到 `meeting_record_id` / `record_file_id`）：
+   - **查指定会议的录制（含权限状态）**：使用会议查询工具，响应中每个会议携带 `records` 数组（含 `meeting_record_id` / `state` / `permission_status` 等）。按以下方式定位具体会议：
+     - 按会议主题或主持人搜索 → `search_meetings`
+     - 有会议号 → `get_meeting_by_code`（按会议号精确查）
+     - 有 meeting_id → `get_meeting`（按会议ID精确查）
+     - 按时间查近期会议 → `get_user_meetings`（未开始/进行中）或 `get_user_ended_meetings`（已结束）
+   - **指定关键词查录制**：用户给出主题、创建者、内容等关键词想搜索匹配的录制 → `search_records`
+   - **未指定某场会议、想找自己的录制**：也用 `search_records`（可只传时间窗口 / 不传关键词），仅返回用户有权限的录制文件
+
+2. **读录制内容 → `record_content`**（按 `action` 分派）：
+   - 智能纪要（录制纪要）→ `action=minutes`
+   - 智能待办 → `action=todos`
+   - 转写全文详情 → `action=transcript`（**不传** `text`）
+   - 转写关键词搜索 → `action=transcript` 并传 `text=<关键词>`
+   - 转写段落 ID 列表 → `action=paragraphs`（先拿段落 ID，再用 `action=transcript` 取具体段落文本）
+   - 智能时间轴 → `action=timeline`
+
+3. **查录制访问信息 → `record_access`**（按 `action` 分派）：
+   - 获取录制播放地址 → `action=address`
+   - 查看当前分享配置 → `action=sharing`
+   - 查看已授权成员列表 → `action=members`
+   - 查看智能化开关配置（字幕/AI 开关等）→ `action=settings`
 
 **注意事项**
-- 获取录制会议内容时的推荐优先级：`get_smart_minutes` > `get_transcripts_details` > `get_record_addresses`
-- `get_records_list` 未传 meeting_id/meeting_code 时，`start_time` 和 `end_time` 必须同时传入
-- `get_records_list` 按时间查询：范围不超过 31 天，起始不早于 1 年前
+
+- 获取录制会议内容时的推荐优先级：`record_content action=minutes` > `record_content action=transcript` > `record_access action=address`
+- `record_content` / `record_access` 的定位参数**因 action 而异**：
+  - `record_content action=minutes/todos/transcript/paragraphs/timeline`：必填 `record_file_id`；`action=minutes` 与 `action=transcript`（不传 `text` 的详情场景）也可改传录制分享链接 `share_url`（对方分享录制访问链接时使用）
+  - `record_access action=address/sharing/members`：必填 `meeting_record_id`
+  - `record_access action=settings`：必填 `record_file_id`
+- `record_content action=transcript` 通过 **是否传 `text`** 区分两种场景：**不传** `text` = 取转写详情文本；**传** `text` = 按关键词搜索转写内容（中文关键词需 urlencode）
 - `search_records` 支持按关键词(q)、搜索字段(q_fields)、会议ID/会议号、日期窗口、文件类型等过滤，数据按分页返回
 - `search_records` 的 `from`/`to` 参数使用 ISO 8601 格式（如 `2026-03-20T00:00:00+08:00`），按用户输入原值透传
-- `search_transcripts` 中文关键词需 urlencode
-- **录制状态限制**：`state` 为「录制中」或「转码中」的录制文件**不可查看内容、不可申请权限**（场景6的播放/转写/搜索/纪要、场景8的权限申请均不可对这类文件执行）。遇到此类状态时，应告知用户该录制尚未就绪、需等待变为「转码完成」后再操作
+- `search_records` 未传 `from`/`to` 时默认按当前时间向前推 30 天检索；若用户诉求覆盖更久之前的录制，需显式传入 `from`
+- `search_records` 按时间查询：范围不超过 31 天，起始不早于 1 年前
+- **录制状态限制**：`state` 为「录制中」或「转码中」的录制文件**不可查看内容、不可申请权限**（本场景的 `record_content` / `record_access`、场景9 的权限申请均不可对这类文件执行）。遇到此类状态时，应告知用户该录制尚未就绪、需等待变为「转码完成」后再操作
+- 若 `record_content` / `record_access` 返回**录制权限不足**类错误，**自动进入场景9（录制权限申请）**
 
 **输出规范**
-展示录制列表/播放地址/转写内容/智能纪要，附带追踪信息
+展示录制列表 / 播放地址 / 转写内容 / 智能纪要 / 分享配置 / 授权成员 / 智能化开关，附带追踪信息
 
 ---
 
 ### 元宝纪要与录制纪要的边界规则
 
-> **CRITICAL — 取纪要前必读**：遇到"查纪要/会议总结/会议纪要/会议要点"等诉求时，必须先按本规则判断走元宝纪要（场景7A）还是录制纪要（场景6），不得仅凭命令名字面匹配。
+> **CRITICAL — 取纪要前必读**：遇到"查纪要/会议总结/会议纪要/会议要点"等诉求时，必须先按本规则判断走元宝纪要（场景7A）还是录制纪要（场景7），不得仅凭命令名字面匹配。
 
 #### 两条链路对比
 
-| 维度 | 元宝纪要（`search_minutes` / `get_minutes`） | 录制纪要（`get_smart_minutes` / `search_records` / `get_transcripts_*`） |
+| 维度 | 元宝纪要（`search_minutes` / `get_minutes`） | 录制纪要（`record_content` / `search_records`） |
 |------|------|------|
-| 纪要产物 | 完整总结（overview/summary_points/todos）+ 滚动总结（short_summaries） | 智能纪要（基于录制文件的 AI 总结）+ 逐字稿 |
+| 纪要产物 | 全局总结（overview/summary_points/todos）+ 实时总结（short_summaries） | 智能纪要（基于录制文件的 AI 总结）+ 逐字稿 |
 | 生成时机 | 会中（用户开启元宝纪要） | 会后（基于云录制/文字转写/录音/文件上传） |
 | 所有权 | 参会者每人一份 | 录制创建者所有 |
 | 权限 | 参会者人人可取 | 需录制查看权限，无权限需申请 |
-| 链接 | 无（只能取内容） | 有（播放地址） |
+| 链接 | 无（只能取内容） | 有（播放地址，通过 `record_access action=address` 获取） |
 | 内容一致性 | 因入会时段不同，各人取到的内容可能不一致 | 基于完整录制文件，多人共享相同内容 |
-| 逐字稿 | 无（short_summaries 是 AI 加工版，非原话） | 有（`get_transcripts_details`，含说话人/时间戳） |
+| 逐字稿 | 无（short_summaries 是 AI 加工版，非原话） | 有（`record_content action=transcript`，含说话人/时间戳） |
 
 #### 纪要选择规则
 
@@ -292,14 +321,14 @@ metadata:
 |------|------|
 | 只存在一类纪要 | 取存在的那一类 |
 | 两类都存在、用户明确指定（如"取录制纪要""看元宝纪要"） | 按用户指定走对应链路 |
-| 两类都存在、用户未指定 | 先查 `get_smart_minutes`（录制纪要）或 `get_minutes`（元宝纪要）任一均可；先查的一种取不到时，继续查另一种（双向兜底）。取到后告知用户纪要来源 |
+| 两类都存在、用户未指定 | 先查 `record_content action=minutes`（录制纪要）或 `get_minutes`（元宝纪要）任一均可；先查的一种取不到时，继续查另一种（双向兜底）。取到后告知用户纪要来源 |
 | 两条链路都取不到 | 告知用户该会议无可取的纪要 |
 
 #### 原话/逐字稿降级规则
 
 用户要"原话/逐字稿/谁说了什么"时：
-- **有录制权限** → 走录制链路 `get_transcripts_paragraphs` + `get_transcripts_details` 取逐字稿
-- **无录制权限但元宝纪要可用** → 降级取元宝 `get_minutes` 的 `short_summary`（滚动总结），**必须标注"非原话/AI 加工版"**，无需先询问用户是否接受降级
+- **有录制权限** → 走录制链路 `record_content action=paragraphs`（拿段落 ID）+ `record_content action=transcript`（取段落文本） 取逐字稿
+- **无录制权限但元宝纪要可用** → 降级取元宝 `get_minutes` 的 `short_summary`（实时总结），**必须标注"非原话/AI 加工版"**，无需先询问用户是否接受降级
 
 #### 两条链路的独立性
 
@@ -314,7 +343,7 @@ metadata:
 **触发条件**
 用户要求搜索或查询元宝纪要、会议总结/要点/待办（经边界规则判定走元宝链路）
 
-> **领域边界**：元宝纪要与录制纪要（`get_smart_minutes`）是两条独立链路。取纪要前请先阅读上方「元宝纪要与录制纪要的边界规则」判断走哪条链路。
+> **领域边界**：元宝纪要与录制纪要（`record_content action=minutes`）是两条独立链路。取纪要前请先阅读上方「元宝纪要与录制纪要的边界规则」判断走哪条链路。
 
 > **当前仅支持会后获取**：元宝纪要在会中生成，但当前工具仅支持取已结束会议的纪要。会议进行中或未开始时，告知用户会后重试。
 
@@ -325,10 +354,10 @@ metadata:
 | 用户线索 | 入口工具 | 说明 |
 |---------|---------|------|
 | 会议号 / 会议 ID | `get_minutes`（传 `meeting_code` 或 `meeting_id`） | 取该会议的元宝纪要 |
-| 已有 `minute_id` | `get_minutes`（传 `minute_id`） | 取单份完整纪要（含滚动总结） |
+| 已有 `minute_id` | `get_minutes`（传 `minute_id`） | 取单份完整纪要（含实时总结） |
 | 纪要内容关键词（无会议号、记得会上说过什么） | `search_minutes`（传 `q`） | 跨会议搜纪要文本 |
 | 主题 / 创建人 / 时间范围（无会议号） | 先 `search_meetings` / `get_user_ended_meetings` 定位会议，再 `get_minutes` | 元宝无按主题/创建人直接搜纪要的能力 |
-| 要"原话/逐字稿/谁说了什么" | 元宝无逐字稿，走录制链路（场景6）；无录制权限时降级取 `get_minutes` 的 `short_summary`，标注"非原话/AI 加工版" | 见边界规则「原话/逐字稿降级规则」 |
+| 要"原话/逐字稿/谁说了什么" | 元宝无逐字稿，走录制链路（场景7）；无录制权限时降级取 `get_minutes` 的 `short_summary`，标注"非原话/AI 加工版" | 见边界规则「原话/逐字稿降级规则」 |
 
 **处理流程**
 1. **判断纪要类型**：按「元宝纪要与录制纪要的边界规则」确定走元宝链路
@@ -340,9 +369,9 @@ metadata:
    - 纪要内容关键词（无会议号）→ `search_minutes`
 3. **取纪要**：
    - 取一场会议的完整总结 → `get_minutes`（传 `meeting_code` 或 `meeting_id`）
-   - 取单份完整纪要（含滚动总结）→ `get_minutes`（传 `minute_id`）
-   - 单独取滚动总结 → `get_minutes`（传 `minute_id` + `short_summary=true`）
-4. **兜底**：元宝纪要无结果时，询问用户是否尝试查找该会议的录制纪要（`get_smart_minutes`）
+   - 取单份完整纪要（含实时总结）→ `get_minutes`（传 `minute_id`）
+   - 单独取实时总结 → `get_minutes`（传 `minute_id` + `short_summary=true`）
+4. **兜底**：元宝纪要无结果时，询问用户是否尝试查找该会议的录制纪要（`record_content action=minutes`）
 
 **纪要搜索路由策略（用户说「搜索纪要」「找纪要」「查纪要内容」时的路由规则）**
 
@@ -353,42 +382,91 @@ metadata:
 | ① 检查录制权限 | 先通过上下文判断用户是否有录制权限（如此前调用录制相关工具是否成功、会议查询响应中 `records[].permission_status` 等） | 若无法判断，可先尝试调用 `search_records` 探测权限 |
 | ② 有录制权限 | 用户 query 为「搜索纪要」「查纪要」等通用纪要搜索 | **优先走录制链路**：调用 `search_records`（`q_fields=smart_minutes`）搜录制纪要；录制纪要无结果时，再降级调用 `search_minutes` 搜元宝纪要 |
 | ③ 无录制权限 | 用户 query 为通用纪要搜索 | **直接走元宝链路**：调用 `search_minutes` 搜元宝纪要 |
-| ④ 细节/原话类问题 | 用户问的是细节问题（如「谁说要延期」「有没有人提到预算」「XX 说了什么」），纪要搜索无结果或纪要粒度不够 | **直接走录制逐字稿**：调用 `search_records`（`q_fields=transcript_content`）或 `search_transcripts` 搜索转写原文，逐字稿能提供说话人+时间戳级别的精确匹配 |
+| ④ 细节/原话类问题 | 用户问的是细节问题（如「谁说要延期」「有没有人提到预算」「XX 说了什么」），纪要搜索无结果或纪要粒度不够 | **直接走录制逐字稿**：调用 `search_records`（`q_fields=transcript_content`）或 `record_content action=transcript` 并传 `text=<关键词>` 搜索转写原文，逐字稿能提供说话人+时间戳级别的精确匹配 |
 | ⑤ 无录制权限 + 需要逐字稿 | 步骤④需要走录制链路但用户无权限 | **引导申请权限**：告知用户「该录制需要查看权限才能搜索逐字稿内容，是否需要申请录制权限？」，用户同意后进入场景9（录制权限申请流程） |
 
 **路由示例**：
 - 用户说「帮我搜一下上周纪要里有没有提到排期」→ 有录制权限时先 `search_records(q="排期", q_fields="smart_minutes")`，无结果再 `search_minutes(q="排期")`
-- 用户说「张三在会上说要延期，帮我找一下」→ 这是细节/原话类问题，直接走录制逐字稿 `search_records(q="延期", q_fields="transcript_content")` 或 `search_transcripts`
+- 用户说「张三在会上说要延期，帮我找一下」→ 这是细节/原话类问题，直接走录制逐字稿 `search_records(q="延期", q_fields="transcript_content")` 或 `record_content(action="transcript", text="延期")`
 - 用户无录制权限时说「搜一下纪要」→ 直接 `search_minutes` 搜元宝纪要
 - 用户无录制权限时说「谁说了要延期」→ 告知需要录制权限才能查逐字稿，引导申请权限（场景9）
 
 **搜索元宝纪要（`search_minutes`）**
 - 支持按关键词(q)、时间窗口(from/to)过滤，所有过滤参数均为可选，可任意组合
 - `from`/`to` 参数使用 ISO 8601 格式（如 `2026-03-20T00:00:00+08:00`），按用户输入原值透传
+- 未传 `from`/`to` 时默认按当前时间向前推 365 天检索；若用户诉求覆盖更久之前的会议，需显式传入 `from`
 - 数据按分页返回，使用 `page_token`/`page_size` 分页
-- **与 `search_records` 的区别**：`search_minutes` 搜元宝纪要文本（overview/summary_points/todos/short_summaries）；`search_records --q_fields transcript_content` 搜录制转写原文。两者检索范围不同，按用户要的纪要类型选择
+- **与 `search_records` 的区别**：`search_minutes` 搜元宝纪要文本（overview/summary_points/todos/short_summaries）；`search_records`（`q_fields=transcript_content`）搜录制转写原文。两者检索范围不同，按用户要的纪要类型选择
 
 **查询元宝纪要详情（`get_minutes`）**
 
 支持两种模式：
 
-- **稳态纪要**：传入 `meeting_id` 或 `meeting_code` 获取稳态纪要；`page_token` / `page_size` 控制分页，`page_size` 默认10，最大30；周期会议需配合 `sub_meeting_id` 定位实例
-- **滚动（瞬态）纪要**：传入 `short_summary=true` 且**必须**同时传入 `minute_id`（稳态纪要唯一标识），否则报错；`page_token` / `page_size` 控制分页，`page_size` 默认100，最大300
+- **全局总结**：传入 `meeting_id` 或 `meeting_code` 获取全局总结；`page_token` / `page_size` 控制分页，`page_size` 默认10，最大30；周期会议需配合 `sub_meeting_id` 定位实例
+- **实时总结**：传入 `short_summary=true` 且**必须**同时传入 `minute_id`（全局总结唯一标识），否则报错；`page_token` / `page_size` 控制分页，`page_size` 默认100，最大300
 
 **注意事项**
-- `get_minutes` 获取滚动（瞬态）纪要时，**必须自动全量拉取**：首次调用后检查响应中的 `has_more` 字段，若为 `true` 则将响应中的 `next_page_token` 作为下一次请求的 `page_token` 继续拉取，循环直到 `has_more` 为 `false`，最终将所有分页结果聚合后一次性返回给用户
+- `get_minutes` 获取实时总结时，**必须自动全量拉取**：首次调用后检查响应中的 `has_more` 字段，若为 `true` 则将响应中的 `next_page_token` 作为下一次请求的 `page_token` 继续拉取，循环直到 `has_more` 为 `false`，最终将所有分页结果聚合后一次性返回给用户
 - `get_minutes` 入参识别规则：用户提供的会议标识字符串长度为 9~12 位时视为 `meeting_code`，更长的视为 `meeting_id`
-- `get_minutes` 可选获取概览(overview)、要点(summary_points)、待办(todos)、滚动总结(short_summary)，默认获取概览/要点/待办
+- `get_minutes` 可选获取概览(overview)、要点(summary_points)、待办(todos)、实时总结(short_summary)，默认获取概览/要点/待办
 - **元宝纪要因人而异**：参会者因入会时段不同，取到的元宝纪要内容不同。同一会议的不同参会者可能拿到不同的纪要
 - **元宝纪要无链接**：只能取内容，没有可分享的播放地址
-- **元宝纪要无逐字稿**：`short_summaries` 是 AI 加工版，非原话
+- **元宝纪要无逐字稿**：实时总结(`short_summaries`) 是 AI 加工版，非原话
 
 **输出规范**
-展示元宝纪要内容（概览/要点/待办/滚动总结），附带追踪信息。取到纪要后应告知用户纪要来源为"元宝纪要"
+展示元宝纪要内容（概览/要点/待办/实时总结），附带追踪信息。取到纪要后应告知用户纪要来源为"元宝纪要"
 
 ---
 
-### 场景7：提交反馈（Agent 意见箱）
+### 场景7B：修改录制的分享配置与智能化开关（写操作）
+
+**触发条件**
+用户要求：
+- 修改某个录制的分享配置（如公开范围、密码开关）、增删授权成员
+- 修改某个录制的智能化开关（字幕开关 `subtitle_switch` / AI 开关 `enable_ai_switch`，均为 int 枚举：`1`=关闭 / `2`=开启）
+
+**工具总览**
+
+| 工具 | 作用 | 定位参数 |
+|---|---|---|
+| `record_share_set` | 一次性完成"改分享配置 + 增授权成员 + 删授权成员"三类写操作的组合（子字段任选） | `meeting_record_id` |
+| `record_settings_set` | 修改录制的智能化开关（字幕 / AI 开关） | `record_file_id` |
+
+**处理流程**
+
+1. **先查当前状态**：
+   - 修改分享 / 授权成员前 → 先调 `record_access action=sharing` 与 `action=members` 展示**当前**配置与成员
+   - 修改智能化开关前 → 先调 `record_access action=settings` 展示**当前**开关状态
+2. **向用户完整展示变更前后对比**（尤其是移除授权成员、关闭 AI/字幕开关这类破坏性操作）
+3. **获得用户明确同意**后再调用写工具
+4. 写操作返回后，展示操作结果与追踪信息
+
+**注意事项**
+
+- **强制二次确认**（见核心规范"敏感操作"）：所有写操作提交前必须获得用户明确同意，**严禁**基于用户模糊表述直接下发写请求
+- `record_share_set` 的三类子操作字段（`sharing_config` / `add_members` / `remove_members`）**可任选组合**，未传的字段视为不变更；空传的列表视为"该维度不做变更"
+- `record_share_set` 是**聚合写工具**，一次调用可能同时触发多个底层 API（改分享 / 加成员 / 减成员），返回结构为 `results` 聚合对象；模型应逐项检查每个子操作的结果并汇报给用户
+- 授权成员变更涉及 `open_id` 时：
+  - `add_members`（新增授权）场景：若用户仅提供姓名/手机号/邮箱，可按通用规则（场景10）调用 `contact_*` 解析为 open_id，并**立即**用于 `record_share_set.add_members`
+  - `remove_members`（移除授权）场景：**推荐先调 `record_access action=members`** 展示当前授权成员列表让用户选择，避免误删；此时无需也不应用 `contact_*` 反查
+- 关闭 AI 开关或字幕开关会影响后续录制的智能化产物（纪要 / 转写 / 时间轴等），修改前**必须**向用户强调这一影响
+- **`record_settings_set` 跨字段联动与易错点**（字段基本语义详见 MCP schema）：
+  - `subtitle_switch` / `enable_ai_switch` 仅接受 **int `1`（关闭）/ `2`（开启）**，**严禁传 `true` / `false`**（类型校验会直接拒绝）
+  - 两个开关存在联动：开启 AI 会自动开启字幕，关闭字幕会自动关闭 AI；应以响应中的 `subtitle_switch` / `enable_ai_switch` 作为实际生效值告知用户
+- **`record_share_set` 跨字段联动与易错点**（字段基本语义详见 MCP schema）：
+  - `sharing_config.switch_state=false` 与 `permission_point_id` **互斥**，二者不得同时传
+  - `sharing_config.permission_point_id` 选 `2` / `5`（需密码模式）时，**必须**同时传 `pwd`
+  - `sharing_config.expired_time_type=4`（自定义过期）时，**必须**同时传 `expired_time`；`expired_time` 未带时区时按 `timezone` 参数解析
+
+**输出规范**
+
+- 展示变更前 → 变更后对比
+- 展示每个子操作的成功 / 失败状态（`record_share_set` 会返回多个子结果）
+- 附带追踪信息
+
+---
+
+### 场景8：提交反馈（Agent 意见箱）
 
 **触发条件（强制触发 - 优先级最高）**
 Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**必须立即暂停当前任务**并主动询问用户是否调用 `submit_feedback` 上报反馈：
@@ -414,18 +492,22 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 
 **触发条件**
 - 用户主动请求"申请录制权限"、"申请查看录制"
-- 调用录制相关工具（`get_record_addresses`/`get_transcripts_details`/`get_transcripts_paragraphs`/`search_transcripts`/`get_smart_minutes`）返回**录制权限不足**类错误（如"录制权限校验失败"、"无权限查看录制"）时，**自动**进入该流程
+- 调用录制相关工具（`record_content` / `record_access`）返回**录制权限不足**类错误（如"录制权限校验失败"、"无权限查看录制"）时，**自动**进入该流程
+
+**统一入口**：`record_permission_apply`，通过 `action` 二选一分派：
+- `action=prepare` — 获取申请预览信息（不实际下发申请）
+- `action=commit` — 正式提交申请
 
 **处理流程（必须两步完成，严禁跳过预览步骤）**
-1. 调用 `apply_record_permission_prepare` 获取申请预览信息（包含会议标题 `subject`、录制所有者 `file_owner`、申请人 `applicant`、申请类型 `approval_name` 等）
+1. 调用 `record_permission_apply` `action=prepare` 获取申请预览信息（包含会议标题 `subject`、录制所有者 `file_owner`、申请人 `applicant`、申请类型 `approval_name` 等）
 2. **向用户完整展示预览信息**，明确说明"即将向录制所有者发起录制权限申请"，**等待用户明确确认（如"同意"、"申请"、"确认提交"）**
-3. 用户确认后调用 `apply_record_permission_commit` 正式提交申请
+3. 用户确认后调用 `record_permission_apply` `action=commit` 正式提交申请
 4. 提交成功后，向用户展示审批状态 `status`、审批说明 `message`，以及**审批链接 `approval_url`** 供用户跟进审批进度
 
 **注意事项**
-- `meeting_record_id` 为必填，应从上下文中获取，**严禁伪造**；来源优先级：会议查询响应中的 `records[].meeting_record_id`（场景4/5）> `get_records_list` 返回结果
+- `meeting_record_id` 为必填（`action=prepare` 与 `action=commit` 两个 action 入参完全一致），应从上下文中获取，**严禁伪造**；来源优先级：会议查询响应中的 `records[].meeting_record_id`（场景4/5）> `search_records` 返回结果
 - prepare 返回的 `expires_in` 表示预览有效期（秒），用户长时间未确认（接近过期）时建议重新调用 prepare
-- 用户明确拒绝或未确认时，**严禁**调用 commit 工具；告知用户"已取消录制权限申请"
+- 用户明确拒绝或未确认时，**严禁**调用 `action=commit`；告知用户"已取消录制权限申请"
 - 提交申请前必须二次确认（见核心规范"敏感操作"）
 
 **输出规范**
@@ -434,32 +516,35 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 
 ---
 
-### 场景10：通讯录解析用户（仅服务于邀请/呼叫，非通用搜索）
+### 场景10：通讯录解析用户（纯 open_id 解析工具，非通用搜索）
 
 **触发条件（强约束）**
-用户已表达明确的「会议邀请 / 添加受邀人 / 会中呼叫入会」意图，**且**仅提供姓名/手机号/邮箱（未提供 open_id），需要将其解析为 open_id 以便立即用于会议动作。
+用户已表达明确的某项需要 open_id 入参的下游 MCP 工具调用意图（典型如：会议邀请 / 添加受邀人 / 会中呼叫入会 / 录制授权成员管理等，非穷尽），**且**仅提供姓名/手机号/邮箱（未提供 open_id），需要将其解析为 open_id 以便**在同一轮内立即**用于对应下游工具。
 
 > ⛔ **调用前必过自检清单（任一为「否」即禁止调用 `contact_*` 工具）**：
-> 1. 当前对话是否已锁定一个具体的会议动作（邀请 / 添加受邀人 / 呼叫入会）？
-> 2. 拿到 open_id 后，是否会**立即**喂给 `schedule_meeting` / `update_meeting` / `meeting_invitees_*` / `meeting_control_call` 的入参？
-> 3. 用户是否只是想"查人/看某人信息/搜一下是谁"？（若是 → **立即停止**，回复"查询通讯录人员信息不在本服务范围内，如需邀请或呼叫该成员入会我可以帮您操作"）
-> 4. 本轮的邀请/呼叫意图，是否来自**用户当前这句话本身**，而非"上一轮刚做过邀请"的惯性延续？（若是惯性 → 判定为纯查询，禁止调用）
+> 1. 当前对话是否已锁定某项将消费 open_id 的下游 MCP 工具调用？（典型如邀请入会、呼叫入会、录制授权新增成员等，非穷尽）
+> 2. 拿到 open_id 后，是否会**立即**喂给某条下游 MCP 工具的入参（如 `schedule_meeting` / `update_meeting` / `meeting_invitees_*` / `meeting_control_call` / `record_share_set.add_members` 等）？
+> 3. 用户是否只是想"查人/看某人信息/搜一下是谁"？（若是 → **立即停止**，回复"查询通讯录人员信息不在本服务范围内，如需邀请、呼叫或将该成员加入录制授权我可以帮您操作"）
+> 4. 本轮的下游动作意图，是否来自**用户当前这句话本身**，而非"上一轮刚做过类似操作"的惯性延续？（若是惯性 → 判定为纯查询，禁止调用）
 >
-> 📌 **反面触发词**：当用户指令出现"搜索 / 查找 / 查一下 / 看看 / 是谁 / 什么部门 / 什么职位 / 联系方式"等词，**且不伴随**邀请或呼叫动作时，一律判定为纯查询场景，禁止调用任何 `contact_*` 工具。
+> 📌 **反面触发词**：当用户指令出现"搜索 / 查找 / 查一下 / 看看 / 是谁 / 什么部门 / 什么职位 / 联系方式"等词，**且不伴随**任何下游 MCP 工具调用动作时，一律判定为纯查询场景，禁止调用任何 `contact_*` 工具。
 
 **处理流程**
 1. 按用户提供的信息选择工具：
    - 仅有**姓名**（可附职位/部门）→ `contact_search`（必填 `username`，可选 `job_title` / `department_name` 缩小范围）
    - 有**手机号**（1~50 个）→ `contact_lookup_by_phone`
    - 有**邮箱**（1~50 个）→ `contact_lookup_by_email`
-2. 拿到 `open_id` 后，再用于后续工具（`schedule_meeting` / `update_meeting` / `meeting_invitees_*` / `meeting_control_*`）
+2. 拿到 `open_id` 后，**立即**用于本轮已锁定的下游 MCP 工具（典型消费方：`schedule_meeting` / `update_meeting` / `meeting_invitees_*` / `meeting_control_*` / `record_share_set.add_members` 等，非穷尽）
 
 **注意事项**
-- **`contact_*` 工具调用场景白名单（强约束）**：`contact_*` 工具 **仅可用于以下两类场景**，用于将姓名解析为 `open_id`：
-    1. **会议邀请**：`schedule_meeting` / `update_meeting` / `meeting_invitees_add` / `meeting_invitees_replace` 的受邀人入参解析
-    2. **呼叫成员入会**：`meeting_control_call` 的 `users` 入参解析
-    
-- **严禁在其他场景下调用 `contact_*` 工具**，包括但不限于：仅为查看某人部门/职位/联系方式、好奇某人信息、为通用人员搜索目的、为踢人提供 open_id（应用 `get_meeting_participants`，详见场景12），**不得将通讯录工具作为通用人员信息查询接口使用**。
+- **`contact_*` 工具禁止用途（黑名单）**：`contact_*` 工具仅用于把姓名/手机号/邮箱**正向解析**为 `open_id` 供同轮次下游 MCP 工具消费；**严禁**用于下列场景：
+
+    | 禁止用途 | 典型用户话术 | 正确处理 |
+    |---|---|---|
+    | 通用查人 | "张三是谁 / 哪个部门 / 什么职位 / 联系方式" | 直接告知"查询通讯录人员信息不在本服务范围内" |
+    | `open_id` 反查姓名 | （内部伪需求）"把这个 open_id 翻译成姓名" | 该工具物理上不支持反查；姓名回填用 `get_meeting_invitees` / `get_meeting_participants` 响应中的 `user_name` |
+
+- **凡本轮不再调用任何其他 MCP 工具的 `contact_*` 调用均视为违规**：此规则覆盖所有未在上表显式列出的其他新型滥用场景，**不得将通讯录工具作为通用人员信息查询接口使用**。
 - **`username` 为必填（强约束）**：`contact_search` 的 `username` 参数为**必填**，缺失时工具会直接报错。**严禁模型自行猜测、编造或截取一个名字调用工具**；必须先与用户确认要查找的用户名后再执行。
 - **结果较多时建议追加过滤**：当仅按 `username` 查询返回的成员较多（如同名情况）时，**应建议用户补充 `job_title` 或 `department_name`** 进一步过滤后再次调用 `contact_search`，提升匹配精准度，减少候选项；不得在用户未确认的情况下自行选择某一条。
 - **唯一命中的返回特性**：当 `contact_search` 搜索结果**只有一条**时，工具仅返回该成员的 `open_id` 字段，**不会返回 `user_name` / `job_title` / `department` 等其他成员信息**。此时模型可直接将该 `open_id` 用于后续工具（如 `meeting_invitees_add` / `meeting_control_call`），**无需也无法**基于该响应向用户展示部门/职位等字段；如确需展示成员名称用于二次确认，应使用用户原始口径中的姓名，**严禁伪造**职位/部门信息。
@@ -478,13 +563,14 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 
 ### 场景11：管理会议受邀人
 
+
 **触发条件**
 用户要求查看、添加、移除、替换已有会议的受邀成员
 
 **处理流程**
 1. 若用户提供会议号，先调用 `get_meeting_by_code` 获取 meeting_id
 2. 调用 `get_meeting_invitees` 查询当前受邀人列表
-3. 若用户仅提供姓名/手机号/邮箱，按场景9获取 open_id
+3. 若用户仅提供姓名/手机号/邮箱，按场景10获取 open_id
 4. 根据需求选择工具：
    - **添加** → `meeting_invitees_add`（增量添加，不影响已有）
    - **移除** → `meeting_invitees_remove`（按 open_id 精确移除）
@@ -529,7 +615,7 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 
 **处理流程（呼叫）**
 1. 确认会议正在进行（用户口径或先调 `get_meeting` 校验状态）
-2. 若用户仅提供姓名/手机号/邮箱，按场景9获取 open_id
+2. 若用户仅提供姓名/手机号/邮箱，按场景10获取 open_id
 3. 向用户展示**被呼叫成员名单**（昵称），获得明确同意
 4. 调用 `meeting_control_call`（`users` 最多 20 个 open_id）
 
@@ -588,20 +674,17 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 | `get_user_meetings` | 查询未开始/进行中的会议列表 | 场景6 |
 | `get_user_ended_meetings` | 查询已结束的历史会议列表 | 场景6 |
 | `search_meetings` | 搜索会议列表，支持关键词、搜索字段、会议号、时间窗口等过滤 | 场景6 |
-| `get_records_list` | 查询录制文件列表 | 场景7 |
 | `search_records` | 搜索录制文件，支持关键词、搜索字段、时间窗口、会议、文件类型等过滤 | 场景7 |
-| `get_record_addresses` | 获取录制播放地址 | 场景7 |
-| `get_transcripts_paragraphs` | 获取转写段落 ID 列表 | 场景7 |
-| `get_transcripts_details` | 通过 pid 获取转写文本 | 场景7 |
-| `search_transcripts` | 搜索转写关键词 | 场景7 |
-| `get_smart_minutes` | 获取 AI 智能纪要 | 场景7 |
+| `record_content` | 读录制内容聚合入口，`action` 五选一：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（转写详情或搜索）/ `paragraphs`（段落 ID）/ `timeline`（时间轴） | 场景7 |
+| `record_access` | 查录制访问信息聚合入口，`action` 四选一：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员）/ `settings`（智能化开关） | 场景7 |
+| `record_share_set` | 写-录制分享（改分享配置 / 增删授权成员），三类子操作可任选组合，写操作前必须二次确认 | 场景7B |
+| `record_settings_set` | 写-录制智能化开关（字幕 `subtitle_switch` / AI `enable_ai_switch`，均为 int 枚举：1=关闭 / 2=开启），写操作前必须二次确认 | 场景7B |
 | `search_minutes` | 搜索元宝纪要，支持关键词、时间窗口过滤 | 场景7A |
-| `get_minutes` | 查询元宝纪要详情，支持获取概览/要点/待办/滚动总结 | 场景7A |
-| `apply_record_permission_prepare` | 录制权限申请-预览，展示申请的会议标题/所有者/申请人等信息供用户确认 | 场景9 |
-| `apply_record_permission_commit` | 录制权限申请-提交，用户确认后正式发起申请，返回审批链接 | 场景9 |
-| `contact_search` | 按姓名/职位/部门搜索企业通讯录成员（仅限会议邀请、呼叫入会场景），返回 open_id | 场景10 |
-| `contact_lookup_by_phone` | 按手机号批量查找企业用户（仅限会议邀请、呼叫入会场景）（最多 50），返回 open_id | 场景10 |
-| `contact_lookup_by_email` | 按邮箱批量查找企业用户（仅限会议邀请、呼叫入会场景）（最多 50），返回 open_id | 场景10 |
+| `get_minutes` | 查询元宝纪要详情，支持获取概览/要点/待办/实时总结 | 场景7A |
+| `record_permission_apply` | 录制权限申请统一入口，`action` 二选一：`prepare`（预览）/ `commit`（提交），必须先 prepare 展示后再 commit | 场景9 |
+| `contact_search` | 按姓名/职位/部门解析成员 open_id（仅供同轮次下游 MCP 工具消费，严禁通用查人） | 场景10 |
+| `contact_lookup_by_phone` | 按手机号（最多 50）批量解析成员 open_id（仅供同轮次下游 MCP 工具消费，严禁通用查人） | 场景10 |
+| `contact_lookup_by_email` | 按邮箱（最多 50）批量解析成员 open_id（仅供同轮次下游 MCP 工具消费，严禁通用查人） | 场景10 |
 | `meeting_invitees_add` | 向已创建会议增量添加受邀人（最多 100，仅主持人可操作） | 场景11 |
 | `meeting_invitees_remove` | 从会议中移除指定受邀人（仅主持人可操作） | 场景11 |
 | `meeting_invitees_replace` | 用新列表整体替换会议受邀人（传空数组=清空，仅主持人可操作） | 场景11 |
