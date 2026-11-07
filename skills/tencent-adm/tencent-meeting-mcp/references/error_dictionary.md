@@ -142,101 +142,107 @@
 
 ## 录制相关工具
 
-### `get_records_list` — 查询录制列表
+### `search_records` — 搜索录制文件
 
 | 错误信息 | 问题类型 | 处理指引 |
 |---------|---------|---------|
 | 参数非法，请对照接口文档检查您的参数 | 传参错误 | 检查 `meeting_code` 参数是否正确（最少 9 位纯数字），或检查时间参数格式是否为 ISO 8601 |
 | 查询时间范围不得大于31天且开始时间必须早于结束时间 | 传参错误 | 查询时间范围不得超过 **31 天**，且开始时间必须早于结束时间，请调整后重试 |
-| MCP 查询起始时间不得早于 1 年前 | 传参错误 | 查询起始时间不得早于 **1 年前**，请调整 `start_time` 后重试 |
-| 查询起始时间必须早于当前时间 | 传参错误 | `start_time` 不能晚于当前时间，请检查时间参数 |
+| MCP 查询起始时间不得早于 1 年前 | 传参错误 | 查询起始时间不得早于 **1 年前**，请调整 `from` 后重试 |
+| 查询起始时间必须早于当前时间 | 传参错误 | `from` 不能晚于当前时间，请检查时间参数 |
 | 非法的meeting_id参数 | 传参错误 | meeting_id 必须为纯数字（uint64），请检查参数格式 |
 
 ---
 
-### `get_record_addresses` — 获取录制下载地址
+### `record_content` — 读录制内容（聚合）
 
-| 错误信息 | 问题类型 | 处理指引                                                                        |
-|---------|---------|-----------------------------------------------------------------------------|
-| meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 为必填参数，需通过 `get_records_list` 获取后传入，且必须为非 0 的纯数字（uint64） |
-| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取    |
-| 参数非法，请对照接口文档检查您的参数 | 传参错误 | 检查所有参数格式，`meeting_record_id` 必须为非 0 的纯数字（uint64）                            |
-| 录制权限校验失败 | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户没有权限查看该会议的录制，仅限有权限的成员访问                               |
+> 涵盖 `action=minutes` / `todos` / `transcript` / `paragraphs` / `timeline` 五种子场景的错误。
 
----
-
-### `get_transcripts_details` — 查询转写详情
+#### `action=minutes/todos/transcript/paragraphs/timeline` — 通用传参与权限错误
 
 | 错误信息 | 问题类型 | 处理指引 |
 |---------|---------|---------|
-| 找不到会议录制文件 | 数据不存在 | 检查 `record_file_id` 是否正确，需通过 `get_records_list` 重新获取有效的 `record_file_id` |
-| Invalid RecordFileId | 传参错误 | `record_file_id` 无效，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
+| action为必填参数 / action取值非法 | 传参错误 | `action` 必填，取值必须为 `minutes` / `todos` / `transcript` / `paragraphs` / `timeline` 之一 |
+| record_file_id参数查询不到数据 | 传参错误 | 检查传入的是否为 `record_file_id`（非 `meeting_record_id`），需通过 `search_records` 获取正确的 `record_file_id` |
+| record_file_id参数错误 / Invalid RecordFileId / record_file_id is invalid | 传参错误 | `record_file_id` 无效，必须为非 0 的纯数字（uint64），请通过 `search_records` 重新获取 |
+| 找不到会议录制文件 | 数据不存在 | 检查 `record_file_id` 是否正确，需通过 `search_records` 重新获取有效的 `record_file_id` |
+| 录制文件已经被删除 | 数据不存在 | 告知用户录制文件已被删除，无法获取内容 |
+| oauth corp cannot query minutes | 权限问题 | 可尝试发起申请录制权限（`record_permission_apply`），若无法申请则告知用户当前账号**暂无权限**使用该工具 |
+| 录制权限校验失败 | 权限问题 | 可尝试发起申请录制权限（`record_permission_apply`），若无法申请则告知用户没有权限查看该会议的录制 |
+
+#### `action=minutes` — 智能纪要专属错误
+
+| 错误信息 | 问题类型 | 处理指引 |
+|---------|---------|---------|
+| 转写暂未生成，请稍后再试 | 其他问题 | 告知用户智能纪要正在生成中，**不要重复调用**，等待 **5 分钟**后再尝试 |
+| 智能化数据生成中 | 其他问题 | 告知用户智能化数据正在生成中，请稍后再试 |
+| 智能化开关已关闭 | 操作限制 | 告知用户智能化功能开关未打开，需前往腾讯会议设置中开启后再使用；也可通过 `record_settings_set` 打开 AI 开关 |
+| 暂无智能化数据，请重新生成 | 数据不存在 | 告知用户暂无智能化数据，请前往腾讯会议客户端重新生成后再查询 |
+
+#### `action=transcript` / `paragraphs` — 转写专属错误
+
+| 错误信息 | 问题类型 | 处理指引 |
+|---------|---------|---------|
 | 纪要无内容 | 数据不存在 | 该会议暂无转写内容，可能未开启转写功能 |
 | 纪要不存在 | 数据不存在 | 该会议的纪要不存在，请确认会议是否已生成转写 |
 | 该录制文件未开启转写 | 操作限制 | 告知用户该录制文件未开启转写功能，无法获取转写内容 |
-| 录制文件已经被删除 | 数据不存在 | 告知用户录制文件已被删除，无法获取转写内容 |
-| oauth corp cannot query minutes | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户当前账号**暂无权限**使用转写查询工具 |
 | 获取会议纪要错误 | 其他问题 | 服务端异常，可稍后重试；若持续失败请联系腾讯会议支持 |
 
 ---
 
-### `get_transcripts_paragraphs` — 查询转写段落列表
+### `record_access` — 查录制访问信息（聚合）
+
+> 涵盖 `action=address` / `sharing` / `members` / `settings` 四种子场景的错误。
 
 | 错误信息 | 问题类型 | 处理指引 |
 |---------|---------|---------|
-| 找不到会议录制文件 | 数据不存在 | 检查 `record_file_id` 是否正确，需通过 `get_records_list` 重新获取 |
-| Invalid RecordFileId | 传参错误 | `record_file_id` 无效，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
-| 纪要不存在 | 数据不存在 | 该会议的纪要不存在，请确认会议是否已生成转写 |
-| oauth corp cannot query minutes | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户当前账号**暂无权限**使用该工具 |
+| action为必填参数 / action取值非法 | 传参错误 | `action` 必填，取值必须为 `address` / `sharing` / `members` / `settings` 之一 |
+| meeting_record_id为必填参数 | 传参错误 | `action=address/sharing/members` 时 `meeting_record_id` 必填；需通过 `search_records` 获取后传入，且必须为非 0 的纯数字（uint64） |
+| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64），请通过 `search_records` 重新获取 |
+| record_file_id为必填参数 | 传参错误 | `action=settings` 时 `record_file_id` 必填；请通过 `search_records` 获取有效的 `record_file_id` |
+| 参数非法，请对照接口文档检查您的参数 | 传参错误 | 检查所有参数格式，`meeting_record_id` / `record_file_id` 必须为非 0 的纯数字（uint64） |
+| 录制权限校验失败 | 权限问题 | 可尝试发起申请录制权限（`record_permission_apply`），若无法申请则告知用户没有权限查看该会议的录制 |
 
 ---
 
-### `search_transcripts` — 搜索转写内容
+### `record_share_set` — 修改录制分享/授权成员（聚合写）
 
 | 错误信息 | 问题类型 | 处理指引 |
 |---------|---------|---------|
-| 找不到会议录制文件 | 数据不存在 | 检查 `record_file_id` 是否正确，需通过 `get_records_list` 重新获取 |
-| record_file_id is invalid | 传参错误 | `record_file_id` 无效，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
-| oauth corp cannot query minutes | 权限问题 | 可尝试发起申请录制权限，若无法申请则告知用户当前账号**暂无权限**使用该工具 |
+| meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 必填，需通过 `search_records` 获取，且必须为非 0 的纯数字（uint64） |
+| sharing_config / add_members / remove_members 至少一个非空 | 传参错误 | 三个子字段至少传一个才有实际写入效果，请补全变更内容 |
+| 无权限修改录制分享 | 权限问题 | 告知用户**仅录制所有者**可修改分享配置与授权成员 |
+| open_id 无效 / 用户不存在 | 传参错误 | `add_members` / `remove_members` 中部分 `open_id` 无效，可能为跨企业用户或已离职，回显无效清单由用户确认 |
+| 部分子操作失败 | 其他问题 | 检查响应 `results` 中每个子操作的结果，逐项汇报给用户；成功的子操作已生效，失败的可针对性重试 |
 
 ---
 
-### `get_smart_minutes` — 获取智能纪要
+### `record_settings_set` — 修改录制智能化开关
 
 | 错误信息 | 问题类型 | 处理指引 |
 |---------|---------|---------|
-| record_file_id参数查询不到数据 | 传参错误 | 检查传入的是否为 `record_file_id`（非 `meeting_record_id`），需通过 `get_records_list` 获取正确的 `record_file_id` |
-| record_file_id参数错误 | 传参错误 | `record_file_id` 格式错误，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
-| 转写暂未生成，请稍后再试 | 其他问题 | 告知用户智能纪要正在生成中，**不要重复调用**，等待 **5 分钟**后再尝试 |
-| 智能化数据生成中 | 其他问题 | 告知用户智能化数据正在生成中，请稍后再试 |
-| 智能化开关已关闭 | 操作限制 | 告知用户智能化功能开关未打开，需前往腾讯会议设置中开启后再使用 |
-| 暂无智能化数据，请重新生成 | 数据不存在 | 告知用户暂无智能化数据，请前往腾讯会议客户端重新生成后再查询 |
+| record_file_id为必填参数 | 传参错误 | `record_file_id` 必填，需通过 `search_records` 获取，且必须为非 0 的纯数字（uint64） |
+| subtitle_switch / enable_ai_switch 至少一个 | 传参错误 | 至少传一个开关字段才有实际写入效果 |
+| 无权限修改智能化开关 | 权限问题 | 告知用户**仅录制所有者**可修改智能化开关配置 |
+| 智能化服务未开通 | 操作限制 | 告知用户所在企业未开通智能化服务，需联系企业管理员开通后再使用 |
 
 ---
 
-### `apply_record_permission_prepare` — 申请录制权限-预览
+### `record_permission_apply` — 申请录制权限（聚合）
+
+> 涵盖 `action=prepare` / `commit` 两种子场景的错误。
 
 | 错误信息 | 问题类型 | 处理指引 |
 |---------|---------|---------|
-| meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 为必填参数，需通过 `get_records_list` 获取后传入，且必须为非 0 的纯数字（uint64） |
-| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64），请通过 `get_records_list` 重新获取 |
+| action为必填参数 / action取值非法 | 传参错误 | `action` 必填，取值必须为 `prepare` 或 `commit` |
+| meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 为必填参数，需通过 `search_records` 获取后传入，且必须为非 0 的纯数字（uint64） |
+| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64），请通过 `search_records` 重新获取 |
 | 录制不存在 | 数据不存在 | 告知用户该录制不存在或已被删除，无法发起权限申请 |
 | 已有进行中的申请 | 操作限制 | 告知用户该录制存在尚未完结的权限申请，请等待审批结果或前往审批链接查看进度，**不要重复发起申请** |
 | 当前用户已具备录制权限 | 操作限制 | 告知用户当前账号已具备录制权限，无需重复申请，可直接访问对应录制资源 |
 | 录制所有者不允许申请权限 | 权限问题 | 告知用户该录制所有者已关闭权限申请通道，请直接联系录制所有者获取访问权限 |
-
----
-
-### `apply_record_permission_commit` — 申请录制权限-提交
-
-| 错误信息 | 问题类型 | 处理指引 |
-|---------|---------|---------|
-| meeting_record_id为必填参数 | 传参错误 | `meeting_record_id` 为必填参数，且必须与 prepare 阶段一致 |
-| 非法的meeting_record_id参数 | 传参错误 | `meeting_record_id` 格式非法，必须为非 0 的纯数字（uint64） |
-| 申请预览已过期 | 操作限制 | 告知用户预览信息已过期，需要**重新调用 `apply_record_permission_prepare`** 获取最新预览并请用户重新确认 |
-| 已有进行中的申请 | 操作限制 | 告知用户该录制存在尚未完结的权限申请，**不要重复提交**，请前往审批链接查看进度 |
-| 当前用户已具备录制权限 | 操作限制 | 告知用户当前账号已具备录制权限，无需重复申请 |
-| 提交申请失败，请稍后重试 | 其他问题 | 服务端异常，告知用户稍后重试；若持续失败请联系腾讯会议支持 |
+| 申请预览已过期 | 操作限制 | （`action=commit` 场景）告知用户预览信息已过期，需要**重新调用 `record_permission_apply` `action=prepare`** 获取最新预览并请用户重新确认 |
+| 提交申请失败，请稍后重试 | 其他问题 | （`action=commit` 场景）服务端异常，告知用户稍后重试；若持续失败请联系腾讯会议支持 |
 
 ---
 
