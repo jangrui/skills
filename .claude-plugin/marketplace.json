@@ -73,7 +73,7 @@
     {
       "name": "jangrui-daily",
       "displayName": "jangrui-daily",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "description": "日常工作辅助：改善中英文表达、整理项目知识并完成会话收尾。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/daily.png",
       "source": "./",
@@ -115,7 +115,7 @@
     {
       "name": "jangrui-diagram",
       "displayName": "jangrui-diagram",
-      "version": "0.4.3",
+      "version": "0.4.4",
       "description": "图表与架构表达：制作流程图、架构图、UML 等结构化图表。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/diagram.png",
       "source": "./",
