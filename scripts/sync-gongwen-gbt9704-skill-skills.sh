@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ============================================================================
-# sync-gongwen-gbt9704-skill.sh — 同步 mizzlelover/gongwen-gbt9704-skill 上游
+# sync-gongwen-gbt9704-skill-skills.sh — 同步 mizzlelover/gongwen-gbt9704-skill 上游
 #
 # 上游特点：
 #   - 单仓库单 skill，SKILL.md 在仓库根目录（禁用 sparse-checkout，用整仓浅克隆 + rsync）
@@ -19,8 +19,8 @@
 #   - 同步后自动跑「自包含性自检」，防止上游引入 npm 依赖导致 vendor 断裂
 #
 # 用法：
-#   ./scripts/sync-gongwen-gbt9704-skill.sh            # 检查并同步
-#   ./scripts/sync-gongwen-gbt9704-skill.sh --check    # 仅检查不修改（dry-run）
+#   ./scripts/sync-gongwen-gbt9704-skill-skills.sh            # 检查并同步
+#   ./scripts/sync-gongwen-gbt9704-skill-skills.sh --check    # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：
 #   git diff -- skills/gongwen-gbt9704-skill/ .claude-plugin/marketplace.json
