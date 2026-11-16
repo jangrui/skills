@@ -146,6 +146,8 @@ sync_one() {
   # 首次同步无 old_commit 时不带 --delete（目标可能为空，删无可删）；
   # 后续同步带 --delete 以清理上游已删除的文件。
   rsync -a ${old_commit:+--delete} "${RSYNC_EXCLUDES[@]}" "$src/" "$vendor_dir/"
+  # claude.ai 拒绝 description 含 XML 标签，rsync 后统一去尖括号
+  python3 "$REPO_ROOT/scripts/strip-skill-desc-xml-tags.py" "$vendor_dir"
   echo "$new_commit" > "$commit_file"
   echo "  ✅ 已更新 $skill"
   UPDATED_SKILLS+=("$skill")
@@ -202,6 +204,7 @@ else
       else
         mkdir -p "$SKILLS_DIR/$sub"
         rsync -a "${RSYNC_EXCLUDES[@]}" "$UPSTREAM_TMP/$UPSTREAM_SKILLS_SUBDIR/$sub/" "$SKILLS_DIR/$sub/"
+        python3 "$REPO_ROOT/scripts/strip-skill-desc-xml-tags.py" "$SKILLS_DIR/$sub"
         echo "$UPSTREAM_COMMIT" > "$SKILLS_DIR/$sub/.upstream-commit"
         echo "  ✅ 已 vendor 新 skill: $sub"
         echo "  ⚠️  请手动编辑 skills/shuohao/.claude-plugin/plugin.json 和 marketplace.json 的 skills 数组加入 \"$sub\""

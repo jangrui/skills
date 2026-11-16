@@ -195,6 +195,8 @@ sync_one() {
     --exclude='.upstream-commit' \
     --exclude='*.test.ts' \
     "$src/" "$vendor_dir/"
+  # claude.ai 拒绝 description 含 XML 标签，rsync 后统一去尖括号
+  python3 "$REPO_ROOT/scripts/strip-skill-desc-xml-tags.py" "$vendor_dir"
   echo "$new_commit" > "$commit_file"
   echo "  ✅ 已更新 $skill"
   UPDATED_SKILLS+=("$skill")
@@ -264,6 +266,7 @@ else
           --exclude='.upstream-commit' \
           --exclude='*.test.ts' \
           "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$sub/" "$SKILLS_DIR/$sub/"
+        python3 "$REPO_ROOT/scripts/strip-skill-desc-xml-tags.py" "$SKILLS_DIR/$sub"
         echo "$UPSTREAM_COMMIT" > "$SKILLS_DIR/$sub/.upstream-commit"
         echo "  ✅ 已 vendor 新 skill: $sub"
         check_self_contained "$SKILLS_DIR/$sub" "$sub"

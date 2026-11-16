@@ -168,6 +168,8 @@ sync_one() {
 
   mkdir -p "$vendor_dir"
   rsync -a --delete --exclude='.upstream-commit' "$src/" "$vendor_dir/"
+  # claude.ai 拒绝 description 含 XML 标签，rsync 后统一去尖括号
+  python3 "$REPO_ROOT/scripts/strip-skill-desc-xml-tags.py" "$vendor_dir"
   echo "$new_commit" > "$commit_file"
   echo "  ✅ 已更新 $cat/$skill"
   UPDATED_SKILLS+=("$cat/$skill")
@@ -255,6 +257,7 @@ else
           mkdir -p "$PLUGIN_DIR/$cat/$sub"
           rsync -a --delete --exclude='.upstream-commit' \
             "$UPSTREAM_TMP/$UPSTREAM_SUBDIR/$cat/$sub/" "$PLUGIN_DIR/$cat/$sub/"
+          python3 "$REPO_ROOT/scripts/strip-skill-desc-xml-tags.py" "$PLUGIN_DIR/$cat/$sub"
           echo "$UPSTREAM_COMMIT" > "$PLUGIN_DIR/$cat/$sub/.upstream-commit"
           echo "  ✅ 已 vendor 新 skill: $cat/$sub"
           echo "  ⚠️  请手动把 \"$cat/$sub\" 加入根 .claude-plugin/marketplace.json 中对应 category plugin（名为 ${cat}）的 skills 数组"
