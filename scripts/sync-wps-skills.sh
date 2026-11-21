@@ -174,7 +174,7 @@ RSYNC_EXCLUDES=(
 # ---------- 比对与同步 ----------
 SYNC_NEEDED=1
 if [ "$OLD_PIN" = "$PIN" ]; then
-  drift=$(rsync -a -n --checksum --delete --out-format='%n' \
+  drift=$(rsync -a -n --checksum --delete --omit-dir-times --out-format='%n' \
     "${RSYNC_EXCLUDES[@]}" "$SRC_DIR/" "$VENDOR_DIR/" || true)
   if [ -z "$drift" ]; then
     echo "✓ $SKILL_NAME 已是最新 ($VERSION)"
