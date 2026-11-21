@@ -46,7 +46,7 @@
 |---|---|---|---|
 | `daily` 常用必备 | 去 AI 味润色与会话收尾 | `skills/humanizer/`、`skills/khazix/` 等 | blader/humanizer 等 |
 | `coding` 代码 | Go 工程、工程实践与数据库 | `skills/golang/` `skills/mattpocock/` `skills/dbx/` | samber、mattpocock、t8y2 |
-| `design` 设计 | taste 前端设计 | `skills/taste/` | Leonxlnx/taste-skill |
+| `design` 设计 | taste 前端设计与图片生成设计稿 | `skills/taste/` `skills/imagegen/` | Leonxlnx/taste-skill、Leonxlnx/imagegen-skills |
 | `opc` | OPC 生图与平台调研 | `skills/opc/` | ReScienceLab/opc-skills |
 | `observability` 运维可观测 | Grafana Core 与 LGTM | `skills/grafana/` | grafana/skills |
 | `office` 日常办公 | 文档处理、anydoc、网页 PPT 与公文排版 | `skills/anthropic/` `skills/anydoc/` `skills/ppt/` `skills/gongwen-gbt9704-skill/` | anthropics、firecrawl、op7418、mizzlelover |
@@ -119,6 +119,7 @@
 - [mizzlelover/gongwen-gbt9704-skill](https://github.com/mizzlelover/gongwen-gbt9704-skill) — 按 GB/T 9704-2012 生成公文 DOCX：版心、字体、标题层级、文号、页码、附件与版记（MIT）
 - [anthropics/skills](https://github.com/anthropics/skills) — Anthropic 官方 skill：docx/pdf/pptx/xlsx 文档处理、claude-api 参考、skill-creator、mcp-builder 等（部分采用 Apache-2.0；文档处理 skill 为 Anthropic 专属条款，随 skill 保留 LICENSE.txt）
 - [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) — anti-slop 前端设计技能
+- [Leonxlnx/imagegen-skills](https://github.com/Leonxlnx/imagegen-skills) — 图片生成驱动的网页与移动端设计稿技能
 - [Vincentwei1021/video-shotcraft](https://github.com/Vincentwei1021/video-shotcraft) — 电影感产品视频制作：镜头配方卡、Ink Press 宣传片模板、Remotion 组件与音频资产（Apache-2.0）
 
 ## 许可证
