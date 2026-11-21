@@ -1,11 +1,16 @@
 name: Validate
 
 # PR 与 main 推送时的仓库一致性校验。
-# 注：sync-skills 用 GITHUB_TOKEN 创建的 PR 不会触发本 workflow（GitHub 限制），
-# 因此 sync-skills.yml 自身也会跑同样的校验。
+# 只改 skills/ 与市场清单的 PR 不在 PR 阶段触发：自动同步 PR 由 github-actions[bot]
+# 创建，其触发的运行需人工批准，而同步 PR 数秒内即自动合并，审批过期后会被记为失败。
+# 这类变更已由 sync-skills.yml 在开 PR 前跑过同样的校验；人工改动合并后仍会在
+# main 推送时校验。
 "on":
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "skills/**"
+      - ".claude-plugin/marketplace.json"
   push:
     branches: [main]
   workflow_dispatch:
