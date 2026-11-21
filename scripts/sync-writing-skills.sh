@@ -43,7 +43,8 @@ PLUGIN_BASE="$REPO_ROOT/skills"
 # skill 元数据：key | 本地目录名 | 上游 owner | 上游 repo | 上游 skill 路径模式
 #   path_mode:
 #     root   = 上游根目录即 skill（如 humanizer、Humanizer-zh）
-#     subdir = 上游 skills/<name>/ 下（如 baoyu 那种，预留）
+#              （shuorenhua 自 v2.7.0 起移到 skills/shuorenhua/，改用 subdir）
+#     subdir = 上游 skills/<name>/ 下（如 no-ai-slop、shuorenhua）
 # 注：humanizer (blader/humanizer) 上游本身是标准 plugin，
 #     只取 SKILL.md 精选（排除上游 plugin 声明）
 SKILL_NAMES=(humanizer humanizer-zh stop-slop shuorenhua no-ai-slop)
@@ -60,7 +61,7 @@ meta_for() {
       echo "stop-slop|hardikpandya|stop-slop|root"
       ;;
     shuorenhua)
-      echo "shuorenhua|MrGeDiao|shuorenhua|root"
+      echo "shuorenhua|MrGeDiao|shuorenhua|subdir"
       ;;
     no-ai-slop)
       echo "no-ai-slop|petergyang|no-ai-slop|subdir"
