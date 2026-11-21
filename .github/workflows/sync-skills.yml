@@ -7,6 +7,7 @@ name: Sync skills
 #   - pr_hint:            PR 正文中给 review 者的路径提示
 #
 # 机制：跑 scripts/sync-<plugin>-skills.sh → 已收录内容变化时递增组版本 → 自动开 PR → 自动审核 → 自动合并
+# 失败检测：同步脚本非零退出或输出 ❌ 即视为失败，重试一次后仍失败则在 job 末尾报错（不阻塞其他同步源）
 # 自动审核门禁（本 workflow）：diff 仅限 skills/ 和 marketplace 版本、无 SKILL.md 被删、JSON 合法
 # AI 审核：由 CodeRabbit GitHub App 独立评审（非阻塞，仅建议）
 # 修 bug 只改这一个文件即可，不再维护 12 份副本
@@ -115,18 +116,48 @@ jobs:
           : > "$ALL_CHANGES_FILE"
           : > "$DEFERRED_GROUPS_FILE"
           COMPONENTS='${{ toJson(matrix.components) }}'
+          FAILED=()
 
+          # 各同步脚本对单个 skill 的失败（clone 失败、上游结构变化等）多为打印 ❌ 后
+          # 继续，退出码仍为 0。这里以「非零退出或输出含 ❌」判定失败：先重试一次
+          # 排除网络抖动，仍失败则记为错误。其余同步源照常提 PR，最后由
+          # 「Report sync failures」让 job 变红，避免 skill 静默停更。
           while IFS= read -r PLUGIN; do
             PLUGIN_CHANGES_FILE="/tmp/updated-${PLUGIN}-skills.txt"
-            : > "$PLUGIN_CHANGES_FILE"
-            CI_CHANGES_FILE="$PLUGIN_CHANGES_FILE" \
-              MARKETPLACE_VERSION_DEFER=1 \
-              MARKETPLACE_VERSION_GROUPS_FILE="$DEFERRED_GROUPS_FILE" \
-              bash "./scripts/sync-${PLUGIN}-skills.sh"
+            LOG_FILE="/tmp/sync-${PLUGIN}.log"
+            ok=0
+            for attempt in 1 2; do
+              : > "$PLUGIN_CHANGES_FILE"
+              set +e
+              CI_CHANGES_FILE="$PLUGIN_CHANGES_FILE" \
+                MARKETPLACE_VERSION_DEFER=1 \
+                MARKETPLACE_VERSION_GROUPS_FILE="$DEFERRED_GROUPS_FILE" \
+                bash "./scripts/sync-${PLUGIN}-skills.sh" 2>&1 | tee "$LOG_FILE"
+              rc=${PIPESTATUS[0]}
+              set -e
+              if [ "$rc" = "0" ] && ! grep -q '❌' "$LOG_FILE"; then
+                ok=1
+                break
+              fi
+              if [ "$attempt" = "1" ]; then
+                echo "⚠️ ${PLUGIN} 同步失败（rc=${rc}），30 秒后重试"
+                sleep 30
+              fi
+            done
+            if [ "$ok" != "1" ]; then
+              FAILED+=("$PLUGIN")
+              DETAIL=$(grep '❌' "$LOG_FILE" | head -5 | sed 's/^ *//' | tr '\n' ' ' || true)
+              echo "::error title=sync-${PLUGIN} 失败::rc=${rc} ${DETAIL}"
+            fi
+            # 上游删除/缺失 skill 不阻塞同步，但要在运行摘要里可见
+            grep -E '上游已移除|上游无 ' "$LOG_FILE" | sed 's/^ *//' | while IFS= read -r line; do
+              echo "::warning title=sync-${PLUGIN}::${line}"
+            done || true
             if [ -s "$PLUGIN_CHANGES_FILE" ]; then
               sed "s#^#${PLUGIN}/#" "$PLUGIN_CHANGES_FILE" >> "$ALL_CHANGES_FILE"
             fi
           done < <(printf '%s' "$COMPONENTS" | jq -r '.[]')
+          echo "failed=${FAILED[*]}" >> "$GITHUB_OUTPUT"
 
           if [ -s "$DEFERRED_GROUPS_FILE" ]; then
             python3 ./scripts/bump-marketplace-versions.py bump-groups \
@@ -150,6 +181,7 @@ jobs:
           bash -n scripts/lib/marketplace-version.sh scripts/sync-*-skills.sh
           python3 -m unittest -v tests/test_marketplace_versions.py
           jq empty .claude-plugin/marketplace.json
+          python3 scripts/validate-repo.py
 
       - name: Skip if no changes
         if: steps.sync.outputs.has_changes != 'true'
@@ -340,3 +372,13 @@ jobs:
             gh pr comment "${PR}" --body "⚠️ 自动合并失败（已重试 5 次）。请检查 main 分支保护（是否要求 required reviews）或 CodeRabbit 等 required check 未通过。"
             exit 1
           fi
+
+      - name: Report sync failures
+        # 放在最后：成功的同步源已正常提 PR / 合并，这里只负责把失败暴露出来
+        if: always() && steps.sync.outputs.failed != ''
+        env:
+          FAILED: ${{ steps.sync.outputs.failed }}
+        run: |
+          echo "::error::以下同步源失败（已重试一次），相关 skill 本次未更新：${FAILED}"
+          echo "详见上方 Run group sync scripts 步骤中的 ❌ 输出与 Annotations。"
+          exit 1

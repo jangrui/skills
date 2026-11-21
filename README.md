@@ -64,7 +64,7 @@
 | opc | 各 skill 对应 API key（reddit 免 key） | 生图需 `GEMINI_API_KEY`（logo 另需 REMOVE_BG/RECRAFT），twitter/producthunt/seo-geo/requesthunt 见各 SKILL.md |
 | collab·飞书 | `lark-cli` | `npx @larksuite/cli@latest install` 或 `brew install jangrui/tap/lark-cli`；首次使用执行 `lark-cli config init --new`，再 `lark-cli auth login --recommend` |
 | collab·金山文档 | `kdocs-cli`（仅 WPS 个人账号） | 在 `skills/wps/kdocs/` 下运行 `bash scripts/setup.sh`（官方 CDN 预编译二进制），再执行 `kdocs-cli auth login` 完成授权 |
-| collab·WPS 笔记 | `wpsnote-cli` | 按其官方说明安装 |
+| collab·WPS 笔记 | 云端 MCP `wpsnote` 或云端 CLI `wpsnote-cli` | MCP 按 `skills/wpsnote/wpsnote/SKILL.md` 配置；CLI 用 `npm install -g wpsnote-cli` 安装后 `wpsnote-cli auth login` |
 | collab·腾讯会议 | python3 与 `TENCENT_MEETING_TOKEN` | 从 https://meeting.tencent.com/ai-skill 获取 Token 并 `export TENCENT_MEETING_TOKEN=...`；skill 自带纯标准库 MCP 桥接脚本，按其 `SKILL.md` 经官方 MCP 端点调用 |
 | office·anydoc | Node 20+（npx 自动下载 `@firecrawl/anydoc`） | 免安装，首次 `npx -y @firecrawl/anydoc <file>` 即用 |
 | office·公文排版 | Node 20+、`zip`/`unzip`；字体检查需 `fc-list`，PDF 验证可选 LibreOffice | 免安装，脚本随 skill 自带，只用 node 内置模块 |
@@ -86,6 +86,10 @@
 ### 为什么安装后仍不能使用某个 skill？
 
 先查看上方依赖表和该 skill 的 `SKILL.md`。有些 skill 需要 API Key、CLI、桌面端连接或特定运行时。
+
+### 上游更新如何同步？
+
+`.github/workflows/sync-skills.yml` 每天运行各 `scripts/sync-*-skills.sh`，有变化时自动开 PR，审核通过即合并。同步脚本非零退出或输出 ❌ 时，会先重试一次，仍失败则让该次运行失败，避免 skill 静默停更。本地可运行 `python3 scripts/validate-repo.py` 校验清单、skill 元数据与 workflow 配置的一致性。
 
 ### 为什么 ZCode 会占用较多磁盘空间？
 
