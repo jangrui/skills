@@ -82,4 +82,5 @@ architecture-beta
     disk1:T -- B:server
     disk2:T -- B:db
 ```
-logos reference: https://icon-sets.iconify.design/logos
+
+logos reference: <https://icon-sets.iconify.design/logos>
