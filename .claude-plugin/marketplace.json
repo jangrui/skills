@@ -41,7 +41,7 @@
     {
       "name": "jangrui-collab",
       "displayName": "jangrui-collab",
-      "version": "0.3.4",
+      "version": "0.3.5",
       "description": "协作平台集成：在已接入的平台中处理消息、文档、表格、日程、任务与内容流转；需相应 CLI 与授权。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/collab.png",
       "source": "./",
@@ -60,11 +60,10 @@
         "./skills/lark/lark-calendar",
         "./skills/lark/lark-task",
         "./skills/lark/lark-mail",
-        "./skills/wpsnote/wps-note",
+        "./skills/wpsnote/wpsnote",
         "./skills/wpsnote/content-digest",
         "./skills/wpsnote/doc-importer",
         "./skills/wpsnote/web-importer",
-        "./skills/wpsnote/wps-note-intelligent-search",
         "./skills/wpsnote/wechat-publisher",
         "./skills/wps/kdocs",
         "./skills/tencent-adm/tencent-meeting-mcp"
