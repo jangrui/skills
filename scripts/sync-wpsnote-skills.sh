@@ -3,12 +3,12 @@
 # sync-wpsnote-skills.sh — 同步 wpsnote/wpsnote-skills 上游 skill 到 vendor 目录 skills/wpsnote/
 #
 # 上游特点（单仓库多 skill / 扁平）：
-#   - wpsnote/wpsnote-skills 的 skills/ 下有 36 个 skill 子目录（无统一前缀）
+#   - wpsnote/wpsnote-skills 的 skills/ 下每个 skill 一个子目录（无统一前缀；v0.2.0 起收敛为 13 个）
 #   - 一次 sparse-checkout skills/ 即可拿到全部
 #   - 所有 skill 共享同一上游 commit
-#   - 运行时主要依赖外部 CLI：wpsnote-cli（由 WPS 笔记「AI 实验室」提供）
+#   - 运行时主要依赖云端 MCP（wpsnote）或云端 CLI（wpsnote-cli）
 #   - 部分 skill 含 Python 脚本（stdlib + 可选 pip 包：httpx/bs4/requests 等）
-#   - image-gen / xiaohongshu 的 image_gen.py 已内联到各自 scripts/，
+#   - xiaohongshu 的 image_gen.py 已内联到其 scripts/，
 #     无需 vendor 上游根目录 comm_script/
 #
 # 机制：
@@ -19,7 +19,7 @@
 #
 # 用法：
 #   ./scripts/sync-wpsnote-skills.sh                      # 检查并同步全部
-#   ./scripts/sync-wpsnote-skills.sh wps-note             # 只同步 wps-note
+#   ./scripts/sync-wpsnote-skills.sh wpsnote              # 只同步 wpsnote
 #   ./scripts/sync-wpsnote-skills.sh --check              # 仅检查不修改（dry-run）
 #
 # 同步后请人工 review：

@@ -9,7 +9,7 @@
 #   - 根目录无 package.json，无 workspaces，无运行时脚本依赖
 #     （skill.sh / scripts/ / research/ 均为仓库维护资产，不 vendor）
 #   - 所有 skill 共享同一上游 commit
-#   - 纯 SKILL.md（+ stitch-skill 的 DESIGN.md），自包含
+#   - 纯 SKILL.md，自包含
 #
 # 机制：
 #   - git sparse-checkout 只拉上游 skills/ 子目录
