@@ -1,0 +1,30 @@
+name: Validate
+
+# PR 与 main 推送时的仓库一致性校验。
+# 注：sync-skills 用 GITHUB_TOKEN 创建的 PR 不会触发本 workflow（GitHub 限制），
+# 因此 sync-skills.yml 自身也会跑同样的校验。
+"on":
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Shell 语法
+        run: bash -n scripts/lib/*.sh scripts/sync-*-skills.sh
+
+      - name: 市场版本单元测试
+        run: python3 -m unittest -v tests/test_marketplace_versions.py
+
+      - name: 仓库一致性
+        run: python3 scripts/validate-repo.py

@@ -72,7 +72,7 @@
     {
       "name": "jangrui-daily",
       "displayName": "jangrui-daily",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "description": "日常工作辅助：改善中英文表达、整理项目知识并完成会话收尾。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/daily.png",
       "source": "./",
@@ -94,7 +94,7 @@
     {
       "name": "jangrui-design",
       "displayName": "jangrui-design",
-      "version": "0.0.8",
+      "version": "0.0.9",
       "description": "产品界面与视觉设计：探索设计方向，创建或改进页面和交互。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/design.png",
       "source": "./",
@@ -106,15 +106,14 @@
       "homepage": "https://github.com/jangrui/skills",
       "skills": [
         "./skills/taste/taste-skill",
-        "./skills/taste/imagegen-frontend-web",
-        "./skills/taste/imagegen-frontend-mobile",
-        "./skills/taste/redesign-skill"
+        "./skills/imagegen/imagegen-frontend-web",
+        "./skills/imagegen/imagegen-frontend-mobile"
       ]
     },
     {
       "name": "jangrui-diagram",
       "displayName": "jangrui-diagram",
-      "version": "0.4.6",
+      "version": "0.4.7",
       "description": "图表与架构表达：制作流程图、架构图、UML 等结构化图表。",
       "icon": "https://raw.githubusercontent.com/jangrui/skills/main/.claude-plugin/icons/diagram.png",
       "source": "./",

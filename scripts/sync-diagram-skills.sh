@@ -37,6 +37,8 @@ UPSTREAM_OWNER="Agents365-ai"     # 5 个图表 skill 的默认上游 org
 #   - 上游仓库名:     drawio-skill        (clone 用的 repo 名)
 #   - 上游子目录名:   skills/drawio-skill (sparse-checkout 路径)
 # 例外：archify 来自 tt-a1i/archify 单仓库，skill 在 archify/ 子目录
+#       mermaid/excalidraw/tldraw/plantuml 来自 Agents365-ai/365-skills，
+#       skill 在 plugins/<key>/skills/<key>-skill/ 子目录
 SKILL_NAMES=(drawio mermaid excalidraw tldraw plantuml archify)
 owner_for() {                # skill key → 上游 owner（默认 UPSTREAM_OWNER）
   case "$1" in
@@ -47,10 +49,8 @@ owner_for() {                # skill key → 上游 owner（默认 UPSTREAM_OWNE
 repo_for() {                # skill key → 上游仓库名
   case "$1" in
     drawio)     echo "drawio-skill" ;;
-    mermaid)    echo "mermaid-skill" ;;
-    excalidraw) echo "excalidraw-skill" ;;
-    tldraw)     echo "tldraw-skill" ;;
-    plantuml)   echo "plantuml-skill" ;;
+    # 2026-11 起这 4 个 skill 的独立仓库下线，迁入 Agents365-ai/365-skills monorepo
+    mermaid|excalidraw|tldraw|plantuml) echo "365-skills" ;;
     archify)    echo "archify" ;;
     *) echo "$1-skill" ;;
   esac
@@ -58,7 +58,14 @@ repo_for() {                # skill key → 上游仓库名
 srcdir_for() {               # skill key → 上游仓库内 skill 子目录（sparse-checkout 路径）
   case "$1" in
     archify)    echo "archify" ;;
+    mermaid|excalidraw|tldraw|plantuml) echo "plugins/$1/skills/$1-skill" ;;
     *)          echo "skills/$(repo_for "$1")" ;;
+  esac
+}
+is_monorepo() {              # 上游为多 skill monorepo：以「最后改动该子目录的 commit」为版本，避免无关提交触发更新
+  case "$1" in
+    mermaid|excalidraw|tldraw|plantuml) return 0 ;;
+    *) return 1 ;;
   esac
 }
 local_name() {              # skill key → 本地 vendor 目录名（= skill key，去后缀）
@@ -119,7 +126,10 @@ sync_one() {
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' RETURN
 
-  if ! git clone --depth 1 --filter=blob:none --sparse \
+  # monorepo 需要历史定位子目录的最后改动：用 treeless 克隆（不带 --depth，体积很小）
+  local depth_args=(--depth 1)
+  is_monorepo "$skill" && depth_args=()
+  if ! git clone "${depth_args[@]}" --filter=blob:none --sparse \
        "https://github.com/$owner/$repo.git" "$tmp/$repo" >/dev/null 2>&1; then
     echo "  ❌ clone 失败：$owner/$repo"
     return 1
@@ -137,7 +147,11 @@ sync_one() {
   fi
 
   local new_commit
-  new_commit=$(cd "$tmp/$repo" && git rev-parse HEAD)
+  if is_monorepo "$skill"; then
+    new_commit=$(cd "$tmp/$repo" && git log -1 --format=%H -- "$subdir")
+  else
+    new_commit=$(cd "$tmp/$repo" && git rev-parse HEAD)
+  fi
   local old_commit=""
   [ -f "$commit_file" ] && old_commit=$(cat "$commit_file")
 
