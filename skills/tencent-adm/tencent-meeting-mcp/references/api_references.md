@@ -151,6 +151,57 @@ python3 scripts/tencent_meeting.py tools/call '{
 > `invitees` 与 `invitees_operate_type` 必须**成对出现**，缺一报参数错误。
 > 仅做受邀人变更（无其他字段修改）时，推荐使用 `meeting_invitees_add` / `_remove` / `_replace` 专用工具。
 
+#### 调用示例（会议描述 / 附件）
+
+```bash
+# 仅更新描述文本（空字符串 "" 表示清空描述）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "update_meeting",
+  "arguments": {
+    "meeting_id": "xxx",
+    "description": "评审内容已调整为：Q3 路线图"
+  }
+}'
+
+# 追加附件：使用 attachment_add；服务端会自动 GET 当前列表后幂等合并（按 file_id 去重）
+#   —— 模型无需自己先调 get_meeting 读取现有附件
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "update_meeting",
+  "arguments": {
+    "meeting_id": "xxx",
+    "attachment_add": [
+      {"file_id": "fid_appendix_v2", "file_name": "appendix.pdf"}
+    ]
+  }
+}'
+
+# 移除指定附件：使用 attachment_remove，传入要删除的 file_id 列表
+#   —— 对不存在的 file_id 静默跳过（幂等），服务端自动合并后整体下发
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "update_meeting",
+  "arguments": {
+    "meeting_id": "xxx",
+    "attachment_remove": ["fid_existing_v1"]
+  }
+}'
+
+# 清空该会议的所有附件（不可逆，必须二次确认）：attachment_clear=true
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "update_meeting",
+  "arguments": {
+    "meeting_id": "xxx",
+    "attachment_clear": true
+  }
+}'
+```
+
+> `update_meeting` 的会议描述与附件入参由以下四个「操作意图」字段表达：
+> - `description`：未传=不改；传了（含 `""`）=覆盖，`""`=清空描述文本
+> - `attachment_add`：要追加的附件，形如 `[{file_id, file_name?}]`，按 `file_id` 幂等去重
+> - `attachment_remove`：要移除的 `file_id` 列表，对不存在的 id 静默跳过（幂等）
+> - `attachment_clear`：`true`=清空全部附件（**与 `attachment_add` / `attachment_remove` 互斥，不可同传**）
+> `attachment_add[].file_id` 必须由 `upload_meeting_attachments` 返回，禁止自己编造。
+
 ---
 
 ### `cancel_meeting` — 取消会议
@@ -419,11 +470,13 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### `search_records` — 搜索录制文件
 
+> 💡 **入口说明**：此处"录制"对应腾讯会议 App 的「回顾」入口；用户说"搜索回顾 / 找回顾文件"即对应本工具（`search_records`），请正常处理。
+
 > `q_fields` 取值分为两类，**snippet 返回行为不同**：
 > - **返回 snippet**：`transcript_content`（转写原文）/ `smart_minutes`（智能纪要）/ `timeline`（时间轴），均为分词匹配
 > - **不返回 snippet**：`subject`（主题，分词匹配）/ `creator`（创建人昵称，模糊匹配）/ `all`（所有字段，按各字段自身方式匹配）
 >
-> `page_size` 上限 30。可用 `meeting_id` / `meeting_code` 精准定位；`file_type` 可选 `video` 等。按时间查询范围不超过 31 天，起始不早于 1 年前。
+> `page_size` 上限 30。可用 `meeting_id` / `meeting_code` 精准定位；`file_type` 可选 `video` 等。
 >
 > **默认时间范围**：未传 `from`/`to` 时，默认按当前时间向前推 30 天检索；若用户诉求覆盖更久之前的录制，需显式传入 `from`。
 
@@ -476,7 +529,7 @@ python3 scripts/tencent_meeting.py tools/call '{
 | `todos` | 内部旧工具 | 获取智能待办 | `record_file_id` |
 | `transcript`（不传 `text`） | `get_transcripts_details`（deprecated） | 查询转写详情文本 | `record_file_id` 或 `share_url`；可选配合 `pid`（起始段落号字符串型，未传默认 `"0"`，仅本场景生效）+ `limit`（数字型，仅本场景生效） |
 | `transcript`（传 `text`） | `search_transcripts`（deprecated） | 按关键词搜索转写内容（中文关键词需 urlencode） | `record_file_id` + `text` |
-| `paragraphs` | `get_transcripts_paragraphs`（deprecated） | 获取转写段落 ID 列表（后续用 `action=transcript` 取具体段落文本） | `record_file_id` |
+| `paragraphs` | `get_transcripts_paragraphs`（deprecated） | 获取逐字稿段落 ID 列表（后续用 `action=transcript` 取具体段落文本） | `record_file_id` |
 | `timeline` | 内部旧工具 | 获取智能时间轴 | `record_file_id` |
 
 #### 可选参数
@@ -516,7 +569,7 @@ python3 scripts/tencent_meeting.py tools/call '{
   }
 }'
 
-# 4) 转写详情（不传 text）
+# 4) 逐字稿详情（不传 text）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "record_content",
   "arguments": {
@@ -527,7 +580,7 @@ python3 scripts/tencent_meeting.py tools/call '{
   }
 }'
 
-# 5) 转写关键词搜索（传 text）
+# 5) 逐字稿关键词搜索（传 text）
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "record_content",
   "arguments": {
@@ -537,7 +590,7 @@ python3 scripts/tencent_meeting.py tools/call '{
   }
 }'
 
-# 6) 转写段落 ID 列表
+# 6) 逐字稿段落 ID 列表
 python3 scripts/tencent_meeting.py tools/call '{
   "name": "record_content",
   "arguments": {
@@ -1265,6 +1318,121 @@ python3 scripts/tencent_meeting.py tools/call '{
 - **去重**：同一成员可能出现多条记录，按 id 去重。
 
 > ⚠️ **常见失败根因**：把 PSTN/SIP 成员误塞进 `users`、或对其使用了空的 `open_id`，会导致服务端**静默踢出失败**（接口返回成功但成员仍在会）。务必严格按上表核对 `instanceid` 与 id 字段。
+
+---
+
+## 会议附件
+
+### `upload_meeting_attachments` — 批量上传附件（本地伪工具）
+
+> **本地伪工具**：在 Skill 包内处理，不转发任何文件内容到 MCP Server；内部串联
+> `meeting_attachment_upload_auth` → 直传对象存储 → `meeting_attachment_upload_notify`。
+> 创建/修改会议前调用，拿到 `file_id` 列表后喂给 `schedule_meeting.attachments`
+> 或 `update_meeting.attachment_add`（服务端自动合并当前附件列表，无需模型自行先调 `get_meeting` 合并）。
+
+#### 调用示例
+
+```bash
+# 上传一批本地文件（最多 20 个，总大小 <= 100 MB）
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "upload_meeting_attachments",
+  "arguments": {
+    "paths": [
+      "/Users/me/Documents/proposal.pdf",
+      "/Users/me/Documents/data.xlsx"
+    ]
+  }
+}'
+```
+
+#### 返回示例
+
+```json
+{
+  "uploaded": [
+    {"file_id": "fid_proposal_v1", "file_name": "proposal.pdf", "file_size": 123456},
+    {"file_id": "fid_data_v1",     "file_name": "data.xlsx",    "file_size": 234567}
+  ],
+  "failures": []
+}
+```
+
+> 部分失败时 `failures` 会包含具体原因（如"文件为空"、"文件不存在或不是普通文件"、"直传对象存储失败"），
+> **不会中断其他文件的上传**。
+
+---
+
+### `meeting_attachment_upload_auth` — 申请附件上传授权
+
+> 远端代理工具，一般由 `upload_meeting_attachments` 内部调用；调试场景下也可独立使用。
+> **不接收**文件字节流，仅接收文件元信息。
+
+#### 调用示例
+
+> **所有字段均为必填**，包括 `file_crc64`（十进制字符串形式的 CRC64-ECMA，与 Go `hash/crc64.ECMA` 等价）。
+> 本地伪工具 `upload_meeting_attachments` 会自动计算 md5 / sha1 / crc64 并下发，调试场景下独立调用须自行生成。
+
+```bash
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "meeting_attachment_upload_auth",
+  "arguments": {
+    "file_name":  "proposal.pdf",
+    "file_type":  "pdf",
+    "file_size":  "123456",
+    "file_md5":   "5d41402abc4b2a76b9719d911017c592",
+    "file_sha1":  "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+    "file_crc64": "11051210869376104954"
+  }
+}'
+```
+
+---
+
+### `meeting_attachment_upload_notify` — 通知附件上传完成
+
+> 远端代理工具，一般由 `upload_meeting_attachments` 内部调用。
+> **仅在直传成功后调用一次**；直传失败不调用本接口，悬挂的 `file_id` 由服务端按超时自行回收。
+
+#### 调用示例
+
+```bash
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "meeting_attachment_upload_notify",
+  "arguments": {
+    "file_id": "fid_proposal_v1"
+  }
+}'
+```
+
+---
+
+### `meeting_attachment_download` — 获取附件下载地址
+
+> 仅返回 6 小时有效的临时下载地址，由调用方自行按 URL 获取文件内容；MCP 服务端不下载、不缓存文件。
+
+#### 调用示例
+
+```bash
+python3 scripts/tencent_meeting.py tools/call '{
+  "name": "meeting_attachment_download",
+  "arguments": {
+    "meeting_id": "123456789",
+    "file_id":    "fid_proposal_v1"
+  }
+}'
+```
+
+#### 返回示例
+
+```json
+{
+  "file_id":         "fid_proposal_v1",
+  "file_name":       "proposal.pdf",
+  "file_size":       123456,
+  "download_url":    "https://cos.example.com/key/...?sign=...",
+  "url_expire_time": 1764050000
+}
+```
 
 ---
 
