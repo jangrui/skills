@@ -59,9 +59,12 @@ metadata:
 - 受邀人变更（`meeting_invitees_remove` / `meeting_invitees_replace`）前，**必须先调用 `get_meeting_invitees` 展示当前受邀人列表**，明确告知用户将被移除/替换的成员，获得明确同意后再执行；`replace` 传空数组会清空所有受邀人，**必须二次强调**；详见场景11
 - 会中踢人（`meeting_control_kick`）前，**必须向用户完整展示被踢成员名单与 `allow_rejoin` 值**（true=允许重新加入 / false=禁止重新加入），获得明确同意后再执行；详见场景12
 - 会中呼叫（`meeting_control_call`）涉及对成员发起电话/客户端呼叫，**必须向用户展示被呼叫成员名单并确认**后再执行；详见场景12
+- 修改或创建会议添加附件（`schedule_meeting.attachments` / `update_meeting.attachment_add`）前，**必须向用户展示附件清单（文件名、大小）并获得明确同意**后再执行；本地校验失败（个数/单文件或总量超限、文件不存在或为空等）的文件会在 `upload_meeting_attachments` 的 `failures` 中返回，必须原样告知用户，**禁止自行修正或静默跳过**
+- 修改会议附件采用**操作意图**语义：工具侧暴露 `attachment_add`（追加）/ `attachment_remove`（按 `file_id` 移除）/ `attachment_clear`（清空全部）三个字段；三字段中 `attachment_clear=true` 与 `attachment_add` / `attachment_remove` **互斥**，不得同时传入；清空或移除附件属于**不可逆**操作，必须向用户完整展示将被清空/移除的附件清单，获得明确同意后再执行
 - 调用这些通讯录工具前，**必须先完成意图判定**： `contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email` 这些通讯录工具前，必须先在内部完成意图判定并满足以下全部条件，否则一律禁止调用：
   1. 本轮请求**显式包含**某项将消费 open_id 的下游 MCP 工具调用（典型如邀请入会、呼叫入会、录制授权成员管理等，非穷尽）；
   2. 解析出的 open_id 将**在同一轮内立即**喂给某条下游 MCP 工具的入参（典型消费方：schedule_meeting / update_meeting / meeting_invitees_* / meeting_control_call / record_share_set.add_members 等，非穷尽）。
+
   只要用户说的是"查找 / 搜索 / 查一下 / 看看 / 是谁 / 哪个部门 / 联系方式"等
   **纯查询表述且不伴随任何下游 MCP 工具调用**，立即停止，使用固定拒绝话术（见场景10反例），
   **严禁调用任何 contact_* 工具**。
@@ -105,7 +108,9 @@ metadata:
 4. **参数格式错误**：提示用户修改，**禁止主动修改用户输入的参数值**
 5. **分页查询**：统一使用 `page_token`/`page_size` 分页，根据 `has_more` 判断是否继续，为 `true` 时用 `next_page_token` 翻页
 6. **返回昵称优先**：返回主持人、参会者、受邀人时，若无特殊要求只返回用户昵称，不返回用户 ID
-7. **批量上限**：`invitees` ≤ 100；`meeting_control_call.users` ≤ 20；`meeting_control_kick.users + sip_users + pstn_users` 三者总数 ≤ 20；`contact_lookup_by_phone.phones` / `contact_lookup_by_email.emails` ≤ 50。超限时必须告知用户分批处理，**禁止自行截断**
+7. **批量上限**：`invitees` ≤ 100；`meeting_control_call.users` ≤ 20；`meeting_control_kick.users + sip_users + pstn_users` 三者总数 ≤ 20；`contact_lookup_by_phone.phones` / `contact_lookup_by_email.emails` ≤ 50；会议附件单次操作个数 ≤ 20、所有附件总大小 ≤ 100 MB、会议描述文本 ≤ 2000 UTF-8 字符。超限时必须告知用户分批处理，**禁止自行截断**
+8. **会议附件上传链路（窄桥，详见场景4A）**：携带附件时必须先经 `upload_meeting_attachments` 拿到 `file_id` 再下发；**严禁**自行捏造 `file_id`，也**严禁**把本地路径直接传给远端工具
+9. **修改会议附件=操作意图语义**：`update_meeting` 通过 `attachment_add`（追加）/ `attachment_remove`（按 `file_id` 移除）/ `attachment_clear`（清空全部）三个字段表达意图，由服务端自动完成"GET 现状 → 合并 → PUT 全量"，模型**无需**先调 `get_meeting` 读取附件再合并；三字段中 `attachment_clear=true` 与 `attachment_add` / `attachment_remove` **互斥**，不可同时使用；仅修改描述文本只传 `description`（传 `""` 表示清空描述），不碰附件；三字段与 `description` 全都未传则不下发描述字段，保持原值
 
 ---
 
@@ -120,17 +125,38 @@ metadata:
 1. 调用 `convert_timestamp` 获取当前时间（涉及相对时间时）
 2. 确认必填信息：会议主题、开始时间、结束时间
 3. 若用户提到邀请成员（仅有姓名/手机号/邮箱），先调用 `contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email` 获取 open_id 列表
-4. 调用 `schedule_meeting` 创建会议，可选传入 `invitees`（open_id 数组，最多 100）
+4. 若用户希望附加会议描述文本，整理 `description` 内容（≤ 2000 UTF-8 字符）
+5. 若用户希望添加附件 → 按**场景4A 上传链路**拿到 `uploaded` 列表（内含 `file_id` + `file_name`）；`failures` 非空时必须原样告知用户并询问是否仅携带成功部分继续创建
+6. 调用 `schedule_meeting` 创建会议，可选传入 `invitees`（open_id 数组，最多 100）、`description`、`attachments: [{file_id, file_name}]`
+
+**调用示例（携带描述 + 附件的最小示例）**
+
+```jsonc
+// Step 5：先上传本地附件拿到 file_id
+upload_meeting_attachments({ "paths": ["/abs/path/周会材料.pdf"] })
+// → { "uploaded": [{"file_id": "fid_xxx", "file_name": "周会材料.pdf", "file_size": 20480}], "failures": [] }
+
+// Step 6：创建会议时一并下发 description + attachments
+schedule_meeting({
+  "subject": "周会",
+  "start_time": "2026-03-25T15:00:00+08:00",
+  "end_time":   "2026-03-25T16:00:00+08:00",
+  "description": "本周进度同步，详见附件材料",
+  "attachments": [{ "file_id": "fid_xxx", "file_name": "周会材料.pdf" }]
+})
+```
 
 **注意事项**
 - 未提及结束时间默认 1 小时，提示用户可修改
 - 周期性会议重复次数默认 50 次，提示用户可修改
 - 缺少会议主题时工具直接报错，必须提示用户输入
 - 创建时若传入 `invitees`，必须先向用户确认邀请名单（昵称展示）后再执行
+- 创建时若传入 `attachments`，必须先向用户确认附件清单（文件名 + 大小）后再执行
 - 创建后如需追加/修改受邀人，使用 `meeting_invitees_add` / `meeting_invitees_remove` / `meeting_invitees_replace`
+- 创建后如需修改附件，使用 `update_meeting` 的 `attachment_add` / `attachment_remove` / `attachment_clear` 三字段表达操作意图（服务端自动合并）
 
 **输出规范**
-展示创建成功的会议主题、时间、会议号、受邀人数（若有）及追踪信息
+展示创建成功的会议主题、时间、会议号、受邀人数、附件数（若有）及追踪信息
 
 ---
 
@@ -143,17 +169,33 @@ metadata:
 1. 若用户提供会议号，先调用 `get_meeting_by_code` 获取 meeting_id
 2. 调用 `get_meeting` 查询当前会议信息；如需修改受邀人，加调 `get_meeting_invitees` 查看当前列表
 3. 若用户提到邀请成员（仅有姓名/手机号/邮箱），先调用 `contact_search` / `contact_lookup_by_phone` / `contact_lookup_by_email` 获取 open_id 列表
-4. 向用户展示**完整变更摘要**（含基础信息变更 + 受邀人变更），确认后调用 `update_meeting` 执行修改
+4. 若用户希望追加附件 → 按**场景4A 上传链路**拿到新文件 `file_id` 列表，再按下方「附件修改路由表」组装入参
+5. 向用户展示**完整变更摘要**（含基础信息变更 + 受邀人变更 + 描述/附件变更），确认后调用 `update_meeting` 执行修改
+
+**附件修改路由表（`update_meeting` 使用 `attachment_add` / `attachment_remove` / `attachment_clear` 三字段表达操作意图，服务端自动合并）**
+
+| 用户诉求 | 使用字段 | 入参示例 |
+|---|---|---|
+| 修改/清空描述文本 | `description` | 非空字符串=覆盖；传 `""`=清空描述；不传=不改 |
+| 追加附件 | `attachment_add` | `[{"file_id": "fid_xxx", "file_name": "a.pdf"}, ...]` |
+| 移除指定附件 | `attachment_remove` | `["fid_xxx", "fid_yyy"]`（按 `file_id` 列表移除） |
+| 清空全部附件 | `attachment_clear` | `true` |
+| 不修改附件 | — | 三个附件字段均不传 |
+
+> ⚠️ `attachment_clear=true` 与 `attachment_add` / `attachment_remove` **互斥**，不可同时传入；`attachment_add` 元素中 `file_id` 不能为空，`attachment_remove` 元素不能为空串；合并后附件总数超上限会被服务端拒绝。
 
 **注意事项**
 - 修改前必须二次确认（见核心规范"敏感操作"）
-- 可修改：主题、时间、密码、时区、会议类型、入会限制、等候室、周期性规则、受邀人等
+- 可修改：主题、时间、密码、时区、会议类型、入会限制、等候室、周期性规则、受邀人、**描述文本**、**附件（追加/移除/清空）** 等
 - 若同时修改会议信息和受邀人，需在 `update_meeting` 中传入 `invitees` + `invitees_operate_type`（字符串枚举：`"add"`=增量添加 / `"remove"`=批量移除 / `"replace"`=整体替换），并在确认摘要中**一次性展示所有变更**
 - `invitees` 与 `invitees_operate_type` **必须成对出现**，缺一报参数错误
 - 仅做受邀人变更（无其他字段修改）时，**推荐使用** `meeting_invitees_add` / `_remove` / `_replace` 专用工具，语义更清晰
+- `update_meeting` 附件采用**操作意图**语义：`attachment_add` 追加 / `attachment_remove` 按 `file_id` 移除 / `attachment_clear=true` 清空全部，三者中 clear 与 add/remove 互斥；服务端自动合并，无需客户端预读
+- 只想修改描述但不改附件 → 只传 `description`；只想改附件但不改描述 → 只传对应的 `attachment_*` 字段；**服务端对未传字段保持原值**（不下发 = 不改）
+- 清空附件 / 批量移除附件为**不可逆**操作，强制二次确认（见核心规范"敏感操作"）
 
 **输出规范**
-展示修改后的会议信息（含受邀人变化）及追踪信息，提示用户确认变更
+展示修改后的会议信息（含受邀人变化、描述/附件变化）及追踪信息，提示用户确认变更
 
 ---
 
@@ -195,6 +237,39 @@ metadata:
 
 **输出规范**
 展示会议基本信息、人员列表、会议录制信息等，附带追踪信息
+
+---
+
+
+
+### 场景4A：会议附件上传与下载
+
+**触发条件**
+- 用户希望在创建/修改会议时携带附件
+- 用户要求下载会议附件
+
+**上传链路**（创建/修改会议前置）
+1. `upload_meeting_attachments`（入参 `paths`：本地绝对路径数组）→ 返回 `{uploaded, failures}`
+2. 向用户逐项展示 `uploaded`（文件名 + 大小）与 `failures`（文件名 + 原因），`failures` 非空须询问是否仅携带成功项继续
+3. 将 `uploaded` 的 `{file_id, file_name}` 下发：
+   - 创建 → `schedule_meeting.attachments`
+   - 修改追加 → `update_meeting.attachment_add`（服务端自动合并，无需先 `get_meeting`）
+   - 修改移除 → `update_meeting.attachment_remove`（传 `file_id` 列表）
+   - 修改清空 → `update_meeting.attachment_clear=true`
+
+**下载链路**
+1. 有会议号先 `get_meeting_by_code` 获取 meeting_id
+2. 从 `get_meeting` 响应的 `description.attachments[]` 读取目标 `file_id`
+3. 调用 `meeting_attachment_download(meeting_id, file_id)`，将 `download_url` 展示给用户并标注"6 小时有效"
+
+**硬规则**
+- `description.attachments` 可能不返回：无权限或无内容时响应不含 `description` 字段，原样告知用户"该会议暂无可见附件"
+- `failures` 非空须原样告知用户，禁止自行修正或静默跳过
+- 不替用户下载文件内容，由用户自行使用浏览器下载
+
+**输出规范**
+- 上传：展示 `uploaded` 列表（文件名 + 大小）+ `failures` 列表（文件名 + 原因）+ 追踪信息
+- 下载：展示 `file_name` + `download_url` + 过期时间 + 追踪信息
 
 ---
 
@@ -251,8 +326,10 @@ metadata:
 | 阶段 | 工具 | 作用 |
 |---|---|---|
 | ① 定位录制 | `search_records` | 按关键词 / 会议 / 时间窗口 / 文件类型定位录制文件，也用于按 `q_fields=smart_minutes` / `transcript_content` 搜纪要或逐字稿命中 |
-| ② 读录制内容 | `record_content` | 通过 `action` 五选一读取录制内容：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（转写详情或转写关键词搜索）/ `paragraphs`（转写段落 ID）/ `timeline`（智能时间轴） |
+| ② 读录制内容 | `record_content` | 通过 `action` 五选一读取录制内容：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（逐字稿详情或逐字稿关键词搜索）/ `paragraphs`（逐字稿段落 ID）/ `timeline`（智能时间轴） |
 | ③ 查录制访问信息 | `record_access` | 通过 `action` 四选一查录制访问相关信息：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员列表）/ `settings`（智能化开关配置） |
+
+> 💡 **入口概念对齐（录制 ↔ App「回顾」）**：本 skill 中的"录制"（录制搜索 `search_records` / 读录制内容 `record_content` / 查录制访问信息 `record_access`）对应腾讯会议 App 的「回顾」入口。当用户说"回顾"（如"搜一下回顾""我的回顾文件""看看会议回顾"）时，即指上述录制相关功能，应正常走本场景处理，**不要因名称差异产生困惑或拒答**；向用户呈现结果时可标注"（对应 App 的「回顾」入口）"，帮助用户对应到 App 中的实际位置。
 
 **处理流程**
 
@@ -268,9 +345,9 @@ metadata:
 2. **读录制内容 → `record_content`**（按 `action` 分派）：
    - 智能纪要（录制纪要）→ `action=minutes`
    - 智能待办 → `action=todos`
-   - 转写全文详情 → `action=transcript`（**不传** `text`）
-   - 转写关键词搜索 → `action=transcript` 并传 `text=<关键词>`
-   - 转写段落 ID 列表 → `action=paragraphs`（先拿段落 ID，再用 `action=transcript` 取具体段落文本）
+   - 逐字稿全文详情 → `action=transcript`（**不传** `text`）
+   - 逐字稿关键词搜索 → `action=transcript` 并传 `text=<关键词>`
+   - 逐字稿段落 ID 列表 → `action=paragraphs`（先拿段落 ID，再用 `action=transcript` 取具体段落文本）
    - 智能时间轴 → `action=timeline`
 
 3. **查录制访问信息 → `record_access`**（按 `action` 分派）：
@@ -286,11 +363,10 @@ metadata:
   - `record_content action=minutes/todos/transcript/paragraphs/timeline`：必填 `record_file_id`；`action=minutes` 与 `action=transcript`（不传 `text` 的详情场景）也可改传录制分享链接 `share_url`（对方分享录制访问链接时使用）
   - `record_access action=address/sharing/members`：必填 `meeting_record_id`
   - `record_access action=settings`：必填 `record_file_id`
-- `record_content action=transcript` 通过 **是否传 `text`** 区分两种场景：**不传** `text` = 取转写详情文本；**传** `text` = 按关键词搜索转写内容（中文关键词需 urlencode）
+- `record_content action=transcript` 通过 **是否传 `text`** 区分两种场景：**不传** `text` = 取逐字稿详情文本；**传** `text` = 按关键词搜索逐字稿内容（中文关键词需 urlencode）
 - `search_records` 支持按关键词(q)、搜索字段(q_fields)、会议ID/会议号、日期窗口、文件类型等过滤，数据按分页返回
 - `search_records` 的 `from`/`to` 参数使用 ISO 8601 格式（如 `2026-03-20T00:00:00+08:00`），按用户输入原值透传
 - `search_records` 未传 `from`/`to` 时默认按当前时间向前推 30 天检索；若用户诉求覆盖更久之前的录制，需显式传入 `from`
-- `search_records` 按时间查询：范围不超过 31 天，起始不早于 1 年前
 - **录制状态限制**：`state` 为「录制中」或「转码中」的录制文件**不可查看内容、不可申请权限**（本场景的 `record_content` / `record_access`、场景9 的权限申请均不可对这类文件执行）。遇到此类状态时，应告知用户该录制尚未就绪、需等待变为「转码完成」后再操作
 - 若 `record_content` / `record_access` 返回**录制权限不足**类错误，**自动进入场景9（录制权限申请）**
 
@@ -675,7 +751,7 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 | `get_user_ended_meetings` | 查询已结束的历史会议列表 | 场景6 |
 | `search_meetings` | 搜索会议列表，支持关键词、搜索字段、会议号、时间窗口等过滤 | 场景6 |
 | `search_records` | 搜索录制文件，支持关键词、搜索字段、时间窗口、会议、文件类型等过滤 | 场景7 |
-| `record_content` | 读录制内容聚合入口，`action` 五选一：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（转写详情或搜索）/ `paragraphs`（段落 ID）/ `timeline`（时间轴） | 场景7 |
+| `record_content` | 读录制内容聚合入口，`action` 五选一：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（逐字稿详情或搜索）/ `paragraphs`（段落 ID）/ `timeline`（时间轴） | 场景7 |
 | `record_access` | 查录制访问信息聚合入口，`action` 四选一：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员）/ `settings`（智能化开关） | 场景7 |
 | `record_share_set` | 写-录制分享（改分享配置 / 增删授权成员），三类子操作可任选组合，写操作前必须二次确认 | 场景7B |
 | `record_settings_set` | 写-录制智能化开关（字幕 `subtitle_switch` / AI `enable_ai_switch`，均为 int 枚举：1=关闭 / 2=开启），写操作前必须二次确认 | 场景7B |
@@ -694,3 +770,7 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 | `check_skill_version` | 检查技能版本更新 | 核心规范-版本管理 |
 | `get_skill_update_preference` | 查询本地更新偏好与 snooze 决策（是否需要弹出更新提示） | 核心规范-版本管理 |
 | `set_skill_update_preference` | 设置本地更新偏好（snooze 暂不更新 / auto_upgrade / disable_optional_check / enable_optional_check） | 核心规范-版本管理 |
+| `upload_meeting_attachments` | 本地伪工具，批量上传会议附件（本地校验 + 三步上传流水线），返回 `{file_id, file_name}` 列表供创建/修改会议使用 | 场景1、场景2、场景4A |
+| `meeting_attachment_upload_auth` | 申请附件上传授权（代理工具，由 `upload_meeting_attachments` 调用，一般不直接使用） | 场景4A（内部） |
+| `meeting_attachment_upload_notify` | 通知附件上传完成（代理工具，由 `upload_meeting_attachments` 调用，一般不直接使用） | 场景4A（内部） |
+| `meeting_attachment_download` | 获取附件临时下载地址 | 场景4A |

@@ -176,8 +176,10 @@ def main():
         proxy = McpProxy(user_token, base_url, skill_version)
 
         # 本地伪工具调用：直接在 Skill 包内处理，不转发到 MCP Server
+        # 混合型本地工具（如 upload_meeting_attachments）需要 proxy 访问远端 MCP，
+        # 通过第三参数透传；纯本地工具可忽略该参数（handle_local_tool_call 内部兼容）
         if local_tools.is_local_tool_call(method, params):
-            result = local_tools.handle_local_tool_call(method, params)
+            result = local_tools.handle_local_tool_call(method, params, proxy)
         else:
             result = proxy.request(method, params)
             # tools/list：在远端结果中追加本地伪工具，便于模型发现并调用

@@ -1,23 +1,35 @@
 """
-本地伪工具实现：在 Skill 包内拦截执行，不转发到 MCP Server。
+本地伪工具实现：在 Skill 包内拦截执行；可按需转发到 MCP Server。
 
 当前提供的本地工具：
     - set_skill_update_preference：设置当前设备的版本更新偏好
     - get_skill_update_preference：查询当前更新偏好与 snooze 静默状态，
       返回 shouldPrompt 决策给模型，模型不再自行做时间戳运算
+    - upload_meeting_attachments：批量上传会议附件（本地校验 + 三步上传流水线），
+      内部会调用远端 meeting_attachment_upload_auth / meeting_attachment_upload_notify，
+      需要调用方透传 McpProxy 实例
 """
 
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import update_state
+import upload_attachment
 
 # 本地伪工具名称
 LOCAL_TOOL_SET_PREFERENCE = "set_skill_update_preference"
 LOCAL_TOOL_GET_PREFERENCE = "get_skill_update_preference"
+LOCAL_TOOL_UPLOAD_ATTACHMENTS = "upload_meeting_attachments"
 
 # 当前所有本地工具名集合
-_LOCAL_TOOL_NAMES = {LOCAL_TOOL_SET_PREFERENCE, LOCAL_TOOL_GET_PREFERENCE}
+_LOCAL_TOOL_NAMES = {
+    LOCAL_TOOL_SET_PREFERENCE,
+    LOCAL_TOOL_GET_PREFERENCE,
+    LOCAL_TOOL_UPLOAD_ATTACHMENTS,
+}
+
+# 需要 McpProxy 访问远端 MCP 的本地伪工具集合（用于区分纯本地工具 vs. 混合工具）
+_LOCAL_TOOLS_NEED_PROXY = {LOCAL_TOOL_UPLOAD_ATTACHMENTS}
 
 # 本地工具的 inputSchema 定义（与 MCP Tool 协议保持一致）
 _SET_PREFERENCE_TOOL_DEFINITION: Dict[str, Any] = {
@@ -79,9 +91,46 @@ _GET_PREFERENCE_TOOL_DEFINITION: Dict[str, Any] = {
 }
 
 
+
+
+
+# upload_meeting_attachments 的 inputSchema 定义
+_UPLOAD_ATTACHMENTS_TOOL_DEFINITION: Dict[str, Any] = {
+    "name": LOCAL_TOOL_UPLOAD_ATTACHMENTS,
+    "description": (
+        "批量上传本地文件作为会议附件，返回可直接用于 schedule_meeting / update_meeting 的 "
+        "attachments（含 file_id、file_name）。\n"
+        "- 创建会议：把结果作为 `schedule_meeting.attachments` 下发；\n"
+        "- 修改会议：把结果作为 `update_meeting.attachment_add` 下发。\n"
+        "本工具是 Skill 层本地伪工具，处理步骤：\n"
+        "1) 本地预校验：个数（<= 20）、单文件/总大小（<= 100 MB）、存在性与非空检查；\n"
+        "2) 为每个文件调用远端 meeting_attachment_upload_auth 申请直传授权（file_type 按本地扩展名透传，无扩展名时为空串）；\n"
+        "3) 本地按 PUT 方式直传对象存储；\n"
+        "4) 直传成功后调用远端 meeting_attachment_upload_notify 通知完成；直传失败不回传状态，"
+        "悬挂的 file_id 由服务端按超时自行回收。\n"
+        "**安全约束**：禁止把本地文件内容发给 MCP Server；file 内容仅在本机与对象存储之间流转。\n"
+        "**部分失败不中断**：任一文件失败不会中断其他文件，结果中 `uploaded` 为成功列表、"
+        "`failures` 为失败明细（含路径与原因）。"
+    ),
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "paths": {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 1,
+                "maxItems": 20,
+                "description": "本地文件绝对路径列表；最多 20 个，总大小上限 100 MB",
+            },
+        },
+        "required": ["paths"],
+    },
+}
+
+
 def _get_local_tool_definitions() -> List[Dict[str, Any]]:
     """返回当前所有本地伪工具的协议定义"""
-    return [_SET_PREFERENCE_TOOL_DEFINITION, _GET_PREFERENCE_TOOL_DEFINITION]
+    return [_SET_PREFERENCE_TOOL_DEFINITION, _GET_PREFERENCE_TOOL_DEFINITION, _UPLOAD_ATTACHMENTS_TOOL_DEFINITION]
 
 
 def is_local_tool_call(method: str, params: Dict[str, Any]) -> bool:
@@ -98,12 +147,19 @@ def is_local_tool_call(method: str, params: Dict[str, Any]) -> bool:
     return name in _LOCAL_TOOL_NAMES
 
 
-def handle_local_tool_call(method: str, params: Dict[str, Any]) -> Dict[str, Any]:
+def handle_local_tool_call(method: str, params: Dict[str, Any],
+                           proxy: Optional[Any] = None) -> Dict[str, Any]:
     """
     执行本地伪工具调用，并返回符合 MCP 协议的响应结构。
 
     返回结构与远端 tools/call 一致：
         {"jsonrpc": "2.0", "id": 1, "result": {"content": [{"type": "text", "text": "..."}]}}
+
+    Args:
+        method: JSONRPC2.0 method，必须为 tools/call
+        params: JSONRPC2.0 params（含 name/arguments）
+        proxy: 可选的 McpProxy 实例；仅混合型本地工具（如 upload_meeting_attachments）
+               需要通过它与远端 MCP Server 交互。纯本地工具可省略。
     """
     if method != "tools/call":
         return _build_error_response("不支持的本地方法")
@@ -119,7 +175,17 @@ def handle_local_tool_call(method: str, params: Dict[str, Any]) -> Dict[str, Any
     if name == LOCAL_TOOL_GET_PREFERENCE:
         return _handle_get_skill_update_preference(arguments)
 
+    if name == LOCAL_TOOL_UPLOAD_ATTACHMENTS:
+        if proxy is None:
+            return _build_text_response("[失败] 当前调用上下文未提供 MCP 代理，无法上传附件")
+        return _handle_upload_meeting_attachments(arguments, proxy)
+
     return _build_error_response(f"未知的本地工具: {name}")
+
+
+def tool_needs_proxy(name: str) -> bool:
+    """判断某个本地工具是否需要 McpProxy（供入口层决定如何调用 handle_local_tool_call）。"""
+    return name in _LOCAL_TOOLS_NEED_PROXY
 
 
 def inject_local_tools(tools_list_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -204,6 +270,35 @@ def _handle_get_skill_update_preference(arguments: Dict[str, Any]) -> Dict[str, 
         payload["snooze"] = None
 
     return _build_text_response(json.dumps(payload, ensure_ascii=False))
+
+
+def _handle_upload_meeting_attachments(arguments: Dict[str, Any], proxy: Any) -> Dict[str, Any]:
+    """处理 upload_meeting_attachments 工具调用。
+
+    入参结构：{"paths": ["/abs/a.pdf", "/abs/b.docx", ...]}
+    返回文本是业务 JSON：{"uploaded": [...], "failures": [...]}
+
+    任何预校验异常（如个数/总量超限、空 paths）会以 [失败] 文本返回，保持与
+    其它本地工具的失败态一致，避免调用方把 Python 异常直接抛给用户。
+    """
+    raw_paths = arguments.get("paths")
+    if not isinstance(raw_paths, list) or not raw_paths:
+        return _build_text_response("[失败] 参数 paths 必填且为非空字符串数组")
+    paths: List[str] = []
+    for p in raw_paths:
+        if isinstance(p, str) and p:
+            paths.append(p)
+    if not paths:
+        return _build_text_response("[失败] 参数 paths 中没有有效的字符串路径")
+
+    try:
+        result = upload_attachment.upload_attachments(proxy, paths)
+    except ValueError as e:
+        # 预校验级错误（个数/总量超限等），作为人类可读文本返回
+        return _build_text_response(f"[失败] {e}")
+    except Exception as e:  # noqa: BLE001 — 本地伪工具的兜底，防止异常泄漏到入口层
+        return _build_text_response(f"[失败] 上传过程发生异常: {e}")
+    return _build_text_response(json.dumps(result, ensure_ascii=False))
 
 
 def _build_text_response(text: str) -> Dict[str, Any]:
