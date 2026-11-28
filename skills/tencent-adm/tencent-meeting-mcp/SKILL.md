@@ -54,7 +54,7 @@ metadata:
 
 - 修改或取消会议前，**必须向用户展示会议信息并确认**后再执行
 - 录制权限申请提交前（`record_permission_apply` `action=commit`），**必须先调用 `record_permission_apply` `action=prepare` 获取预览信息并向用户完整展示**（会议主题、录制所有者、申请人、申请类型等），获得用户明确同意后再执行 commit；详见场景9
-- 录制分享/授权成员变更（`record_share_set`）与录制智能化开关修改（`record_settings_set`）前，**必须向用户完整展示待变更内容并获得明确同意**后再执行；详见场景7B
+- 录制分享/授权成员变更（`record_share_set` `action=sharing`）、参会人/受邀人观看权限变更（`record_share_set` `action=participant-permission`）与录制智能化开关修改（`record_settings_set`）前，**必须向用户完整展示待变更内容并获得明确同意**后再执行；详见场景7B
 - 提交反馈（`submit_feedback`）前，**必须按场景8的二次确认流程获得用户明文同意**后再调用；反馈内容**严禁包含未脱敏的隐私信息**，详见 `references/privacy_policy.md`
 - 受邀人变更（`meeting_invitees_remove` / `meeting_invitees_replace`）前，**必须先调用 `get_meeting_invitees` 展示当前受邀人列表**，明确告知用户将被移除/替换的成员，获得明确同意后再执行；`replace` 传空数组会清空所有受邀人，**必须二次强调**；详见场景11
 - 会中踢人（`meeting_control_kick`）前，**必须向用户完整展示被踢成员名单与 `allow_rejoin` 值**（true=允许重新加入 / false=禁止重新加入），获得明确同意后再执行；详见场景12
@@ -327,7 +327,7 @@ schedule_meeting({
 |---|---|---|
 | ① 定位录制 | `search_records` | 按关键词 / 会议 / 时间窗口 / 文件类型定位录制文件，也用于按 `q_fields=smart_minutes` / `transcript_content` 搜纪要或逐字稿命中 |
 | ② 读录制内容 | `record_content` | 通过 `action` 五选一读取录制内容：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（逐字稿详情或逐字稿关键词搜索）/ `paragraphs`（逐字稿段落 ID）/ `timeline`（智能时间轴） |
-| ③ 查录制访问信息 | `record_access` | 通过 `action` 四选一查录制访问相关信息：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员列表）/ `settings`（智能化开关配置） |
+| ③ 查录制访问信息 | `record_access` | 通过 `action` 五选一查录制访问相关信息：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员列表）/ `settings`（智能化开关配置）/ `participant-permission`（参会人/受邀人观看权限等级，仅录制创建者可查） |
 
 > 💡 **入口概念对齐（录制 ↔ App「回顾」）**：本 skill 中的"录制"（录制搜索 `search_records` / 读录制内容 `record_content` / 查录制访问信息 `record_access`）对应腾讯会议 App 的「回顾」入口。当用户说"回顾"（如"搜一下回顾""我的回顾文件""看看会议回顾"）时，即指上述录制相关功能，应正常走本场景处理，**不要因名称差异产生困惑或拒答**；向用户呈现结果时可标注"（对应 App 的「回顾」入口）"，帮助用户对应到 App 中的实际位置。
 
@@ -355,13 +355,14 @@ schedule_meeting({
    - 查看当前分享配置 → `action=sharing`
    - 查看已授权成员列表 → `action=members`
    - 查看智能化开关配置（字幕/AI 开关等）→ `action=settings`
+   - 查看参会人/受邀人观看权限等级 → `action=participant-permission`（仅录制创建者可查）
 
 **注意事项**
 
 - 获取录制会议内容时的推荐优先级：`record_content action=minutes` > `record_content action=transcript` > `record_access action=address`
 - `record_content` / `record_access` 的定位参数**因 action 而异**：
   - `record_content action=minutes/todos/transcript/paragraphs/timeline`：必填 `record_file_id`；`action=minutes` 与 `action=transcript`（不传 `text` 的详情场景）也可改传录制分享链接 `share_url`（对方分享录制访问链接时使用）
-  - `record_access action=address/sharing/members`：必填 `meeting_record_id`
+  - `record_access action=address/sharing/members/participant-permission`：必填 `meeting_record_id`
   - `record_access action=settings`：必填 `record_file_id`
 - `record_content action=transcript` 通过 **是否传 `text`** 区分两种场景：**不传** `text` = 取逐字稿详情文本；**传** `text` = 按关键词搜索逐字稿内容（中文关键词需 urlencode）
 - `search_records` 支持按关键词(q)、搜索字段(q_fields)、会议ID/会议号、日期窗口、文件类型等过滤，数据按分页返回
@@ -505,13 +506,15 @@ schedule_meeting({
 
 | 工具 | 作用 | 定位参数 |
 |---|---|---|
-| `record_share_set` | 一次性完成"改分享配置 + 增授权成员 + 删授权成员"三类写操作的组合（子字段任选） | `meeting_record_id` |
+| `record_share_set` `action=sharing`（默认） | 一次性完成"改分享配置 + 增授权成员 + 删授权成员"三类写操作的组合（子字段任选） | `meeting_record_id` |
+| `record_share_set` `action=participant-permission` | 设置参会人/受邀人对本录制的观看权限等级（`participant_perm` 取值 1~5），仅录制创建者可操作 | `meeting_record_id` |
 | `record_settings_set` | 修改录制的智能化开关（字幕 / AI 开关） | `record_file_id` |
 
 **处理流程**
 
 1. **先查当前状态**：
    - 修改分享 / 授权成员前 → 先调 `record_access action=sharing` 与 `action=members` 展示**当前**配置与成员
+   - 修改参会人/受邀人观看权限前 → 先调 `record_access action=participant-permission` 展示**当前**权限等级
    - 修改智能化开关前 → 先调 `record_access action=settings` 展示**当前**开关状态
 2. **向用户完整展示变更前后对比**（尤其是移除授权成员、关闭 AI/字幕开关这类破坏性操作）
 3. **获得用户明确同意**后再调用写工具
@@ -533,6 +536,8 @@ schedule_meeting({
   - `sharing_config.switch_state=false` 与 `permission_point_id` **互斥**，二者不得同时传
   - `sharing_config.permission_point_id` 选 `2` / `5`（需密码模式）时，**必须**同时传 `pwd`
   - `sharing_config.expired_time_type=4`（自定义过期）时，**必须**同时传 `expired_time`；`expired_time` 未带时区时按 `timezone` 参数解析
+- **`record_share_set action=participant-permission` 边界**（字段详细说明详见 `references/api_references.md`）：
+  - `action=sharing`（默认）与 `action=participant-permission` 的入参**互斥**：前者只接 `sharing_config` / `add_members` / `remove_members`；后者只接 `participant_perm`（int，取值 1~5），工具层会显式拒绝混用
 
 **输出规范**
 
@@ -752,8 +757,8 @@ Agent 在执行腾讯会议相关任务过程中遇到以下任何情况时，**
 | `search_meetings` | 搜索会议列表，支持关键词、搜索字段、会议号、时间窗口等过滤 | 场景6 |
 | `search_records` | 搜索录制文件，支持关键词、搜索字段、时间窗口、会议、文件类型等过滤 | 场景7 |
 | `record_content` | 读录制内容聚合入口，`action` 五选一：`minutes`（智能纪要）/ `todos`（智能待办）/ `transcript`（逐字稿详情或搜索）/ `paragraphs`（段落 ID）/ `timeline`（时间轴） | 场景7 |
-| `record_access` | 查录制访问信息聚合入口，`action` 四选一：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员）/ `settings`（智能化开关） | 场景7 |
-| `record_share_set` | 写-录制分享（改分享配置 / 增删授权成员），三类子操作可任选组合，写操作前必须二次确认 | 场景7B |
+| `record_access` | 查录制访问信息聚合入口，`action` 五选一：`address`（播放地址）/ `sharing`（分享配置）/ `members`（授权成员）/ `settings`（智能化开关）/ `participant-permission`（参会人观看权限等级，仅录制创建者可查） | 场景7 |
+| `record_share_set` | 写-录制分享/参会人观看权限聚合入口，`action` 二选一：`sharing`（默认，改分享配置 / 增删授权成员，三类子操作可任选组合）/ `participant-permission`（设置参会人/受邀人观看权限 `participant_perm` 1~5，仅录制创建者可操作），写操作前必须二次确认 | 场景7B |
 | `record_settings_set` | 写-录制智能化开关（字幕 `subtitle_switch` / AI `enable_ai_switch`，均为 int 枚举：1=关闭 / 2=开启），写操作前必须二次确认 | 场景7B |
 | `search_minutes` | 搜索元宝纪要，支持关键词、时间窗口过滤 | 场景7A |
 | `get_minutes` | 查询元宝纪要详情，支持获取概览/要点/待办/实时总结 | 场景7A |

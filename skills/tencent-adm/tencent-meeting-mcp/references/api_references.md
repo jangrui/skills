@@ -526,11 +526,11 @@ python3 scripts/tencent_meeting.py tools/call '{
 | `action` | 承接旧工具 | 说明 | 必填定位参数 |
 |---|---|---|---|
 | `minutes` | `get_smart_minutes`（deprecated） | 获取智能纪要（录制纪要） | `record_file_id` 或 `share_url` |
-| `todos` | 内部旧工具 | 获取智能待办 | `record_file_id` |
+| `todos` | - | 获取智能待办 | `record_file_id` |
 | `transcript`（不传 `text`） | `get_transcripts_details`（deprecated） | 查询转写详情文本 | `record_file_id` 或 `share_url`；可选配合 `pid`（起始段落号字符串型，未传默认 `"0"`，仅本场景生效）+ `limit`（数字型，仅本场景生效） |
 | `transcript`（传 `text`） | `search_transcripts`（deprecated） | 按关键词搜索转写内容（中文关键词需 urlencode） | `record_file_id` + `text` |
 | `paragraphs` | `get_transcripts_paragraphs`（deprecated） | 获取逐字稿段落 ID 列表（后续用 `action=transcript` 取具体段落文本） | `record_file_id` |
-| `timeline` | 内部旧工具 | 获取智能时间轴 | `record_file_id` |
+| `timeline` | - | 获取智能时间轴 | `record_file_id` |
 
 #### 可选参数
 
@@ -619,16 +619,17 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 ### `record_access` — 查录制访问信息（聚合）
 
-> **聚合入口**，通过 `action` 四选一查询录制访问相关信息。
+> **聚合入口**，通过 `action` 五选一查询录制访问相关信息。
 
 #### `action` 枚举与场景
 
 | `action` | 承接旧工具 | 说明 | 必填定位参数 |
 |---|---|---|---|
 | `address` | `get_record_addresses`（deprecated） | 获取录制播放地址 | `meeting_record_id` |
-| `sharing` | 内部旧工具 | 查询当前分享配置 | `meeting_record_id` |
-| `members` | 内部旧工具 | 查询已授权成员列表 | `meeting_record_id` |
-| `settings` | 内部旧工具 | 查询智能化开关配置（字幕/AI 开关等） | `record_file_id` |
+| `sharing` | - | 查询当前分享配置 | `meeting_record_id` |
+| `members` | - | 查询已授权成员列表 | `meeting_record_id` |
+| `settings` | - | 查询智能化开关配置（字幕/AI 开关等） | `record_file_id` |
+| `participant-permission` | - | 查询参会人/受邀人对本录制的观看权限等级（`participant_perm` 1~5），**仅录制创建者可查** | `meeting_record_id` |
 
 #### 调用示例
 
@@ -672,27 +673,32 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 #### 注意事项
 
-- `action=address/sharing/members` 用 `meeting_record_id` 定位
-- `action=settings` 用 `record_file_id` 定位（**注意与前三者的定位参数不同**）
+- `action=address/sharing/members/participant-permission` 用 `meeting_record_id` 定位
+- `action=settings` 用 `record_file_id` 定位（**注意与其他四者的定位参数不同**）
 - 权限不足时进入场景9（`record_permission_apply`）流程
 
 ---
 
 ### `record_share_set` — 修改录制分享/授权成员（聚合写）
 
-> **写操作**，一次调用可同时完成"改分享配置 + 增授权成员 + 删授权成员"三类子操作的组合（子字段任选），返回结构为 `results` 聚合对象。
-> **调用前必须**：通过 `record_access action=sharing` + `action=members` 展示当前状态，完整展示变更前后对比，获得用户明确同意后再执行。
+> **写操作**，通过 `action` 二选一分派：
+> - `action=sharing`（默认）：一次调用可同时完成"改分享配置 + 增授权成员 + 删授权成员"三类子操作的组合（子字段任选），返回结构为 `results` 聚合对象。
+> - `action=participant-permission`：设置参会人/受邀人对本录制的观看权限等级（`participant_perm` 取值 1~5），**仅录制创建者可操作**，返回单个下游接口的原始响应。
+>
+> **调用前必须**：`action=sharing` 通过 `record_access action=sharing` + `action=members` 展示当前状态；`action=participant-permission` 通过 `record_access action=participant-permission` 展示当前等级。完整展示变更前后对比，获得用户明确同意后再执行。
 
 #### 参数结构
 
 | 参数 | 类型 | 必填 | 说明 |
 |---|---|---|---|
+| `action` | string | 否 | 写操作分派：`sharing`（默认）/ `participant-permission`；未传=`sharing`，保持老调用兼容 |
 | `meeting_record_id` | string | 是 | 定位录制 |
-| `sharing_config` | object | 否 | 分享配置变更对象，字段均为可选，仅传入的字段会被下发修改；可用字段：`switch_state`（bool：分享总开关，`false` 关闭分享；**与 `permission_point_id` 互斥**）、`permission_point_id`（int：分享模式 1~6，详见下表）、`pwd`（string：访问密码，4~10 位字母或数字；所选分享模式要求密码时必填）、`expired_time_type`（int：链接有效期类型 `0`-永久 / `1`-7天 / `2`-15天 / `3`-30天 / `4`-自定义）、`expired_time`（string：ISO 8601 时间，如 `2026-12-31T23:59:59+08:00`；仅 `expired_time_type=4` 时生效）、`download_enable`（bool：是否允许观看者下载；**企业锁定下载时后端会忽略本项**，变更后应以 `record_access action=sharing` 响应为准）、`view_minutes_enable`（bool：是否允许观看者查看转写与纪要）、`rooms_enable`（bool：是否允许 Rooms 会议室设备查看本录制） |
-| `add_members` | array | 否 | 需新增授权的成员列表（**对象数组**，单次最多 200 个），每个元素形如 `{"open_id": "xxx", "permission": 0}`；`permission` 可选：**0-可查看（默认）/ 1-可管理**；空数组视为不新增 |
-| `remove_members` | array | 否 | 需移除授权的成员列表（**open_id 字符串数组**，单次最多 200 个），形如 `["open_id_aaa", "open_id_bbb"]`；空数组视为不移除 |
+| `sharing_config` | object | 否 | **仅 `action=sharing` 有效**。分享配置变更对象，字段均为可选，仅传入的字段会被下发修改；可用字段：`switch_state`（bool：分享总开关，`false` 关闭分享；**与 `permission_point_id` 互斥**）、`permission_point_id`（int：分享模式 1~6，详见下表）、`pwd`（string：访问密码，4~10 位字母或数字；所选分享模式要求密码时必填）、`expired_time_type`（int：链接有效期类型 `0`-永久 / `1`-7天 / `2`-15天 / `3`-30天 / `4`-自定义）、`expired_time`（string：ISO 8601 时间，如 `2026-12-31T23:59:59+08:00`；仅 `expired_time_type=4` 时生效）、`download_enable`（bool：是否允许观看者下载；**企业锁定下载时后端会忽略本项**，变更后应以 `record_access action=sharing` 响应为准）、`view_minutes_enable`（bool：是否允许观看者查看转写与纪要）、`rooms_enable`（bool：是否允许 Rooms 会议室设备查看本录制） |
+| `add_members` | array | 否 | **仅 `action=sharing` 有效**。需新增授权的成员列表（**对象数组**，单次最多 200 个），每个元素形如 `{"open_id": "xxx", "permission": 0}`；`permission` 可选：**0-可查看（默认）/ 1-可管理**；空数组视为不新增 |
+| `remove_members` | array | 否 | **仅 `action=sharing` 有效**。需移除授权的成员列表（**open_id 字符串数组**，单次最多 200 个），形如 `["open_id_aaa", "open_id_bbb"]`；空数组视为不移除 |
+| `participant_perm` | int | `action=participant-permission` 时必填 | 参会人/受邀人观看权限等级，取值 **1~5**（含义见下表），仅录制创建者可设置 |
 
-`sharing_config` / `add_members` / `remove_members` **三个子字段可任选组合**，至少传一个才有实际写入效果。
+`action=sharing` 时，`sharing_config` / `add_members` / `remove_members` **三个子字段可任选组合**，至少传一个才有实际写入效果。
 
 #### 分享模式枚举（`permission_point_id`）
 
@@ -707,8 +713,21 @@ python3 scripts/tencent_meeting.py tools/call '{
 
 > 使用 `record_access action=sharing` 查询时，响应中的 `current.permission_point_id` 已被转换为人类可读文案。
 
+#### 观看权限等级枚举（`participant_perm`，仅 `action=participant-permission`）
+
+| 等级 | 含义 |
+|---|---|
+| 1 | 可查看参会期间的逐字稿 |
+| 2 | 可查看整场会议的逐字稿和纪要 |
+| 3 | 需指定分享或者链接分享 |
+| 4 | 可查看全部回顾内容 |
+| 5 | 可查看整场会议的纪要 |
+
+> 可先通过 `record_access action=participant-permission` 读取当前等级，展示给用户确认后再下发修改。
+
 #### 互斥约束
 
+- **`action=sharing` 与 `action=participant-permission` 的入参互斥**：前者只接 `sharing_config` / `add_members` / `remove_members`，后者只接 `participant_perm`；工具层会显式拦截混用并报错。
 - **`switch_state=false` 禁止与 `permission_point_id` 同传**：关闭分享总开关和切换分享模式二选一；工具层会显式拦截并报错。
 - 选择 `permission_point_id=2` 或 `permission_point_id=5` 时**必须**同时提供 `pwd`，否则后端会拒绝。
 
